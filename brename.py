@@ -18,28 +18,38 @@ import re
 import sys
 
 from voussoirkit import safeprint
+from voussoirkit import spinal
 
-dot = '.'
-quote = '"'
 apostrophe = "'"
+dot = '.'
+hyphen = '-'
+quote = '"'
 space = ' '
+underscore = '_'
 
-def brename(transformation, autoyes=False):
-    old = os.listdir()
-    new = []
-    for (index, x) in enumerate(old):
+def brename(transformation, autoyes=False, recurse=False):
+    if recurse:
+        olds = [x.absolute_path for x in spinal.walk_generator('.')]
+    else:
+        olds = [os.path.join(os.getcwd(), x) for x in os.listdir('.')]
+
+    news = []
+    for (index, x) in enumerate(olds):
         (noext, ext) = os.path.splitext(x)
+        directory = os.path.dirname(x)
+        basename = os.path.basename(x)
+        x = basename
         x = eval(transformation)
-        new.append(x)
-    pairs = []
-    for (x, y) in zip(old, new):
-        if x == y:
-            continue
-        pairs.append((x, y))
+        x = os.path.join(directory, x)
+        news.append(x)
 
-    if not loop(pairs, dry=True):
+    pairs = [(x, y) for (x, y) in zip(olds, news) if x != y]
+
+    if not pairs:
         print('Nothing to replace')
         return
+
+    loop(pairs, dry=True)
 
     ok = autoyes
     if not ok:
@@ -66,17 +76,12 @@ def longest_length(li):
     return longest
 
 def loop(pairs, dry=False):
-    has_content = False
-    for (x, y) in pairs:
+    for (old, new) in pairs:
         if dry:
-            line = '{old}\n{new}\n'
-            line = line.format(old=x, new=y)
-            #print(line.encode('utf-8'))
+            line = f'{old}\n{new}\n'
             safeprint.safeprint(line)
-            has_content = True
         else:
-            os.rename(x, y)
-    return has_content
+            os.rename(old, new)
 
 def title(text):
     (text, extension) = os.path.splitext(text)
@@ -96,13 +101,14 @@ def title(text):
     return text
 
 def brename_argparse(args):
-    brename(args.transformation, autoyes=args.autoyes)
+    brename(args.transformation, autoyes=args.autoyes, recurse=args.recurse)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('transformation', help='python command using x as variable name')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
+    parser.add_argument('--recurse', dest='recurse', action='store_true', help='operate on subdirectories also')
     parser.set_defaults(func=brename_argparse)
 
     args = parser.parse_args(argv)
