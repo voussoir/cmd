@@ -19,7 +19,6 @@ def clean_version(version):
 def pip_download(package):
     tmpdir = tempfile.TemporaryDirectory(prefix=f'pip_download-{package}')
     subprocess.call([sys.executable, '-m', 'pip', 'download', package, '-d', tmpdir.name])
-    input()
     downloaded_files = os.listdir(tmpdir.name)
     for filename in downloaded_files:
         parts = filename.split('-')
