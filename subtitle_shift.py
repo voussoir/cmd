@@ -13,10 +13,29 @@ This will produce "file_correct.srt" with the new timestamps.
 import os
 import sys
 filename = sys.argv[1]
-offset = float(sys.argv[2])
-f = open(filename, 'r')
 
-lines = [l.strip() for l in f.readlines()]
+def hms_s(hms):
+    hms = hms.split(':')
+    seconds = 0
+    if len(hms) == 3:
+        seconds += int(hms[0])*3600
+        hms.pop(0)
+    if len(hms) == 2:
+        seconds += int(hms[0])*60
+        hms.pop(0)
+    if len(hms) == 1:
+        seconds += float(hms[0])
+    return seconds
+
+def s_hms(s):
+    (minutes, seconds) = divmod(s, 60)
+    (hours, minutes) = divmod(minutes, 60)
+    return '%02d:%02d:%02d' % (hours, minutes, seconds)
+
+offset = hms_s(sys.argv[2])
+f = open(filename, 'r', encoding='utf-8')
+
+lines = [l.strip() for l in f.read().splitlines()]
 for (lineindex, line) in enumerate(lines):
     changed = False
 
