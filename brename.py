@@ -35,9 +35,9 @@ def brename(transformation, autoyes=False, recurse=False):
 
     news = []
     for (index, x) in enumerate(olds):
-        (noext, ext) = os.path.splitext(x)
         directory = os.path.dirname(x)
         basename = os.path.basename(x)
+        (noext, ext) = os.path.splitext(basename)
         x = basename
         x = eval(transformation)
         x = os.path.join(directory, x)
