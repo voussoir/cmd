@@ -98,7 +98,7 @@ def seconds_to_hms(seconds, force_hours=False, force_milliseconds=False):
     if hours or force_hours:
         parts.append(hours)
 
-    if minutes or force_hours:
+    if hours or minutes or force_hours:
         parts.append(minutes)
 
     parts.append(seconds)
