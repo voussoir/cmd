@@ -86,11 +86,10 @@ def checkup(directory):
     return {'committed': committed, 'pushed': pushed, 'details': details}
 
 def main(argv):
-    print('[C][P]')
     for directory in DIRECTORIES:
         result = checkup(directory)
-        committed = 'x' if result['committed'] else ' '
-        pushed = 'x' if result['pushed'] else ' '
+        committed = 'C' if result['committed'] else ' '
+        pushed = 'P' if result['pushed'] else ' '
         details = result['details']
         details = f' ({details})' if details else ''
         print(f'[{committed}][{pushed}] {directory}{details}')
