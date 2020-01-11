@@ -17,26 +17,15 @@ DIRECTORIES = [
     r'D:\Git\YCDL',
 ]
 
-# Here is an example of typical git status output:
+# https://git-scm.com/docs/git-status#_short_format
+# Here is an example of typical `git status --short` output:
 #
-# On branch master
-# Changes not staged for commit:
-#   (use "git add/rm <file>..." to update what will be committed)
-#   (use "git checkout -- <file>..." to discard changes in working directory)
-#
-#         modified:   file1
-#         deleted:    file2
-#
-# Untracked files:
-#   (use "git add <file>..." to include in what will be committed)
-#
-#         file3
-#
-# no changes added to commit (use "git add" and/or "git commit -a")
-# --- ALTERNATE LAST LINE ---
-# nothing added to commit but untracked files present (use "git add" to track)
+#  M file1
+#  D file2
+# A  file4
+# ?? file3
 
-# Here is an example of typical git log -1 --decorate output:
+# Here is an example of typical `git log -1 --decorate` output:
 #
 # commit f8fddd0de4283a251a8beb35493bd1bd3a4c925a (HEAD -> master)
 # Author: My Name <mymail@example.net>
@@ -46,28 +35,30 @@ DIRECTORIES = [
 
 def checkup_committed(directory):
     os.chdir(directory)
-    command = [GIT, 'status']
+    command = [GIT, 'status', '--short']
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
 
-    if b'nothing to commit' in output:
+    added = 0
+    modified = 0
+    deleted = 0
+    for line in output.splitlines():
+        status = line.split()[0].strip().decode('ascii')
+
+        # These are ifs instead of elifs because you might have a file that is
+        # added in the index but deleted on disk, etc. Anyway these numbers
+        # don't need to be super accurate, just enough to remind you to commit.
+        if {'A', '?'}.intersection(status):
+            added += 1
+        if {'M', 'R', '!'}.intersection(status):
+            modified += 1
+        if {'D'}.intersection(status):
+            deleted += 1
+
+    if (added, modified, deleted) == (0, 0, 0):
         committed = True
         details = ''
-
     else:
         committed = False
-
-        if b'Untracked files' in output:
-            added = output.split(b'include in what will be committed)')[1]
-            added = added.split(b'no changes added to commit')[0]
-            added = added.split(b'nothing added to commit but')[0]
-            added = [x.strip() for x in added.splitlines()]
-            added = [x for x in added if x]
-            added = len(added)
-        else:
-            added = 0
-
-        modified = output.count(b'modified:')
-        deleted = output.count(b'deleted:')
         details = f'+{added}, -{deleted}, ~{modified}'
 
     return (committed, details)
