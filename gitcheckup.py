@@ -35,7 +35,7 @@ DIRECTORIES = [
 
 def checkup_committed(directory):
     os.chdir(directory)
-    command = [GIT, 'status', '--short']
+    command = [GIT, 'status', '--short', '--untracked-files=all']
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
 
     added = 0
