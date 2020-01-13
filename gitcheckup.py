@@ -6,17 +6,6 @@ from voussoirkit import winwhich
 
 GIT = winwhich.which('git')
 
-DIRECTORIES = [
-    r'D:\Git\cmd',
-    r'D:\Git\epubfile',
-    r'D:\Git\Etiquette',
-    r'D:\Git\reddit',
-    r'D:\Git\reddit\Timesearch',
-    r'D:\Git\sigilplugins',
-    r'D:\Git\voussoirkit',
-    r'D:\Git\YCDL',
-]
-
 # https://git-scm.com/docs/git-status#_short_format
 # Here is an example of typical `git status --short` output:
 #
@@ -77,7 +66,20 @@ def checkup(directory):
     return {'committed': committed, 'pushed': pushed, 'details': details}
 
 def main(argv):
-    for directory in DIRECTORIES:
+    directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
+    try:
+        handle = open(directories_file, 'r')
+    except FileNotFoundError:
+        print(f'Please put your git repo locations in {directories_file}.')
+        return 1
+
+    directories = handle.readlines()
+    handle.close()
+
+    directories = [line.strip() for line in directories]
+    directories = [line for line in directories if line]
+
+    for directory in directories:
         result = checkup(directory)
         committed = 'C' if result['committed'] else ' '
         pushed = 'P' if result['pushed'] else ' '
