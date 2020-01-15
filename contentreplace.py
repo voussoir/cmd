@@ -1,16 +1,20 @@
 import argparse
 import codecs
 import glob
-import sys
 import pyperclip
+import re
+import sys
 
 
-def contentreplace(filename, replace_from, replace_to, autoyes=False):
+def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=False):
     f = open(filename, 'r', encoding='utf-8')
     with f:
         content = f.read()
 
-    occurances = content.count(replace_from)
+    if do_regex:
+        occurances = len(re.findall(replace_from, content))
+    else:
+        occurances = content.count(replace_from)
 
     print(f'{filename}: Found {occurances} occurences.')
     if occurances == 0:
@@ -20,7 +24,10 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False):
     if not permission:
         return
 
-    content = content.replace(replace_from, replace_to)
+    if do_regex:
+        content = re.sub(replace_from, replace_to, content)
+    else:
+        content = content.replace(replace_from, replace_to)
 
     f = open(filename, 'w', encoding='utf-8')
     with f:
@@ -46,6 +53,7 @@ def contentreplace_argparse(args):
             replace_from,
             replace_to,
             autoyes=args.autoyes,
+            do_regex=args.do_regex,
         )
 
 def main(argv):
@@ -55,6 +63,7 @@ def main(argv):
     parser.add_argument('replace_from')
     parser.add_argument('replace_to')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
+    parser.add_argument('--regex', dest='do_regex', action='store_true')
     parser.add_argument('--clip_prompt', dest='clip_prompt', action='store_true')
     parser.set_defaults(func=contentreplace_argparse)
 
