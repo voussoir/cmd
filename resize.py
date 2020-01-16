@@ -1,7 +1,8 @@
-import glob
 import os
 from PIL import Image
 import sys
+
+from voussoirkit import winglob
 
 def fit_into_bounds(image_width, image_height, frame_width, frame_height):
     '''
@@ -22,7 +23,7 @@ def fit_into_bounds(image_width, image_height, frame_width, frame_height):
 
 filenames = sys.argv[1]
 
-filenames = glob.glob(filenames)
+filenames = winglob.glob(filenames)
 for filename in filenames:
     i = Image.open(filename)
     if all(x.isdigit() for x in sys.argv[2:3]):

@@ -1,15 +1,15 @@
 '''
 Create the file, or update the last modified timestamp.
 '''
-import glob
 import os
 import sys
 
 from voussoirkit import clipext
 from voussoirkit import safeprint
+from voussoirkit import winglob
 
 def touch(glob_pattern):
-    filenames = glob.glob(glob_pattern)
+    filenames = winglob.glob(glob_pattern)
     if len(filenames) == 0:
         safeprint.safeprint(glob_pattern)
         open(glob_pattern, 'a').close()

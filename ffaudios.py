@@ -1,7 +1,6 @@
 import argparse
 import re
 import subprocess
-import glob
 import sys
 
 from voussoirkit import pathclass

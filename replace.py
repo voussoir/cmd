@@ -1,4 +1,3 @@
-import glob
 import sys
 
 from voussoirkit import pipeable

@@ -1,12 +1,10 @@
 '''
 Convert LF line endings to CRLF.
 '''
-
-import glob
 import sys
 
 from voussoirkit import pipeable
-
+from voussoirkit import winglob
 
 CR = b'\x0D'
 LF = b'\x0A'
@@ -22,7 +20,7 @@ def crlf(filename):
 
 def main(args):
     for line in pipeable.go(args, strip=True, skip_blank=True):
-        for filename in glob.glob(line):
+        for filename in winglob.glob(line):
             pipeable.output(filename)
             crlf(filename)
 

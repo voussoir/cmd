@@ -4,7 +4,6 @@ Not a replacement for real version control but could be applicable in very simpl
 cases where e.g. git is not.
 '''
 import argparse
-import glob
 import hashlib
 import os
 import shutil
@@ -13,6 +12,7 @@ import time
 
 from voussoirkit import bytestring
 from voussoirkit import pathclass
+from voussoirkit import winglob
 
 def hash_file(filepath, hasher):
     bytestream = read_filebytes(filepath)
@@ -44,7 +44,7 @@ def filetimelapse(filepath, rate):
     (noext, extension) = os.path.splitext(filepath)
 
     last_hash = None
-    existing_timelapses = glob.glob(f'{noext}-*.filetimelapse{extension}')
+    existing_timelapses = winglob.glob(f'{noext}-*.filetimelapse{extension}')
     if existing_timelapses:
         last_hash = hash_file_md5(existing_timelapses[-1])
         print(f'Starting with previous {existing_timelapses[-1]} {last_hash}')

@@ -1,9 +1,10 @@
 import argparse
 import codecs
-import glob
 import pyperclip
 import re
 import sys
+
+from voussoirkit import winglob
 
 
 def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=False):
@@ -34,7 +35,7 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
         f.write(content)
 
 def contentreplace_argparse(args):
-    filenames = glob.glob(args.filename_glob)
+    filenames = winglob.glob(args.filename_glob)
 
     if args.clip_prompt:
         replace_from = input('Ready from')
