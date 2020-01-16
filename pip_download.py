@@ -21,13 +21,15 @@ def pip_download(package):
     subprocess.call([sys.executable, '-m', 'pip', 'download', package, '-d', tmpdir.name])
     downloaded_files = os.listdir(tmpdir.name)
     for filename in downloaded_files:
-        parts = filename.split('-')
-        filename_package = parts[0]
-        if filename_package.lower() == package.lower():
+        filename = filename.lower()
+        prefix = package.lower() + '-'
+        if filename.startswith(prefix):
+            parts = filename.replace(prefix, '')
+            parts = parts.split('-')
+            version = parts[0]
             break
     else:
         raise Exception(f'None of the downloads match the package name {package}? {downloaded_files}')
-    version = parts[1]
     version = clean_version(version)
     new_directory = f'{package}\\{package}-{version}'
     if not os.path.exists(new_directory):
