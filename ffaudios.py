@@ -5,6 +5,7 @@ import glob
 import sys
 
 from voussoirkit import pathclass
+from voussoirkit import winglob
 from voussoirkit import winwhich
 
 EXTENSIONS = {
@@ -47,7 +48,7 @@ def ffaudios(input_filename, moveto=None):
 
 def ffaudios_argparse(args):
     for pattern in args.input_filename:
-        for input_filename in glob.glob(pattern):
+        for input_filename in winglob.glob(pattern):
             ffaudios(input_filename, moveto=args.moveto)
 
 def main(argv):
