@@ -14,13 +14,13 @@ GIT = winwhich.which('git')
 # A  file4
 # ?? file3
 
-# Here is an example of typical `git log -1 --decorate` output:
+# Here is an example of typical `git log --oneline --branches --not --remotes` output:
+# Only the commits that haven't been pushed to a remote are shown!
+# Thank you cxreg https://stackoverflow.com/a/3338774
 #
-# commit f8fddd0de4283a251a8beb35493bd1bd3a4c925a (HEAD -> master)
-# Author: My Name <mymail@example.net>
-# Date:   Sat Jan 11 01:59:07 2020 -0800
-#
-#     I made some changes.
+# a755f32 Ready to publish
+# 5602e1e Another commit message
+# a32a372 My commit message
 
 def checkup_committed(directory):
     os.chdir(directory)
@@ -48,22 +48,35 @@ def checkup_committed(directory):
         details = ''
     else:
         committed = False
-        details = f'+{added}, -{deleted}, ~{modified}'
+        details = f'(+{added}, -{deleted}, ~{modified})'
 
     return (committed, details)
 
 def checkup_pushed(directory):
     os.chdir(directory)
-    command = [GIT, 'log', '-1', '--decorate']
+    command = [GIT, 'log', '--oneline', '--branches', '--not', '--remotes']
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
-    headline = output.splitlines()[0]
-    refs = headline.split(b'(')[-1].split(b')')[0]
-    return any (b'/' in ref for ref in refs.split(b','))
+
+    commits = sum(1 for line in output.splitlines() if line.strip())
+
+    if commits == 0:
+        pushed = True
+        details = ''
+    else:
+        pushed = False
+        details = f'(↑{commits})'
+
+    return (pushed, details)
 
 def checkup(directory):
-    (committed, details) = checkup_committed(directory)
-    pushed = checkup_pushed(directory)
-    return {'committed': committed, 'pushed': pushed, 'details': details}
+    (committed, commit_details) = checkup_committed(directory)
+    (pushed, push_details) = checkup_pushed(directory)
+    return {
+        'committed': committed,
+        'commit_details': commit_details,
+        'pushed': pushed,
+        'push_details': push_details,
+    }
 
 def main(argv):
     directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
@@ -83,8 +96,14 @@ def main(argv):
         result = checkup(directory)
         committed = 'C' if result['committed'] else ' '
         pushed = 'P' if result['pushed'] else ' '
-        details = result['details']
-        details = f' ({details})' if details else ''
+
+        details = []
+        if result['commit_details']:
+            details.append(result['commit_details'])
+        if result['push_details']:
+            details.append(result['push_details'])
+        details = ' '.join(details)
+        details = (' ' + details).rstrip()
         print(f'[{committed}][{pushed}] {directory}{details}')
 
 if __name__ == '__main__':
