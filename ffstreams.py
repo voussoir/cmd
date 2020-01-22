@@ -17,7 +17,7 @@ AUDIO_EXTENSIONS = {
 SUBTITLE_EXTENSIONS = {
     'ass': 'ass',
     'subrip': 'srt',
-    '*': 'mkv',
+    '*': 'mks',
 }
 
 FFMPEG = winwhich.which('ffmpeg')
@@ -44,7 +44,14 @@ def ffextractor(input_filename, prefix, search_pattern, extension_map, moveto=No
         output_filename = input_filename.replace_extension('').add_extension(f'{prefix}{stream_index}.{extension}')
         if moveto:
             output_filename = moveto.with_child(output_filename.basename)
-        maps.extend(['-map', f'0:{stream_index}', '-c', 'copy', output_filename.absolute_path])
+
+        args = ['-map', f'0:{stream_index}', '-c', 'copy']
+
+        if extension == 'mks':
+            args.extend(['-f', 'matroska'])
+
+        args.append(output_filename.absolute_path)
+        maps.extend(args)
 
     command = [FFMPEG, '-i', input_filename.absolute_path, *maps]
     print(command)
