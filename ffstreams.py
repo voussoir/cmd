@@ -24,24 +24,29 @@ FFMPEG = winwhich.which('ffmpeg')
 
 def ffextractor(input_filename, prefix, search_pattern, extension_map, moveto=None):
     input_filename = pathclass.Path(input_filename)
+
     if moveto is not None:
         moveto = pathclass.Path(moveto)
+
     command = [FFMPEG, '-i', input_filename.absolute_path]
 
     try:
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as exc:
         output = exc.output
-
     output = output.decode('utf-8')
+
     maps = []
     for line in output.splitlines():
         match = re.search(search_pattern, line)
         if match is None:
             continue
+
         (stream_index, codec) = (match.group(1), match.group(2))
         extension = extension_map.get(codec, extension_map['*'])
-        output_filename = input_filename.replace_extension('').add_extension(f'{prefix}{stream_index}.{extension}')
+        output_filename = input_filename.replace_extension('')
+        output_filename = output_filename.add_extension(f'{prefix}{stream_index}.{extension}')
+
         if moveto:
             output_filename = moveto.with_child(output_filename.basename)
 
@@ -75,7 +80,7 @@ def ffsubtitles(input_filename, moveto=None):
         moveto=moveto,
     )
 
-def ffaudios_argparse(args):
+def ffstreams_argparse(args):
     for pattern in args.input_filename:
         for input_filename in winglob.glob(pattern):
             if args.audios:
@@ -90,7 +95,7 @@ def main(argv):
     parser.add_argument('--moveto', dest='moveto', default=None)
     parser.add_argument('--audio', '--audios', dest='audios', action='store_true')
     parser.add_argument('--subtitles', dest='subtitles', action='store_true')
-    parser.set_defaults(func=ffaudios_argparse)
+    parser.set_defaults(func=ffstreams_argparse)
 
     args = parser.parse_args(argv)
     return args.func(args)
