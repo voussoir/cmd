@@ -150,6 +150,8 @@ def search(
             recurse=not local_only,
             yield_directories=True,
         )
+    elif isinstance(text, (list, tuple)):
+        search_objects = text
     else:
         search_objects = text.splitlines()
 
