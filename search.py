@@ -162,6 +162,7 @@ def search(
         else:
             search_text = search_object
             result_text = search_object
+
         if line_numbers:
             result_text = f'{index+1:>4} | {result_text}'
 
@@ -170,15 +171,16 @@ def search(
 
         if not content_args:
             yield result_text
-        else:
-            filepath = pathclass.Path(search_object)
-            if not filepath.is_file:
-                continue
+            continue
 
-            if filepath.extension.lower() == 'lnk' and winshell:
-                yield from search_contents_windows_lnk(filepath, content_args)
-            else:
-                yield from search_contents_generic(filepath, content_args)
+        filepath = pathclass.Path(search_object)
+        if not filepath.is_file:
+            continue
+
+        if filepath.extension.lower() == 'lnk' and winshell:
+            yield from search_contents_windows_lnk(filepath, content_args)
+        else:
+            yield from search_contents_generic(filepath, content_args)
 
 def argparse_to_dict(args):
     text = args.text
