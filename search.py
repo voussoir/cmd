@@ -154,9 +154,8 @@ def search(
         search_objects = text.splitlines()
 
     for (index, search_object) in enumerate(search_objects):
-        if index % 10 == 0:
-            #print(index, end='\r', flush=True)
-            pass
+        # if index % 10 == 0:
+        #     print(index, end='\r', flush=True)
         if isinstance(search_object, pathclass.Path):
             search_text = search_object.basename
             result_text = search_object.absolute_path
