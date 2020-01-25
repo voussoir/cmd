@@ -25,6 +25,16 @@ if stat.S_ISFIFO(STDIN_MODE):
 else:
     STDIN_MODE = 'terminal'
 
+class HeaderedText:
+    def __init__(self, header, text):
+        self.header = header
+        self.text = text
+
+    @property
+    def with_header(self):
+        return f'{self.header}: {self.text}'
+
+
 def all_terms_match(search_text, terms, match_function):
     matches = (
         (not terms['yes_all'] or all(match_function(search_text, term) for term in terms['yes_all'])) and
@@ -70,11 +80,10 @@ def search_contents_windows_lnk(filepath, content_args):
         return
 
     text = [
-        f'Target: {shortcut.path}',
-        f'Start In: {shortcut.working_directory}',
-        f'Comment: {shortcut.description}',
+        HeaderedText('Target', shortcut.path),
+        HeaderedText('Start In', shortcut.working_directory),
+        HeaderedText('Comment', shortcut.description),
     ]
-    text = '\n'.join(text)
     content_args['text'] = text
 
     results = search(**content_args)
@@ -161,6 +170,9 @@ def search(
         if isinstance(search_object, pathclass.Path):
             search_text = search_object.basename
             result_text = search_object.absolute_path
+        elif isinstance(search_object, HeaderedText):
+            search_text = search_object.text
+            result_text = search_object.with_header
         else:
             search_text = search_object
             result_text = search_object
