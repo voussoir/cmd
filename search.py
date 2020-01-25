@@ -6,6 +6,10 @@ import re
 import stat
 import sys
 import traceback
+try:
+    import winshell
+except ImportError:
+    winshell = None
 
 from voussoirkit import clipext
 from voussoirkit import expressionmatch
@@ -49,6 +53,29 @@ def search_contents_generic(filepath, content_args):
 
     content_args['text'] = text
     content_args['line_numbers'] = True
+
+    results = search(**content_args)
+    results = list(results)
+    if not results:
+        return
+
+    yield filepath.absolute_path
+    yield from results
+    yield ''
+
+def search_contents_windows_lnk(filepath, content_args):
+    try:
+        shortcut = winshell.Shortcut(filepath.absolute_path)
+    except Exception:
+        return
+
+    text = [
+        f'Target: {shortcut.path}',
+        f'Start In: {shortcut.working_directory}',
+        f'Comment: {shortcut.description}',
+    ]
+    text = '\n'.join(text)
+    content_args['text'] = text
 
     results = search(**content_args)
     results = list(results)
@@ -147,7 +174,10 @@ def search(
                 if not filepath.is_file:
                     continue
 
-                yield from search_contents_generic(filepath, content_args)
+                if filepath.extension.lower() == 'lnk' and winshell:
+                    yield from search_contents_windows_lnk(filepath, content_args)
+                else:
+                    yield from search_contents_generic(filepath, content_args)
 
 def argparse_to_dict(args):
     text = args.text
