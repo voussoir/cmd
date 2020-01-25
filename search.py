@@ -130,15 +130,15 @@ def search(
         # The value still needs to be a list so the upcoming any() / all()
         # receives an iterable as it expects. It just happens to be 1 tree.
         trees = {}
-        for (key, value) in terms.items():
-            if value == []:
-                trees[key] = []
+        for (term_type, term_expression) in terms.items():
+            if term_expression == []:
+                trees[term_type] = []
                 continue
-            tree = ' '.join(value)
+            tree = ' '.join(term_expression)
             tree = expressionmatch.ExpressionTree.parse(tree)
             if not case_sensitive:
                 tree.map(str.lower)
-            trees[key] = [tree]
+            trees[term_type] = [tree]
         terms = trees
 
     elif not case_sensitive:
