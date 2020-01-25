@@ -30,6 +30,35 @@ def all_terms_match(search_text, terms, match_function):
     )
     return matches
 
+def search_contents_generic(filepath, content_args):
+    try:
+        with open(filepath.absolute_path, 'r') as handle:
+            text = handle.read()
+    except UnicodeDecodeError:
+        try:
+            with open(filepath.absolute_path, 'r', encoding='utf-8') as handle:
+                text = handle.read()
+        except UnicodeDecodeError:
+            #safeprint.safeprint(filepath.absolute_path)
+            #traceback.print_exc()
+            return
+    except Exception:
+        safeprint.safeprint(filepath.absolute_path)
+        traceback.print_exc()
+        return
+
+    content_args['text'] = text
+    content_args['line_numbers'] = True
+
+    results = search(**content_args)
+    results = list(results)
+    if not results:
+        return
+
+    yield filepath.absolute_path
+    yield from results
+    yield ''
+
 def search(
         *,
         yes_all=None,
@@ -117,32 +146,8 @@ def search(
                 filepath = pathclass.Path(search_object)
                 if not filepath.is_file:
                     continue
-                try:
-                    with open(filepath.absolute_path, 'r') as handle:
-                        text = handle.read()
-                except UnicodeDecodeError:
-                    try:
-                        with open(filepath.absolute_path, 'r', encoding='utf-8') as handle:
-                            text = handle.read()
-                    except UnicodeDecodeError:
-                        #safeprint.safeprint(filepath.absolute_path)
-                        #traceback.print_exc()
-                        continue
-                except Exception:
-                    safeprint.safeprint(filepath.absolute_path)
-                    traceback.print_exc()
-                    continue
 
-                content_args['text'] = text
-                content_args['line_numbers'] = True
-                results = search(**content_args)
-                results = list(results)
-                if not results:
-                    continue
-
-                yield filepath.absolute_path
-                yield from results
-                yield ''
+                yield from search_contents_generic(filepath, content_args)
 
 def argparse_to_dict(args):
     text = args.text
