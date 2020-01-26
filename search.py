@@ -81,6 +81,7 @@ def search_contents_windows_lnk(filepath, content_args):
 
     text = [
         HeaderedText('Target', shortcut.path),
+        HeaderedText('Arguments', shortcut.arguments),
         HeaderedText('Start In', shortcut.working_directory),
         HeaderedText('Comment', shortcut.description),
     ]
