@@ -7,8 +7,9 @@ import winshell
 
 
 def load_programs():
-    directory = os.getenv('PGUI_DIR')
-    shortcuts = [os.path.join(directory, sname) for sname in os.listdir(directory)]
+    directory = os.path.join(os.path.dirname(__file__), 'PGUI')
+    shortcuts = [os.path.join(directory, p) for p in os.listdir(directory)]
+    shortcuts = [p for p in shortcuts if p.lower().endswith('.lnk')]
     programs = []
     for shortcut in shortcuts:
         name = os.path.splitext(os.path.basename(shortcut))[0]
