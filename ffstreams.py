@@ -94,7 +94,7 @@ def main(argv):
     parser.add_argument('input_filename', nargs='+')
     parser.add_argument('--moveto', dest='moveto', default=None)
     parser.add_argument('--audio', '--audios', dest='audios', action='store_true')
-    parser.add_argument('--subtitles', dest='subtitles', action='store_true')
+    parser.add_argument('--subtitles', '--subs', dest='subtitles', action='store_true')
     parser.set_defaults(func=ffstreams_argparse)
 
     args = parser.parse_args(argv)
