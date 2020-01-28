@@ -90,12 +90,8 @@ def checkup(directory, do_fetch=False):
 
 def read_directories_file():
     directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
-    try:
-        handle = open(directories_file, 'r')
-    except FileNotFoundError:
-        print(f'Please put your git repo locations in {directories_file}.')
-        return 1
 
+    handle = open(directories_file, 'r')
     directories = handle.readlines()
     handle.close()
 
@@ -105,7 +101,11 @@ def read_directories_file():
     return directories
 
 def gitcheckup(do_fetch=False):
-    directories = read_directories_file()
+    try:
+        directories = read_directories_file()
+    except FileNotFoundError as exc:
+        print(f'Please put your git repo locations in {exc.filename}.')
+        return 1
 
     for directory in directories:
         result = checkup(directory, do_fetch=do_fetch)
