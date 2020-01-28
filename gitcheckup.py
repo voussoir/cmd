@@ -101,7 +101,7 @@ def checkup(directory, do_fetch=False):
         'push_details': push_details,
     }
 
-def gitcheckup(do_fetch=False):
+def read_directories_file():
     directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
     try:
         handle = open(directories_file, 'r')
@@ -114,6 +114,11 @@ def gitcheckup(do_fetch=False):
 
     directories = [line.strip() for line in directories]
     directories = [line for line in directories if line]
+
+    return directories
+
+def gitcheckup(do_fetch=False):
+    directories = read_directories_file()
 
     for directory in directories:
         result = checkup(directory, do_fetch=do_fetch)
