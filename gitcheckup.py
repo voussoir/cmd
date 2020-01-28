@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
+import types
 
 from voussoirkit import winwhich
 
@@ -35,17 +36,8 @@ def checkup_committed():
         if {'D'}.intersection(status):
             deleted += 1
 
-    if (added, modified, deleted) == (0, 0, 0):
-        committed = True
-        details = ''
-    else:
-        committed = False
-        details = []
-        if added: details.append(f'+{added}')
-        if deleted: details.append(f'-{deleted}')
-        if modified: details.append(f'~{modified}')
-        details = ', '.join(details)
-        details = f'({details})'
+    committed = (added, modified, deleted) == (0, 0, 0)
+    details = types.SimpleNamespace(added=added, deleted=deleted, modified=modified)
 
     return (committed, details)
 
@@ -65,16 +57,11 @@ def checkup_pushed():
         to_push = len(git_commits_between(merge_base, my_head))
         to_pull = len(git_commits_between(merge_base, remote_head))
 
-    if (to_push, to_pull) == (0, 0):
-        pushed = True
-        details = ''
-    else:
-        pushed = False
-        details = []
-        if to_push: details.append(f'↑{to_push}')
-        if to_pull: details.append(f'↓{to_pull}')
-        details = ', '.join(details)
-        details = f'({details})'
+    pushed = (to_push, to_pull) == (0, 0)
+    details = types.SimpleNamespace(
+        to_push=to_push,
+        to_pull=to_pull,
+    )
 
     return (pushed, details)
 
@@ -94,12 +81,12 @@ def checkup(directory, do_fetch=False):
         git_fetch()
     (committed, commit_details) = checkup_committed()
     (pushed, push_details) = checkup_pushed()
-    return {
-        'committed': committed,
-        'commit_details': commit_details,
-        'pushed': pushed,
-        'push_details': push_details,
-    }
+    return types.SimpleNamespace(
+        committed=committed,
+        commit_details=commit_details,
+        pushed=pushed,
+        push_details=push_details,
+    )
 
 def read_directories_file():
     directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
@@ -122,14 +109,26 @@ def gitcheckup(do_fetch=False):
 
     for directory in directories:
         result = checkup(directory, do_fetch=do_fetch)
-        committed = 'C' if result['committed'] else ' '
-        pushed = 'P' if result['pushed'] else ' '
+        committed = 'C' if result.committed else ' '
+        pushed = 'P' if result.pushed else ' '
 
         details = []
-        if result['commit_details']:
-            details.append(result['commit_details'])
-        if result['push_details']:
-            details.append(result['push_details'])
+
+        commit_details = []
+        if result.commit_details.added: commit_details.append(f'+{result.commit_details.added}')
+        if result.commit_details.deleted: commit_details.append(f'-{result.commit_details.deleted}')
+        if result.commit_details.modified: commit_details.append(f'~{result.commit_details.modified}')
+        commit_details = ', '.join(commit_details)
+        commit_details = f'({commit_details})' if commit_details else ''
+        details.append(commit_details)
+
+        push_details = []
+        if result.push_details.to_push: push_details.append(f'↑{result.push_details.to_push}')
+        if result.push_details.to_pull: push_details.append(f'↓{result.push_details.to_pull}')
+        push_details = ', '.join(push_details)
+        push_details = f'({push_details})' if push_details else ''
+        details.append(push_details)
+
         details = ' '.join(details)
         details = (' ' + details).rstrip()
         print(f'[{committed}][{pushed}] {directory}{details}')
