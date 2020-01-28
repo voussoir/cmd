@@ -119,15 +119,13 @@ def gitcheckup(do_fetch=False):
         if result.commit_details.deleted: commit_details.append(f'-{result.commit_details.deleted}')
         if result.commit_details.modified: commit_details.append(f'~{result.commit_details.modified}')
         commit_details = ', '.join(commit_details)
-        commit_details = f'({commit_details})' if commit_details else ''
-        details.append(commit_details)
+        if commit_details: details.append(f'({commit_details})')
 
         push_details = []
         if result.push_details.to_push: push_details.append(f'↑{result.push_details.to_push}')
         if result.push_details.to_pull: push_details.append(f'↓{result.push_details.to_pull}')
         push_details = ', '.join(push_details)
-        push_details = f'({push_details})' if push_details else ''
-        details.append(push_details)
+        if push_details: details.append(f'({push_details})')
 
         details = ' '.join(details)
         details = (' ' + details).rstrip()
