@@ -50,13 +50,9 @@ def checkup_committed():
     return (committed, details)
 
 def checkup_pushed():
-    command = [GIT, 'rev-parse', '@']
-    my_head = subprocess.check_output(command, stderr=subprocess.STDOUT)
-    my_head = my_head.strip().decode()
-
-    command = [GIT, 'rev-parse', '@{u}']
-    remote_head = subprocess.check_output(command, stderr=subprocess.STDOUT)
-    remote_head = remote_head.strip().decode()
+    command = [GIT, 'rev-parse', '@', '@{u}']
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    (my_head, remote_head) = output.strip().decode().splitlines()
 
     command = [GIT, 'merge-base', '@', '@{u}']
     merge_base = subprocess.check_output(command, stderr=subprocess.STDOUT)
