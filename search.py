@@ -1,5 +1,4 @@
 import argparse
-import fnmatch
 import itertools
 import os
 import re
@@ -16,6 +15,7 @@ from voussoirkit import expressionmatch
 from voussoirkit import pathclass
 from voussoirkit import safeprint
 from voussoirkit import spinal
+from voussoirkit import winglob
 
 # Thanks georg
 # http://stackoverflow.com/a/13443424
@@ -133,7 +133,7 @@ def search(
         return (
             (term in line) or
             (do_regex and re.search(term, line)) or
-            (do_glob and fnmatch.fnmatch(line, term))
+            (do_glob and winglob.fnmatch(line, term))
         )
 
     if do_expression:
