@@ -3,6 +3,7 @@ import os
 import send2trash
 import sys
 
+from voussoirkit import pathclass
 from voussoirkit import spinal
 
 def hash_file(file):
@@ -16,8 +17,9 @@ def hash_file(file):
     return hasher.hexdigest()
 
 def main(argv):
-    folders = argv
-    drives = set(os.path.splitdrive(folder)[0] for folder in folders)
+    folders = [pathclass.Path(p) for p in argv]
+
+    drives = set(os.path.splitdrive(folder.absolute_path)[0] for folder in folders)
     if len(drives) != 1:
         raise ValueError('All paths must be on the same drive.')
 
