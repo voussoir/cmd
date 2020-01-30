@@ -42,7 +42,7 @@ def fileprefix(
 
     filepaths = current_directory.listdir()
     filepaths = [f for f in filepaths if f.is_file]
-    filepaths = [f for f in filepaths if f.extension.lower() not in IGNORE_EXTENSIONS]
+    filepaths = [f for f in filepaths if f.extension not in IGNORE_EXTENSIONS]
 
     try:
         pyfile = pathclass.Path(__file__)

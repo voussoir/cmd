@@ -192,7 +192,7 @@ def search(
         if not filepath.is_file:
             continue
 
-        if filepath.extension.lower() == 'lnk' and winshell:
+        if filepath.extension == 'lnk' and winshell:
             yield from search_contents_windows_lnk(filepath, content_args)
         else:
             yield from search_contents_generic(filepath, content_args)
