@@ -108,7 +108,11 @@ def gitcheckup(do_fetch=False):
         return 1
 
     for directory in directories:
-        result = checkup(directory, do_fetch=do_fetch)
+        try:
+            result = checkup(directory, do_fetch=do_fetch)
+        except subprocess.CalledProcessError as exc:
+            raise Exception(exc.output)
+
         committed = 'C' if result.committed else ' '
         pushed = 'P' if result.pushed else ' '
 
