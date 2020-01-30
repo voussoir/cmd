@@ -67,7 +67,9 @@ def excise(s, mark_left, mark_right):
     excise('What a wonderful day [soundtrack].mp3', ' [', ']') ->
     returns 'What a wonderful day.mp3'
     '''
-    return s.split(mark_left)[0] + s.split(mark_right)[-1]
+    if mark_left in s and mark_right in s:
+        return s.split(mark_left)[0] + s.split(mark_right)[-1]
+    return s
 
 def longest_length(li):
     longest = 0
