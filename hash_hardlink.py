@@ -34,8 +34,7 @@ def main(argv):
             inodes.add(file.stat.st_ino)
             h = hash_file(file)
             print(file.absolute_path, h)
-            hashes.setdefault(h, [])
-            hashes[h].append(file)
+            hashes.setdefault(h, []).append(file)
 
     hashes = {h: files for (h, files) in hashes.items() if len(files) > 1}
 
