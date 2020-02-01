@@ -156,7 +156,6 @@ def search(
 
     if text is None:
         search_objects = spinal.walk_generator(
-            depth_first=False,
             recurse=not local_only,
             yield_directories=True,
         )
