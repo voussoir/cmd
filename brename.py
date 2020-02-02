@@ -29,7 +29,8 @@ underscore = '_'
 
 def brename(transformation, autoyes=False, recurse=False):
     if recurse:
-        olds = [x.absolute_path for x in spinal.walk_generator('.')]
+        spinal.walk_generator('.', yield_files=True, yield_directories=True)
+        olds = [x.absolute_path for x in walker]
     else:
         olds = [os.path.join(os.getcwd(), x) for x in os.listdir('.')]
 
