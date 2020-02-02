@@ -57,6 +57,7 @@ def brename(transformation, autoyes=False, recurse=False):
         print('Is this correct? y/n')
         ok = input('>').lower() in ('y', 'yes', 'yeehaw')
 
+    pairs = reversed(pairs)
     if ok:
         loop(pairs, dry=False)
 
