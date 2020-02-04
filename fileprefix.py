@@ -67,9 +67,7 @@ def fileprefix(
     rename_pairs = []
 
     for (index, filepath) in enumerate(filepaths):
-        extension = filepath.extension
-        if extension != '':
-            extension = '.' + extension
+        extension = filepath.extension.with_dot
 
         newname = format.format(prefix=prefix, index=index, extension=extension)
         if filepath.basename != newname:
