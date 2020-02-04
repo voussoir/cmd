@@ -120,6 +120,8 @@ def search(
     terms = {k: ([v] if isinstance(v, str) else v or []) for (k, v) in terms.items()}
     #print(terms, content_args)
 
+    do_plain = not (do_glob or do_regex)
+
     if all(v == [] for v in terms.values()) and not content_args:
         raise ValueError('No terms supplied')
 
@@ -131,7 +133,7 @@ def search(
             return term.evaluate(line)
 
         return (
-            (term in line) or
+            (do_plain and term in line) or
             (do_regex and re.search(term, line)) or
             (do_glob and winglob.fnmatch(line, term))
         )
