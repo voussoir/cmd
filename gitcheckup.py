@@ -50,16 +50,23 @@ def checkup_pushed():
     output = check_output(command)
     (my_head, remote_head) = output.strip().decode().splitlines()
 
-    command = [GIT, 'merge-base', '@', '@{u}']
-    merge_base = check_output(command)
-    merge_base = merge_base.strip().decode()
-
     if my_head == remote_head:
         to_push = 0
         to_pull = 0
     else:
-        to_push = len(git_commits_between(merge_base, my_head))
-        to_pull = len(git_commits_between(merge_base, remote_head))
+        command = [GIT, 'merge-base', '@', '@{u}']
+        merge_base = check_output(command)
+        merge_base = merge_base.strip().decode()
+
+        if my_head == merge_base:
+            to_push = 0
+            to_pull = len(git_commits_between(merge_base, remote_head))
+        elif remote_head == merge_base:
+            to_push = len(git_commits_between(merge_base, my_head))
+            to_pull = 0
+        else:
+            to_push = len(git_commits_between(merge_base, my_head))
+            to_pull = len(git_commits_between(merge_base, remote_head))
 
     pushed = (to_push, to_pull) == (0, 0)
     details = types.SimpleNamespace(
