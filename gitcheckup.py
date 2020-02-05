@@ -16,9 +16,13 @@ GIT = winwhich.which('git')
 # A  file4
 # ?? file3
 
+def check_output(command):
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    return output
+
 def checkup_committed():
     command = [GIT, 'status', '--short', '--untracked-files=all']
-    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    output = check_output(command)
 
     added = 0
     modified = 0
@@ -43,11 +47,11 @@ def checkup_committed():
 
 def checkup_pushed():
     command = [GIT, 'rev-parse', '@', '@{u}']
-    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    output = check_output(command)
     (my_head, remote_head) = output.strip().decode().splitlines()
 
     command = [GIT, 'merge-base', '@', '@{u}']
-    merge_base = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    merge_base = check_output(command)
     merge_base = merge_base.strip().decode()
 
     if my_head == remote_head:
@@ -67,13 +71,13 @@ def checkup_pushed():
 
 def git_commits_between(a, b):
     command = [GIT, 'log', '--oneline', f'{a}..{b}']
-    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    output = check_output(command)
     lines = output.strip().decode().splitlines()
     return lines
 
 def git_fetch():
     command = [GIT, 'fetch', '--all']
-    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    output = check_output(command)
 
 def checkup(directory, do_fetch=False):
     os.chdir(directory)
