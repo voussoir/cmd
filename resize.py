@@ -2,24 +2,8 @@ import os
 from PIL import Image
 import sys
 
+from voussoirkit import imagetools
 from voussoirkit import winglob
-
-def fit_into_bounds(image_width, image_height, frame_width, frame_height):
-    '''
-    Given the w+h of the image and the w+h of the frame,
-    return new w+h that fits the image into the frame
-    while maintaining the aspect ratio.
-
-    (1920, 1080, 400, 400) -> (400, 225)
-    '''
-    width_ratio = frame_width / image_width
-    height_ratio = frame_height / image_height
-    ratio = min(width_ratio, height_ratio)
-
-    new_width = int(image_width * ratio)
-    new_height = int(image_height * ratio)
-
-    return (new_width, new_height)
 
 filenames = sys.argv[1]
 
@@ -41,9 +25,9 @@ for filename in filenames:
     (image_width, image_height) = i.size
 
     if new_x == 0:
-        (new_x, new_y) = fit_into_bounds(image_width, image_height, 10000000, new_y)
+        (new_x, new_y) = imagetools.fit_into_bounds(image_width, image_height, 10000000, new_y)
     if new_y == 0:
-        (new_x, new_y) = fit_into_bounds(image_width, image_height, new_x, 10000000)
+        (new_x, new_y) = imagetools.fit_into_bounds(image_width, image_height, new_x, 10000000)
 
     print(i.size, new_x, new_y)
     i = i.resize( (new_x, new_y), Image.ANTIALIAS)
