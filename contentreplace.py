@@ -69,7 +69,7 @@ def main(argv):
     parser.set_defaults(func=contentreplace_argparse)
 
     args = parser.parse_args(argv)
-    args.func(args)
+    return args.func(args)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

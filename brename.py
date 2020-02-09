@@ -116,7 +116,7 @@ def main(argv):
     parser.set_defaults(func=brename_argparse)
 
     args = parser.parse_args(argv)
-    args.func(args)
+    return args.func(args)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

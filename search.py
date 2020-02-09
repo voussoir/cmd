@@ -272,7 +272,7 @@ def main(argv):
         args.content_args = parser.parse_args(content_args)
     else:
         args.content_args = None
-    args.func(args)
+    return args.func(args)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
