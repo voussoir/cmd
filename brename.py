@@ -17,6 +17,7 @@ import random
 import re
 import sys
 
+from voussoirkit import getpermission
 from voussoirkit import safeprint
 from voussoirkit import spinal
 
@@ -52,13 +53,8 @@ def brename(transformation, autoyes=False, recurse=False):
 
     loop(pairs, dry=True)
 
-    ok = autoyes
-    if not ok:
-        print('Is this correct? y/n')
-        ok = input('>').lower() in ('y', 'yes', 'yeehaw')
-
-    pairs = reversed(pairs)
-    if ok:
+    if autoyes or getpermission.getpermission('Is this correct?'):
+        pairs = reversed(pairs)
         loop(pairs, dry=False)
 
 def excise(s, mark_left, mark_right):

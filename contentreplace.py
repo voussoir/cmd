@@ -4,6 +4,7 @@ import pyperclip
 import re
 import sys
 
+from voussoirkit import getpermission
 from voussoirkit import winglob
 
 
@@ -21,8 +22,7 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
     if occurances == 0:
         return
 
-    permission = autoyes or (input('Replace? ').lower() in ('y', 'yes'))
-    if not permission:
+    if not (autoyes or getpermission.getpermission('Replace?')):
         return
 
     if do_regex:

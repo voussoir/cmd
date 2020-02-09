@@ -6,6 +6,7 @@ import sys
 import textwrap
 import time
 
+from voussoirkit import getpermission
 from voussoirkit import passwordy
 from voussoirkit import winwhich
 
@@ -373,7 +374,8 @@ def pypi_release(do_tag=False, versionbump='patch'):
 
     linebreak()
 
-    input(f'PRESS ENTER TO RELEASE {name} {new_version}.')
+    if not getpermission.getpermission(f'READY TO RELEASE {name} {new_version}.'):
+        return
 
     write_setup(setup_py)
 
