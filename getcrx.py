@@ -9,6 +9,7 @@ import traceback
 import zipfile
 
 from voussoirkit import clipext
+from voussoirkit import getpermission
 
 FILENAME_BADCHARS = '\\/:*?<>|"'
 
@@ -19,10 +20,6 @@ def sanitize_filename(name):
     for c in FILENAME_BADCHARS:
         name = name.replace(c, '-')
     return name
-
-def prompt_permission(prompt):
-    answer = input(prompt)
-    return answer.lower() in {'yes', 'y'}
 
 def get_webstore_name_version(extension_id):
     url = WEBSTORE_URL.format(extension_id=extension_id)
@@ -79,9 +76,11 @@ def getcrx(extension_id, auto_overwrite=None):
 
     crx_filename = sanitize_filename(crx_filename)
     if os.path.isfile(crx_filename):
+        if auto_overwrite is True:
+            permission = True
         if auto_overwrite is None:
-            message = '"%s" already exists. Overwrite?' % crx_filename
-            permission = prompt_permission(message)
+            message = f'"{crx_filename}" already exists. Overwrite?'
+            permission = getpermission.getpermission(message)
         else:
             permission = False
     else:
@@ -90,7 +89,7 @@ def getcrx(extension_id, auto_overwrite=None):
     if permission:
         crx_handle = open(crx_filename, 'wb')
         crx_handle.write(response.content)
-        print('Downloaded "%s".' % crx_filename)
+        print(f'Downloaded "{crx_filename}".')
 
 def getcrx_argparse(args):
     extension_ids = []
