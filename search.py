@@ -109,6 +109,7 @@ def search(
         do_regex=False,
         line_numbers=False,
         local_only=False,
+        root_path='.',
         text=None,
     ):
     terms = {
@@ -158,6 +159,7 @@ def search(
 
     if text is None:
         search_objects = spinal.walk_generator(
+            root_path,
             recurse=not local_only,
             yield_directories=True,
         )
