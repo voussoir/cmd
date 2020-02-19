@@ -32,6 +32,7 @@ class NoUpstreamBranch(GitCheckupException):
 ################################################################################
 def check_output(command):
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    output = output.decode().strip()
     return output
 
 def read_directories_file():
@@ -55,26 +56,40 @@ def read_directories_file():
 def git_commits_between(a, b):
     command = [GIT, 'log', '--oneline', f'{a}..{b}']
     output = check_output(command)
-    lines = output.strip().decode().splitlines()
+    lines = output.splitlines()
     return lines
+
+def git_current_branch():
+    command = [GIT, 'rev-parse', '--abbrev-ref', 'HEAD']
+    return check_output(command)
 
 def git_fetch():
     command = [GIT, 'fetch', '--all']
-    output = check_output(command)
+    return check_output(command)
+
+def git_merge_base():
+    command = [GIT, 'merge-base', '@', '@{u}']
+    return check_output(command)
+
+def git_rev_parse(rev):
+    command = [GIT, 'rev-parse', '@{u}']
+    return check_output(command)
+
+def git_status():
+    command = [GIT, 'status', '--short', '--untracked-files=all']
+    return check_output(command)
 
 # CHECKUP
 ################################################################################
 def checkup_committed():
     details = dotdict.DotDict(default=None)
 
-    command = [GIT, 'status', '--short', '--untracked-files=all']
-    output = check_output(command)
-
     details.added = 0
     details.modified = 0
     details.deleted = 0
-    for line in output.splitlines():
-        status = line.split()[0].strip().decode('ascii')
+
+    for line in git_status().splitlines():
+        status = line.split()[0].strip()
 
         # These are ifs instead of elifs because you might have a file that is
         # added in the index but deleted on disk, etc. Anyway these numbers
@@ -93,15 +108,12 @@ def checkup_committed():
 def checkup_pushed():
     details = dotdict.DotDict(default=None)
 
-    command = [GIT, 'rev-parse', '@']
-    my_head = check_output(command).strip().decode()
+    my_head = git_rev_parse('@')
 
-    command = [GIT, 'rev-parse', '@{u}']
     try:
-        remote_head = check_output(command).strip().decode()
+        remote_head = git_rev_parse('@{u}')
     except subprocess.CalledProcessError as exc:
-        command = [GIT, 'rev-parse', '--abbrev-ref', 'HEAD']
-        current_branch = check_output(command).strip().decode()
+        current_branch = git_current_branch()
         details.error = NoUpstreamBranch(current_branch)
         return details
 
@@ -109,8 +121,7 @@ def checkup_pushed():
         details.to_push = 0
         details.to_pull = 0
     else:
-        command = [GIT, 'merge-base', '@', '@{u}']
-        merge_base = check_output(command).strip().decode()
+        merge_base = git_merge_base()
 
         if my_head == merge_base:
             details.to_push = 0
