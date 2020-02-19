@@ -16,6 +16,9 @@ GIT = winwhich.which('git')
 # A  file4
 # ?? file3
 
+class NoUpstreamBranch(Exception):
+    pass
+
 def check_output(command):
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
     return output
@@ -46,9 +49,16 @@ def checkup_committed():
     return (committed, details)
 
 def checkup_pushed():
-    command = [GIT, 'rev-parse', '@', '@{u}']
-    output = check_output(command)
-    (my_head, remote_head) = output.strip().decode().splitlines()
+    command = [GIT, 'rev-parse', '@']
+    my_head = check_output(command).strip().decode()
+
+    command = [GIT, 'rev-parse', '@{u}']
+    try:
+        remote_head = check_output(command).strip().decode()
+    except subprocess.CalledProcessError as exc:
+        command = [GIT, 'rev-parse', '--abbrev-ref', 'HEAD']
+        current_branch = check_output(command).strip().decode()
+        raise NoUpstreamBranch(current_branch)
 
     if my_head == remote_head:
         to_push = 0
