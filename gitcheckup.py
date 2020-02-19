@@ -17,9 +17,16 @@ GIT = winwhich.which('git')
 # A  file4
 # ?? file3
 
-class NoUpstreamBranch(Exception):
+class GitCheckupException(Exception):
+    pass
+
+class NoConfigFile(GitCheckupException):
     def __str__(self):
-        return f'No upstream branch for {self.args[0]}'
+        return f'Please put your git repo locations in "{self.args[0]}".'
+
+class NoUpstreamBranch(GitCheckupException):
+    def __str__(self):
+        return f'No upstream branch for {self.args[0]}.'
 
 # HELPERS
 ################################################################################
@@ -30,9 +37,13 @@ def check_output(command):
 def read_directories_file():
     directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
 
-    handle = open(directories_file, 'r')
-    directories = handle.readlines()
-    handle.close()
+    try:
+        handle = open(directories_file, 'r')
+    except FileNotFoundError as exc:
+        raise NoConfigFile(exc.filename) from exc
+
+    with handle:
+        directories = handle.readlines()
 
     directories = [line.strip() for line in directories]
     directories = [line for line in directories if line]
@@ -114,7 +125,8 @@ def checkup_pushed():
     details.pushed = (details.to_push, details.to_pull) == (0, 0)
     return details
 
-def gitcheckup_one(directory, do_fetch=False):
+def gitcheckup(directory, do_fetch=False):
+    directory = os.path.abspath(directory)
     os.chdir(directory)
 
     if do_fetch:
@@ -149,27 +161,30 @@ def gitcheckup_one(directory, do_fetch=False):
     details = (' ' + details).rstrip()
     print(f'[{committed}][{pushed}] {directory}{details}')
 
-def gitcheckup_all(do_fetch=False):
-    try:
+# COMMAND LINE
+################################################################################
+def gitcheckup_argparse(args):
+    if args.directories:
+        directories = args.directories
+    else:
         directories = read_directories_file()
-    except FileNotFoundError as exc:
-        print(f'Please put your git repo locations in {exc.filename}.')
-        return 1
 
     for directory in directories:
-        gitcheckup_one(directory, do_fetch=do_fetch)
-
-def gitcheckup_argparse(args):
-    return gitcheckup_all(do_fetch=args.do_fetch)
+        gitcheckup(directory, do_fetch=args.do_fetch)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
+    parser.add_argument('directories', nargs='*')
     parser.add_argument('--fetch', dest='do_fetch', action='store_true')
     parser.set_defaults(func=gitcheckup_argparse)
 
     args = parser.parse_args(argv)
-    return args.func(args)
+    try:
+        return args.func(args)
+    except GitCheckupException as exc:
+        print(exc)
+        return 1
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
