@@ -9,6 +9,8 @@ from voussoirkit import winwhich
 
 AUDIO_EXTENSIONS = {
     'aac': 'm4a',
+    'ac3': 'ac3',
+    'flac': 'flac',
     'mp3': 'mp3',
     'opus': 'opus',
     '*': 'mka',
