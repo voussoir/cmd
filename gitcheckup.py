@@ -72,7 +72,7 @@ def git_merge_base():
     return check_output(command)
 
 def git_rev_parse(rev):
-    command = [GIT, 'rev-parse', '@{u}']
+    command = [GIT, 'rev-parse', rev]
     return check_output(command)
 
 def git_status():
