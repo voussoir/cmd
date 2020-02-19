@@ -21,10 +21,38 @@ class NoUpstreamBranch(Exception):
     def __str__(self):
         return f'No upstream branch for {self.args[0]}'
 
+# HELPERS
+################################################################################
 def check_output(command):
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
     return output
 
+def read_directories_file():
+    directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
+
+    handle = open(directories_file, 'r')
+    directories = handle.readlines()
+    handle.close()
+
+    directories = [line.strip() for line in directories]
+    directories = [line for line in directories if line]
+
+    return directories
+
+# GIT FUNCTIONS
+################################################################################
+def git_commits_between(a, b):
+    command = [GIT, 'log', '--oneline', f'{a}..{b}']
+    output = check_output(command)
+    lines = output.strip().decode().splitlines()
+    return lines
+
+def git_fetch():
+    command = [GIT, 'fetch', '--all']
+    output = check_output(command)
+
+# CHECKUP
+################################################################################
 def checkup_committed():
     details = dotdict.DotDict(default=None)
 
@@ -86,63 +114,36 @@ def checkup_pushed():
     details.pushed = (details.to_push, details.to_pull) == (0, 0)
     return details
 
-def git_commits_between(a, b):
-    command = [GIT, 'log', '--oneline', f'{a}..{b}']
-    output = check_output(command)
-    lines = output.strip().decode().splitlines()
-    return lines
-
-def git_fetch():
-    command = [GIT, 'fetch', '--all']
-    output = check_output(command)
-
-def checkup(directory, do_fetch=False):
+def gitcheckup_one(directory, do_fetch=False):
     os.chdir(directory)
+
     if do_fetch:
         git_fetch()
-    commit_details = checkup_committed()
-    push_details = checkup_pushed()
-    return dotdict.DotDict(
-        commit_details=commit_details,
-        push_details=push_details,
-    )
 
-def read_directories_file():
-    directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
-
-    handle = open(directories_file, 'r')
-    directories = handle.readlines()
-    handle.close()
-
-    directories = [line.strip() for line in directories]
-    directories = [line for line in directories if line]
-
-    return directories
-
-def gitcheckup_one(directory, do_fetch=False):
     try:
-        result = checkup(directory, do_fetch=do_fetch)
+        commit_details = checkup_committed()
+        push_details = checkup_pushed()
     except subprocess.CalledProcessError as exc:
         raise Exception(exc.output)
 
-    committed = 'C' if result.commit_details.committed else ' '
-    pushed = 'P' if result.push_details.pushed else ' '
+    committed = 'C' if commit_details.committed else ' '
+    pushed = 'P' if push_details.pushed else ' '
 
     details = []
 
-    commit_details = []
-    if result.commit_details.added: commit_details.append(f'+{result.commit_details.added}')
-    if result.commit_details.deleted: commit_details.append(f'-{result.commit_details.deleted}')
-    if result.commit_details.modified: commit_details.append(f'~{result.commit_details.modified}')
-    commit_details = ', '.join(commit_details)
-    if commit_details: details.append(f'({commit_details})')
+    commit_summary = []
+    if commit_details.added: commit_summary.append(f'+{commit_details.added}')
+    if commit_details.deleted: commit_summary.append(f'-{commit_details.deleted}')
+    if commit_details.modified: commit_summary.append(f'~{commit_details.modified}')
+    commit_summary = ', '.join(commit_summary)
+    if commit_summary: details.append(f'({commit_summary})')
 
-    push_details = []
-    if result.push_details.to_push: push_details.append(f'↑{result.push_details.to_push}')
-    if result.push_details.to_pull: push_details.append(f'↓{result.push_details.to_pull}')
-    if result.push_details.error: push_details.append(f'!{result.push_details.error}')
-    push_details = ', '.join(push_details)
-    if push_details: details.append(f'({push_details})')
+    push_summary = []
+    if push_details.to_push: push_summary.append(f'↑{push_details.to_push}')
+    if push_details.to_pull: push_summary.append(f'↓{push_details.to_pull}')
+    if push_details.error: push_summary.append(f'!{push_details.error}')
+    push_summary = ', '.join(push_summary)
+    if push_summary: details.append(f'({push_summary})')
 
     details = ' '.join(details)
     details = (' ' + details).rstrip()
