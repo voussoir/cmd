@@ -44,10 +44,15 @@ def make_maps(input_file, prefix, search_pattern, extension_map, moveto=None):
         if match is None:
             continue
 
-        (stream_index, codec) = (match.group(1), match.group(2))
+        (stream_index, language, codec) = match.groups()
+        if language is None:
+            language = ''
+        else:
+            language = language.strip('()')
+            language = '.' + language
         extension = extension_map.get(codec, extension_map['*'])
         output_filename = input_file.replace_extension('')
-        output_filename = output_filename.add_extension(f'{prefix}{stream_index}.{extension}')
+        output_filename = output_filename.add_extension(f'{prefix}{stream_index}{language}.{extension}')
         print(f'{stream_index}, codec={codec}, ext=.{extension}')
 
         if moveto:
@@ -66,7 +71,7 @@ def audio_maps(input_file, moveto=None):
     return make_maps(
         input_file,
         prefix='a',
-        search_pattern=r'Stream #0:(\d+)[^\s]*: Audio: (\w+)',
+        search_pattern=r'Stream #0:(\d+)(\(\w+\))?[^\s]*: Audio: (\w+)',
         extension_map=AUDIO_EXTENSIONS,
         moveto=moveto,
     )
@@ -75,7 +80,7 @@ def subtitle_maps(input_file, moveto=None):
     return make_maps(
         input_file,
         prefix='s',
-        search_pattern=r'Stream #0:(\d+)[^\s]*: Subtitle: (\w+)',
+        search_pattern=r'Stream #0:(\d+)(\(\w+\))?[^\s]*: Subtitle: (\w+)',
         extension_map=SUBTITLE_EXTENSIONS,
         moveto=moveto,
     )
