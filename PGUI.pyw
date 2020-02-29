@@ -14,15 +14,16 @@ def load_programs():
     for shortcut in shortcuts:
         name = os.path.splitext(os.path.basename(shortcut))[0]
         shortcut = winshell.Shortcut(shortcut)
-        program = Program(name, f'{shortcut.path} {shortcut.arguments}')
+        program = Program(name, shortcut.path, shortcut.arguments)
         programs.append(program)
     return programs
 
 
 class Program():
-    def __init__(self, name, path):
+    def __init__(self, name, path, arguments):
         self.name = name
         self.path = os.path.abspath(path)
+        self.arguments = arguments
 
     def __str__(self):
         return f'{self.name}: {self.path}'
@@ -38,7 +39,8 @@ class PGUILauncher(Frame):
     def launch_program(self, program):
         print('opening application', program.name)
         os.chdir(os.path.dirname(program.path))
-        subprocess.Popen(program.path, shell=True)
+        command = f'{program.path} {program.arguments}'
+        subprocess.Popen(command, shell=True)
         self.quit()
 
     def init_ui(self):
