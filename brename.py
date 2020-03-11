@@ -16,6 +16,7 @@ import os
 import random
 import re
 import sys
+import unicodedata
 
 from voussoirkit import getpermission
 from voussoirkit import safeprint
@@ -27,6 +28,8 @@ hyphen = '-'
 quote = '"'
 space = ' '
 underscore = '_'
+def unicode_normalize(s):
+    return unicodedata.normalize('NFC', s)
 
 def brename(transformation, autoyes=False, recurse=False):
     if recurse:
