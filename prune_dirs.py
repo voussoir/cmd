@@ -1,7 +1,16 @@
+'''
+This program deletes all empty directories which are children of the given
+starting directory. The starting directory itself will not be deleted even
+if it is empty.
+
+> prune_dirs .
+> prune_dirs C:\\somepath
+'''
 import argparse
 import os
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import spinal
 from voussoirkit import pathclass
 
@@ -37,8 +46,7 @@ def main(argv):
     parser.add_argument('starting')
     parser.set_defaults(func=prune_dirs_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.single_main(argv, parser, docstring=__doc__)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
