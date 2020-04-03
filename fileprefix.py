@@ -21,6 +21,7 @@ IGNORE_EXTENSIONS = ['py', 'lnk', 'ini']
 
 def natural_sorter(x):
     '''
+    Thank you Mark Byers
     http://stackoverflow.com/a/11150413
     '''
     convert = lambda text: int(text) if text.isdigit() else text.lower()
