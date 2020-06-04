@@ -60,7 +60,10 @@ def filetimelapse(filepath, rate):
         time.sleep(rate)
 
 def filetimelapse_argparse(args):
-    return filetimelapse(args.filepath, args.rate)
+    try:
+        return filetimelapse(args.filepath, args.rate)
+    except KeyboardInterrupt:
+        pass
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
