@@ -3,6 +3,7 @@ from tkinter import Tk, BOTH
 from tkinter.ttk import Frame, Style, Button
 import os
 import subprocess
+import sys
 import winshell
 
 
@@ -34,18 +35,7 @@ class PGUILauncher(Frame):
         Frame.__init__(self, parent)
 
         self.parent = parent
-        self.init_ui()
 
-    def launch_program(self, program):
-        print('opening application', program.name)
-        os.chdir(os.path.dirname(program.path))
-        command = f'{program.path} {program.arguments}'
-        subprocess.Popen(command, shell=True)
-        self.quit()
-
-    def init_ui(self):
-        self.parent.resizable(0,0)
-        self.parent.title("PGUI")
         self.style = Style()
         self.style.theme_use("clam")
         self.pack(fill=BOTH, expand = 1)
@@ -57,7 +47,11 @@ class PGUILauncher(Frame):
         programs = load_programs()
         for (programindex, program) in enumerate(programs):
             print(y, x)
-            newButton = Button(self, text=program.name, command=lambda program=program: self.launch_program(program))
+            newButton = Button(
+                self,
+                text=program.name,
+                command=lambda prog=program: self.launch_program(prog),
+            )
             print(f'creating button for {program.name} at {program.path}')
             newButton.configure(width=self.buttonwidth)
             newButton.grid(row=y, column=x)
@@ -70,17 +64,28 @@ class PGUILauncher(Frame):
         self.pack()
         self.update()
 
-        width = self.parent.winfo_reqwidth()
-        height = self.parent.winfo_reqheight()
-        x_offset = (self.parent.winfo_screenwidth() - width) / 2
-        y_offset = (self.parent.winfo_screenheight() - height) / 2
+    def launch_program(self, program):
+        print('opening application', program.name)
+        os.chdir(os.path.dirname(program.path))
+        command = f'{program.path} {program.arguments}'
+        subprocess.Popen(command, shell=True)
+        self.quit()
 
-        self.parent.geometry('%dx%d+%d+%d' % (width, height, x_offset, y_offset-50))
 
-def main():
+def main(argv):
     root = Tk()
+    root.title("PGUI")
+    root.resizable(0,0)
+
     ex = PGUILauncher(root)
+
+    width = root.winfo_reqwidth()
+    height = root.winfo_reqheight()
+    x_offset = (root.winfo_screenwidth() - width) / 2
+    y_offset = (root.winfo_screenheight() - height) / 2
+
+    root.geometry('%dx%d+%d+%d' % (width, height, x_offset, y_offset-50))
     root.mainloop()
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main(sys.argv[1:]))
