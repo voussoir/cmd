@@ -12,6 +12,12 @@ from voussoirkit import winglob
 
 RESERVE_SPACE_ON_DRIVE = 30 * bytestring.GIBIBYTE
 
+class RarParException(Exception):
+    pass
+
+class NotEnoughSpace(RarParException):
+    pass
+
 def RARCOMMAND(
         basename,
         input_pattern,
@@ -105,7 +111,7 @@ def assert_enough_space(pathsize, workdir, moveto, rec, rev, par):
     print(message)
 
     if reserve > free_space:
-        raise IOError('Please leave more space')
+        raise NotEnoughSpace('Please leave more space')
 
 def move(pattern, directory):
     files = winglob.glob(pattern)
