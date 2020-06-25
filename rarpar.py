@@ -190,6 +190,13 @@ def normalize_volume(volume, pathsize):
     return volume
 
 def run_script(script, dry=False):
+    '''
+    `script` can be a list of strings, which are command line commands, or
+    callable Python functions. They will be run in order, and the sequence
+    will terminate if any step returns a bad status code. Your Python functions
+    must return either 0 or None to be considered successful, all other return
+    values will be considered failures.
+    '''
     status = 0
 
     if dry:
@@ -203,8 +210,7 @@ def run_script(script, dry=False):
             status = os.system(command)
         else:
             status = command()
-            status = status or 0
-        if status != 0:
+        if status not in [0, None]:
             break
 
     return status
