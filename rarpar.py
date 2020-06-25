@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+import send2trash
 import shutil
 import sys
 import time
@@ -223,6 +224,7 @@ def rarpar(
         moveto=None,
         par=None,
         password=None,
+        recycle_original=False,
         rec=None,
         rev=None,
         volume=None,
@@ -309,6 +311,12 @@ def rarpar(
         if par:
             script.append(move_pars)
 
+    def recycle():
+        send2trash.send2trash(path.absolute_path)
+
+    if recycle_original:
+        script.append(recycle)
+
     #### ####
 
     status = run_script(script, dry)
@@ -326,6 +334,7 @@ def rarpar_argparse(args):
         password=args.password,
         rec=args.rec,
         rev=args.rev,
+        recycle_original=args.recycle_original,
         workdir=args.workdir,
     )
 
@@ -372,6 +381,9 @@ path:
     The directory to which the rars and pars will be moved after the program
     has finished working.
 
+--recycle:
+    The input file or directory will be recycled at the end.
+
 --dry:
     Print the commands that will be run, but don't actually run them.
 '''
@@ -388,6 +400,7 @@ def main(argv):
     parser.add_argument('--password', dest='password')
     parser.add_argument('--workdir', dest='workdir', default='.')
     parser.add_argument('--moveto', dest='moveto')
+    parser.add_argument('--recycle', dest='recycle_original', action='store_true')
     parser.add_argument('--dry', dest='dry', action='store_true')
     parser.set_defaults(func=rarpar_argparse)
 
