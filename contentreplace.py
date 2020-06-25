@@ -1,10 +1,12 @@
 import argparse
 import codecs
+import os
 import pyperclip
 import re
 import sys
 
 from voussoirkit import getpermission
+from voussoirkit import spinal
 from voussoirkit import winglob
 
 
@@ -35,7 +37,13 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
         f.write(content)
 
 def contentreplace_argparse(args):
-    filenames = winglob.glob(args.filename_glob)
+    if args.recurse:
+        files = spinal.walk_generator('.')
+        files = (f for f in files if winglob.fnmatch(f.basename, args.filename_glob))
+        filenames = (f.absolute_path for f in files)
+    else:
+        filenames = winglob.glob(args.filename_glob)
+        filenames = [f for f in filenames if os.path.isfile(f)]
 
     if args.clip_prompt:
         replace_from = input('Ready from')
@@ -49,6 +57,7 @@ def contentreplace_argparse(args):
         replace_to = codecs.decode(args.replace_to, 'unicode_escape')
 
     for filename in filenames:
+        print(filename)
         contentreplace(
             filename,
             replace_from,
@@ -64,6 +73,7 @@ def main(argv):
     parser.add_argument('replace_from')
     parser.add_argument('replace_to')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
+    parser.add_argument('--recurse', dest='recurse', action='store_true')
     parser.add_argument('--regex', dest='do_regex', action='store_true')
     parser.add_argument('--clip_prompt', dest='clip_prompt', action='store_true')
     parser.set_defaults(func=contentreplace_argparse)
