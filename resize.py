@@ -1,3 +1,4 @@
+import argparse
 import os
 from PIL import Image
 import sys
@@ -7,22 +8,17 @@ from voussoirkit import winglob
 
 filenames = sys.argv[1]
 
-filenames = winglob.glob(filenames)
-for filename in filenames:
+def resize(filename, new_x=None, new_y=None, scale=None, nearest_neighbor=False):
     i = Image.open(filename)
-    if all(x.isdigit() for x in sys.argv[2:3]):
-        new_x = int(sys.argv[2])
-        new_y = int(sys.argv[3])
-    else:
-        try:
-            ratio = float(sys.argv[2])
-            new_x = int(i.size[0] * ratio)
-            new_y = int(i.size[1] * ratio)
-        except ValueError:
-            print('you did it wrong')
-            quit()
 
     (image_width, image_height) = i.size
+
+    if new_x is not None and new_y is not None:
+        pass
+    elif scale:
+        new_x = int(image_width * scale)
+        new_y = int(image_height * scale)
+    print(new_x, new_y)
 
     if new_x == 0:
         (new_x, new_y) = imagetools.fit_into_bounds(image_width, image_height, 10000000, new_y)
@@ -30,8 +26,39 @@ for filename in filenames:
         (new_x, new_y) = imagetools.fit_into_bounds(image_width, image_height, new_x, 10000000)
 
     print(i.size, new_x, new_y)
-    i = i.resize( (new_x, new_y), Image.ANTIALIAS)
+    if nearest_neighbor:
+        i = i.resize( (new_x, new_y), Image.NEAREST)
+    else:
+        i = i.resize( (new_x, new_y), Image.ANTIALIAS)
     suffix = '_{width}x{height}'.format(width=new_x, height=new_y)
     (base, extension) = os.path.splitext(filename)
     newname = base + suffix + extension
     i.save(newname, quality=100)
+
+
+def resize_argparse(args):
+    filenames = winglob.glob(args.pattern)
+    for filename in filenames:
+        resize(
+            filename,
+            args.new_x,
+            args.new_y,
+            scale=args.scale,
+            nearest_neighbor=args.nearest_neighbor,
+        )
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('pattern')
+    parser.add_argument('new_x', nargs='?', type=int, default=None)
+    parser.add_argument('new_y', nargs='?', type=int, default=None)
+    parser.add_argument('--scale', dest='scale', type=float, default=None)
+    parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
+    parser.set_defaults(func=resize_argparse)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))
