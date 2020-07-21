@@ -67,6 +67,15 @@ def make_maps(input_file, prefix, search_pattern, extension_map, moveto=None):
         maps.extend(args)
     return maps
 
+def video_maps(input_file, moveto=None):
+    return make_maps(
+        input_file,
+        prefix='v',
+        search_pattern=r'Stream #0:(\d+)(\(\w+\))?[^\s]*: Video: (\w+)',
+        extension_map=AUDIO_EXTENSIONS,
+        moveto=moveto,
+    )
+
 def audio_maps(input_file, moveto=None):
     return make_maps(
         input_file,
@@ -85,8 +94,11 @@ def subtitle_maps(input_file, moveto=None):
         moveto=moveto,
     )
 
-def ffstreams(input_file, do_audios=False, do_subtitles=False, dry=False, moveto=None):
+def ffstreams(input_file, do_videos=False, do_audios=False, do_subtitles=False, dry=False, moveto=None):
     maps = []
+    if do_videos:
+        maps.extend(video_maps(input_file, moveto=moveto))
+
     if do_audios:
         maps.extend(audio_maps(input_file, moveto=moveto))
 
@@ -107,6 +119,7 @@ def ffstreams_argparse(args):
             input_file = pathclass.Path(input_filename)
             ffstreams(
                 input_file,
+                do_videos=args.videos,
                 do_audios=args.audios,
                 do_subtitles=args.subtitles,
                 dry=args.dry,
@@ -118,6 +131,7 @@ def main(argv):
 
     parser.add_argument('input_filename', nargs='+')
     parser.add_argument('--moveto', dest='moveto', default=None)
+    parser.add_argument('--video', '--videos', dest='videos', action='store_true')
     parser.add_argument('--audio', '--audios', dest='audios', action='store_true')
     parser.add_argument('--subtitles', '--subs', dest='subtitles', action='store_true')
     parser.add_argument('--dry', dest='dry', action='store_true')
