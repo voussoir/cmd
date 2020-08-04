@@ -1,5 +1,3 @@
-import sys
-
 from voussoirkit import pipeable
 
 

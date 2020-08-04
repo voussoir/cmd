@@ -1,6 +1,5 @@
 import sys
 
-from voussoirkit import bytestring
 from voussoirkit import spinal
 from voussoirkit import pathclass
 

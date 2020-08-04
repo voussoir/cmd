@@ -7,8 +7,6 @@ integer that counts each file in the folder.
 
 import argparse
 import os
-import random
-import string
 import re
 import sys
 

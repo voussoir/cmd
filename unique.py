@@ -17,4 +17,3 @@ for line in lines:
         #new_text.append(line)
         seen.add(line)
         print(line)
-

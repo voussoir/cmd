@@ -2,7 +2,6 @@ import glob
 import os
 import sys
 import tempfile
-import time
 
 if len(sys.argv) < 3:
     raise ValueError()

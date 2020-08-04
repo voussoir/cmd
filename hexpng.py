@@ -1,9 +1,7 @@
 '''
 Generate a png file of a solid color, specified by a hex code.
 '''
-
 import argparse
-import os
 import PIL.Image
 import sys
 

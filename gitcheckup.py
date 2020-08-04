@@ -2,7 +2,6 @@ import argparse
 import os
 import subprocess
 import sys
-import types
 
 from voussoirkit import dotdict
 from voussoirkit import winwhich

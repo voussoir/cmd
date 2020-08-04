@@ -10,7 +10,6 @@ def listget(li, index, fallback=None):
         return fallback
 
 def rid(length=8):
-    import random
     bits = length * 4
     bits = random.getrandbits(bits)
     identifier = '{:02x}'.format(bits).rjust(length, '0')
