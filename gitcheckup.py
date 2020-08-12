@@ -70,6 +70,10 @@ def git_merge_base():
     command = [GIT, 'merge-base', '@', '@{u}']
     return check_output(command)
 
+def git_pull():
+    command = [GIT, 'pull', '--all']
+    return check_output(command)
+
 def git_rev_parse(rev):
     command = [GIT, 'rev-parse', rev]
     return check_output(command)
@@ -135,12 +139,15 @@ def checkup_pushed():
     details.pushed = (details.to_push, details.to_pull) == (0, 0)
     return details
 
-def gitcheckup(directory, do_fetch=False):
+def gitcheckup(directory, do_fetch=False, do_pull=False):
     directory = os.path.abspath(directory)
     os.chdir(directory)
 
     if do_fetch:
         git_fetch()
+
+    if do_pull:
+        git_pull()
 
     try:
         commit_details = checkup_committed()
@@ -180,13 +187,14 @@ def gitcheckup_argparse(args):
         directories = read_directories_file()
 
     for directory in directories:
-        gitcheckup(directory, do_fetch=args.do_fetch)
+        gitcheckup(directory, do_fetch=args.do_fetch, do_pull=args.do_pull)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('directories', nargs='*')
     parser.add_argument('--fetch', dest='do_fetch', action='store_true')
+    parser.add_argument('--pull', dest='do_pull', action='store_true')
     parser.set_defaults(func=gitcheckup_argparse)
 
     args = parser.parse_args(argv)
