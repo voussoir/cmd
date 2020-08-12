@@ -129,9 +129,9 @@ def main(argv):
 
     parser.add_argument('extension_ids', nargs='*', default=None)
     parser.add_argument('--file', dest='file', default=None)
-    parser.add_argument('--fail_early', dest='fail_early', action='store_true')
+    parser.add_argument('--fail_early', '--fail-early', dest='fail_early', action='store_true')
     parser.add_argument('--overwrite', dest='overwrite', action='store_true')
-    parser.add_argument('--dont_overwrite', dest='dont_overwrite', action='store_true')
+    parser.add_argument('--dont_overwrite', '--dont-overwrite', dest='dont_overwrite', action='store_true')
     parser.set_defaults(func=getcrx_argparse)
 
     args = parser.parse_args(argv)
