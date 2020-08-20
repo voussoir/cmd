@@ -1,8 +1,35 @@
+'''
+This program helps you check the commit and push status of your favorite git
+repositories. The output looks like this:
+
+[ ][P] D:\\Git\\cmd (~1)
+[C][P] D:\\Git\\Etiquette
+[ ][P] D:\\Git\\voussoirkit (+1)
+[C][ ] D:\\Git\\YCDL (↑3)
+
+To specify the list of git directories, you may either:
+- Create a gitcheckup.txt file in the same directory as this file, where every
+  line contains an absolute path to the directory, or
+- Pass directories as a series of arguments to this program.
+
+flags:
+--fetch:
+    Run `git fetch --all` in each directory.
+
+--pull:
+    Run `git pull --all` in each directory.
+
+Examples:
+> gitcheckup
+> gitcheckup --fetch
+> gitcheckup D:\\Git\\cmd D:\\Git\\YCDL --pull
+'''
 import argparse
 import os
 import subprocess
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import dotdict
 from voussoirkit import winwhich
 
@@ -197,9 +224,8 @@ def main(argv):
     parser.add_argument('--pull', dest='do_pull', action='store_true')
     parser.set_defaults(func=gitcheckup_argparse)
 
-    args = parser.parse_args(argv)
     try:
-        return args.func(args)
+        return betterhelp.single_main(argv, parser, docstring=__doc__)
     except GitCheckupException as exc:
         print(exc)
         return 1
