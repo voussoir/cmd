@@ -9,12 +9,12 @@ files2 = set(os.listdir(dir2))
 
 print(f'In "{dir1}" but not in "{dir2}":')
 print('=============================')
-for discrepancy in files1.difference(files2):
+for discrepancy in sorted(files1.difference(files2)):
     print(discrepancy)
 
 print()
 
 print(f'In "{dir2}" but not in "{dir1}":')
 print('=============================')
-for discrepancy in files2.difference(files1):
+for discrepancy in sorted(files2.difference(files1)):
     print(discrepancy)
