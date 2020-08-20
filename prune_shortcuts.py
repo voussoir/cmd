@@ -14,6 +14,17 @@ from voussoirkit import pathclass
 def prune_shortcuts(autoyes=False):
     lnks = pathclass.Path('.').glob('*.lnk')
     stale = [lnk for lnk in lnks if not os.path.exists(winshell.Shortcut(lnk.absolute_path).path)]
+    stale = []
+    for lnk in lnks:
+        shortcut = winshell.Shortcut(lnk.absolute_path)
+        # There are some special shortcuts that do not have a path, but instead
+        # trigger some action based on a CLSID that Explorer understands.
+        # I can't find this information in the winshell.Shortcut object, so for
+        # now let's at least not delete these files.
+        if shortcut.path == '':
+            continue
+        if not os.path.exists(shortcut.path):
+            stale.append(lnk)
 
     if not stale:
         return
