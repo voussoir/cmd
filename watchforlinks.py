@@ -1,38 +1,49 @@
+import argparse
 import pyperclip
 import sys
 import time
 
 from voussoirkit import passwordy
+from voussoirkit import pathclass
 
-def loop_once():
+def loop_once(extension):
     try:
         text = pyperclip.paste()
     except Exception:
         return
 
-    if '\n' in text:
+    text = text.strip()
+
+    if len(text.split(sep=None, maxsplit=1)) > 1:
         return
 
     if 'http://' in text or 'https://' in text:
-        fn = passwordy.urandom_hex(12) + '.generic'
+        path = pathclass.Path(passwordy.urandom_hex(12)).add_extension(extension)
         pyperclip.copy('')
-        print(fn, text)
-        h = open(fn, 'w', encoding='utf-8')
+        print(path.basename, text)
+        h = open(path.absolute_path, 'w', encoding='utf-8')
         h.write(text)
         h.close()
 
-def loop_forever():
+def loop_forever(extension):
     while True:
-        loop_once()
+        loop_once(extension=extension)
         time.sleep(1)
 
-def main(argv):
+def watchforlinks_argparse(args):
     try:
-        loop_forever()
+        loop_forever(extension=args.extension)
     except KeyboardInterrupt:
         pass
 
-    return 0
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('extension', nargs='?', default='generic')
+    parser.set_defaults(func=watchforlinks_argparse)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
