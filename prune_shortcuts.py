@@ -10,10 +10,14 @@ import winshell
 
 from voussoirkit import getpermission
 from voussoirkit import pathclass
+from voussoirkit import spinal
 
-def prune_shortcuts(autoyes=False):
-    lnks = pathclass.Path('.').glob('*.lnk')
-    stale = [lnk for lnk in lnks if not os.path.exists(winshell.Shortcut(lnk.absolute_path).path)]
+def prune_shortcuts(recurse=False, autoyes=False):
+    if recurse:
+        lnks = [file for file in spinal.walk_generator('.') if file.extension == 'lnk']
+    else:
+        lnks = pathclass.Path('.').glob('*.lnk')
+
     stale = []
     for lnk in lnks:
         shortcut = winshell.Shortcut(lnk.absolute_path)
@@ -40,11 +44,12 @@ def prune_shortcuts(autoyes=False):
             send2trash.send2trash(lnk.absolute_path)
 
 def prune_shortcuts_argparse(args):
-    return prune_shortcuts(autoyes=args.autoyes)
+    return prune_shortcuts(recurse=args.recurse, autoyes=args.autoyes)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
+    parser.add_argument('--recurse', dest='recurse', action='store_true')
     parser.add_argument('--yes', dest='autoyes', action='store_true')
     parser.set_defaults(func=prune_shortcuts_argparse)
 
