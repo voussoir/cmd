@@ -107,7 +107,8 @@ def assert_enough_space(pathsize, workdir, moveto, rec, rev, par):
 
     if moveto is not None:
         moveto_drive = os.path.splitdrive(moveto.absolute_path)[0]
-        free_space = min(free_space, shutil.disk_usage(moveto_drive).free)
+        moveto_drive = pathclass.Path(moveto_drive)
+        free_space = min(free_space, shutil.disk_usage(moveto_drive.absolute_path).free)
 
     message = ' '.join([
         f'For {bytestring.bytestring(pathsize)},',
