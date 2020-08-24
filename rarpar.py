@@ -52,7 +52,7 @@ def RARCOMMAND(
     '''
     command = [
         'winrar',
-        'a -ibck -ma -m0 -mt1 -ri1:30 -r -ep1',
+        'a -ibck -ma -m0 -mt1 -ri1:30 -ep1',
         '-y -xthumbs.db -xdesktop.ini',
     ]
     if volume is not None:
@@ -66,6 +66,9 @@ def RARCOMMAND(
 
     if password is not None:
         command.append(f'-hp{password}')
+
+    if path.is_dir:
+        command.append('-r')
 
     if path.is_dir:
         input_pattern = path.absolute_path + '\\*'
