@@ -217,6 +217,7 @@ def run_script(script, dry=False):
         else:
             status = command()
         if status not in [0, None]:
+            print('!!!! error status:', status)
             break
 
     return status
