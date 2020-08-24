@@ -20,8 +20,8 @@ class NotEnoughSpace(RarParException):
     pass
 
 def RARCOMMAND(
+        path,
         basename,
-        input_pattern,
         workdir,
         password=None,
         rec=None,
@@ -66,6 +66,11 @@ def RARCOMMAND(
 
     if password is not None:
         command.append(f'-hp{password}')
+
+    if path.is_dir:
+        input_pattern = path.absolute_path + '\\*'
+    else:
+        input_pattern = path.absolute_path
 
     command.append(f'"{workdir.absolute_path}{os.sep}{basename}.rar"')
     command.append(f'"{input_pattern}"')
@@ -234,11 +239,6 @@ def rarpar(
 
     path.assert_exists()
 
-    if path.is_dir:
-        input_pattern = path.absolute_path + '\\*'
-    else:
-        input_pattern = path.absolute_path
-
     workdir = pathclass.Path(workdir)
     workdir.assert_is_directory()
 
@@ -278,8 +278,8 @@ def rarpar(
     script = []
 
     rarcommand = RARCOMMAND(
+        path=path,
         basename=basename,
-        input_pattern=input_pattern,
         password=password,
         rec=rec,
         rev=rev,
