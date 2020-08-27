@@ -115,7 +115,7 @@ def linear(slope, intercept):
     '''
     def f(x):
         y = (slope * x) + intercept
-        print(x, y, f'{y:.03f}', seconds_to_hms(y))
+        print(seconds_to_hms(x), '-->', seconds_to_hms(y), 'slope=', slope)
         return y
     return f
 
