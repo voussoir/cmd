@@ -19,6 +19,12 @@ flags:
 --pull:
     Run `git pull --all` in each directory.
 
+--add path:
+    Add path to the gitcheckup.txt file.
+
+--remove path:
+    Remove path from the gitcheckup.txt file.
+
 Examples:
 > gitcheckup
 > gitcheckup --fetch
@@ -31,6 +37,7 @@ import sys
 
 from voussoirkit import betterhelp
 from voussoirkit import dotdict
+from voussoirkit import pathclass
 from voussoirkit import winwhich
 
 GIT = winwhich.which('git')
@@ -61,11 +68,43 @@ def check_output(command):
     output = output.decode().strip()
     return output
 
-def read_directories_file():
-    directories_file = os.path.join(os.path.dirname(__file__), 'gitcheckup.txt')
+def add_directory(directory):
+    '''
+    Add a directory to the gitcheckup.txt file, creating that file if it does
+    not exist.
+    '''
+    directory = pathclass.Path(directory)
 
     try:
-        handle = open(directories_file, 'r')
+        directories = set(read_directories_file())
+    except NoConfigFile:
+        directories = set()
+
+    directories.add(directory)
+    write_directories_file(directories)
+
+def remove_directory(directory):
+    '''
+    Remove a directory from the gitcheckup.txt file.
+    Raise NoConfigFile if it does not exist.
+    '''
+    directory = pathclass.Path(directory)
+    directories = set(read_directories_file())
+    try:
+        directories.remove(directory)
+    except KeyError:
+        return
+    write_directories_file(directories)
+
+def read_directories_file():
+    '''
+    Return a list of pathclass.Path from the lines of gitcheckup.txt.
+    Raise NoConfigFile if it does not exist.
+    '''
+    directories_file = pathclass.Path(__file__).parent.with_child('gitcheckup.txt')
+
+    try:
+        handle = open(directories_file.absolute_path, 'r', encoding='utf-8')
     except FileNotFoundError as exc:
         raise NoConfigFile(exc.filename) from exc
 
@@ -74,8 +113,26 @@ def read_directories_file():
 
     directories = [line.strip() for line in directories]
     directories = [line for line in directories if line]
+    directories = [pathclass.Path(line) for line in directories]
 
     return directories
+
+def write_directories_file(directories):
+    '''
+    Write a list of directories to the gitcheckup.txt file.
+    '''
+    directories = [pathclass.Path(d) for d in directories]
+    directories = sorted(directories)
+    directories = [d.correct_case() for d in directories]
+    directories = [d.absolute_path for d in directories]
+
+    directories_file = pathclass.Path(__file__).parent.with_child('gitcheckup.txt')
+
+    handle = open(directories_file.absolute_path, 'w', encoding='utf-8')
+
+    with handle:
+        handle.write('\n'.join(directories))
+
 
 # GIT FUNCTIONS
 ################################################################################
@@ -167,8 +224,7 @@ def checkup_pushed():
     return details
 
 def gitcheckup(directory, do_fetch=False, do_pull=False):
-    directory = os.path.abspath(directory)
-    os.chdir(directory)
+    os.chdir(directory.absolute_path)
 
     if do_fetch:
         git_fetch()
@@ -203,13 +259,19 @@ def gitcheckup(directory, do_fetch=False, do_pull=False):
 
     details = ' '.join(details)
     details = (' ' + details).rstrip()
-    print(f'[{committed}][{pushed}] {directory}{details}')
+    print(f'[{committed}][{pushed}] {directory.absolute_path}{details}')
 
 # COMMAND LINE
 ################################################################################
 def gitcheckup_argparse(args):
+    if args.add_directory is not None:
+        add_directory(args.add_directory)
+
+    if args.remove_directory is not None:
+        remove_directory(args.remove_directory)
+
     if args.directories:
-        directories = args.directories
+        directories = [pathclass.Path(d) for d in args.directories]
     else:
         directories = read_directories_file()
 
@@ -222,6 +284,8 @@ def main(argv):
     parser.add_argument('directories', nargs='*')
     parser.add_argument('--fetch', dest='do_fetch', action='store_true')
     parser.add_argument('--pull', dest='do_pull', action='store_true')
+    parser.add_argument('--add', dest='add_directory')
+    parser.add_argument('--remove', dest='remove_directory')
     parser.set_defaults(func=gitcheckup_argparse)
 
     try:
