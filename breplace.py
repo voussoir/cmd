@@ -6,7 +6,10 @@ import brename
 import sys
 
 def breplace_argparse(args):
-    command = f'x.replace("{args.replace_from}", "{args.replace_to}")'
+    if args.regex:
+        command = f're.sub(r"{args.replace_from}", r"{args.replace_to}", x)'
+    else:
+        command = f'x.replace("{args.replace_from}", "{args.replace_to}")'
     brename.brename(command, autoyes=args.autoyes, recurse=args.recurse)
 
 def main(argv):
@@ -16,6 +19,7 @@ def main(argv):
     parser.add_argument('replace_to')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
     parser.add_argument('--recurse', dest='recurse', action='store_true', help='operate on subdirectories also')
+    parser.add_argument('--regex', dest='regex', action='store_true', help='treat arguments as regular expressions')
     parser.set_defaults(func=breplace_argparse)
 
     args = parser.parse_args(argv)
