@@ -107,6 +107,7 @@ def search(
         do_expression=False,
         do_glob=False,
         do_regex=False,
+        do_strip=False,
         line_numbers=False,
         local_only=False,
         root_path='.',
@@ -184,6 +185,9 @@ def search(
         if not all_terms_match(search_text, terms, term_matches):
             continue
 
+        if do_strip:
+            result_text = result_text.strip()
+
         if line_numbers:
             result_text = f'{index+1:>4} | {result_text}'
 
@@ -222,6 +226,7 @@ def argparse_to_dict(args):
         'do_expression': args.do_expression,
         'do_glob': args.do_glob,
         'do_regex': args.do_regex,
+        'do_strip': args.do_strip,
         'local_only': args.local_only,
         'line_numbers': args.line_numbers,
         'text': text,
@@ -258,6 +263,7 @@ def main(argv):
     parser.add_argument('--not_all', '--not-all', dest='not_all', nargs='+')
     parser.add_argument('--not_any', '--not-any', dest='not_any', nargs='+')
 
+    parser.add_argument('--strip', dest='do_strip', action='store_true')
     parser.add_argument('--case', dest='case_sensitive', action='store_true')
     parser.add_argument('--content', dest='do_content', action='store_true')
     parser.add_argument('--count', dest='show_count', action='store_true')
