@@ -181,11 +181,11 @@ def search(
             search_text = search_object
             result_text = search_object
 
-        if line_numbers:
-            result_text = f'{index+1:>4} | {result_text}'
-
         if not all_terms_match(search_text, terms, term_matches):
             continue
+
+        if line_numbers:
+            result_text = f'{index+1:>4} | {result_text}'
 
         if not content_args:
             yield result_text
