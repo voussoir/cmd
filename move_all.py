@@ -20,8 +20,9 @@ destination = pathclass.Path(sys.argv[-1])
 if not destination.is_dir:
     raise TypeError(destination)
 
-if any(destination.with_child(file.basename).exists for file in files):
-    raise Exception(file.basename)
+for file in files:
+    if destination.with_child(file.basename).exists:
+        raise Exception(file.basename)
 
 for file in files:
     new_path = destination.with_child(file.basename)
