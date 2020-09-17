@@ -14,7 +14,7 @@ from voussoirkit import getpermission
 FILENAME_BADCHARS = '\\/:*?<>|"'
 
 WEBSTORE_URL = 'https://chrome.google.com/webstore/detail/x/{extension_id}'
-CRX_URL = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=59.0&x=id%3D{extension_id}%26installsource%3Dondemand%26uc'
+CRX_URL = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=83.0.4103.116&acceptformat=crx2,crx3&x=id%3D{extension_id}%26uc'
 
 def sanitize_filename(name):
     for c in FILENAME_BADCHARS:
