@@ -21,7 +21,7 @@ def loop_once(extension):
         path = pathclass.Path(passwordy.urandom_hex(12)).add_extension(extension)
         pyperclip.copy('')
         print(path.basename, text)
-        h = open(path.absolute_path, 'w', encoding='utf-8')
+        h = path.open('w', encoding='utf-8')
         h.write(text)
         h.close()
 

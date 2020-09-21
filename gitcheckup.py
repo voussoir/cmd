@@ -104,7 +104,7 @@ def read_directories_file():
     directories_file = pathclass.Path(__file__).parent.with_child('gitcheckup.txt')
 
     try:
-        handle = open(directories_file.absolute_path, 'r', encoding='utf-8')
+        handle = directories_file.open('r', encoding='utf-8')
     except FileNotFoundError as exc:
         raise NoConfigFile(exc.filename) from exc
 
@@ -128,7 +128,7 @@ def write_directories_file(directories):
 
     directories_file = pathclass.Path(__file__).parent.with_child('gitcheckup.txt')
 
-    handle = open(directories_file.absolute_path, 'w', encoding='utf-8')
+    handle = directories_file.open('w', encoding='utf-8')
 
     with handle:
         handle.write('\n'.join(directories))

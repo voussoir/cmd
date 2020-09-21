@@ -8,7 +8,7 @@ from voussoirkit import spinal
 
 def hash_file(file):
     hasher = hashlib.md5()
-    with open(file.absolute_path, 'rb') as handle:
+    with file.open('rb') as handle:
         while True:
             chunk = handle.read(2**20)
             if not chunk:

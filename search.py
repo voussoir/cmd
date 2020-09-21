@@ -46,11 +46,11 @@ def all_terms_match(search_text, terms, match_function):
 
 def search_contents_generic(filepath, content_args):
     try:
-        with open(filepath.absolute_path, 'r') as handle:
+        with filepath.open('r') as handle:
             text = handle.read()
     except UnicodeDecodeError:
         try:
-            with open(filepath.absolute_path, 'r', encoding='utf-8') as handle:
+            with filepath.open('r', encoding='utf-8') as handle:
                 text = handle.read()
         except UnicodeDecodeError:
             #safeprint.safeprint(filepath.absolute_path)

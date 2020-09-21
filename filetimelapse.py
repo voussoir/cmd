@@ -31,7 +31,7 @@ def read_filebytes(filepath, chunk_size=bytestring.MIBIBYTE):
     if not filepath.is_file:
         raise FileNotFoundError(filepath)
 
-    f = open(filepath.absolute_path, 'rb')
+    f = filepath.open('rb')
     with f:
         while True:
             chunk = f.read(chunk_size)
