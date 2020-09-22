@@ -1,15 +1,36 @@
 import os
+import sys
 
-paths = os.getenv('PATH').split(';')
-paths = [p for p in paths if os.path.exists(p)]
+from voussoirkit import pathclass
 
-extensions = os.getenv('PATHEXT').split(';')
-extensions = [e.lower() for e in extensions]
-print('Extensions according to PATHEXT:', extensions)
+def windows():
+    paths = os.getenv('PATH').strip(' ;').split(';')
+    paths = (pathclass.Path(p) for p in paths)
+    paths = (p for p in paths if p.is_dir)
 
-for path in paths:
-    print(path)
-    files = os.listdir(path)
-    files = [f for f in files if any(f.lower().endswith(e) for e in extensions)]
-    files = ['    ' + f for f in files]
-    print('\n'.join(files))
+    extensions = os.getenv('PATHEXT').split(';')
+
+    files = (file for path in paths for file in path.listdir())
+    executables = (file for file in files if file.extension in extensions)
+    yield from executables
+
+def linux():
+    paths = os.getenv('PATH').strip(' :').split(':')
+    paths = (pathclass.Path(p) for p in paths)
+    paths = (p for p in paths if p.is_dir)
+
+    files = (file for path in paths for file in path.listdir())
+    executables = (file for file in files if os.access(file.absolute_path, os.X_OK))
+    yield from executables
+
+def main(argv):
+    if os.name == 'nt':
+        executables = windows()
+    else:
+        executables = linux()
+
+    for executable in executables:
+        print(executable.absolute_path)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))
