@@ -16,7 +16,7 @@ def prune_shortcuts(recurse=False, autoyes=False):
     if recurse:
         lnks = [file for file in spinal.walk_generator('.') if file.extension == 'lnk']
     else:
-        lnks = pathclass.Path('.').glob('*.lnk')
+        lnks = pathclass.cwd().glob('*.lnk')
 
     stale = []
     for lnk in lnks:

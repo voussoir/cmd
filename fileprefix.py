@@ -32,7 +32,7 @@ def fileprefix(
         ctime=False,
         autoyes=False,
     ):
-    current_directory = pathclass.Path('.')
+    current_directory = pathclass.cwd()
 
     prefix = prefix.strip()
     if prefix == ':':
