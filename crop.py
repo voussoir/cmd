@@ -10,6 +10,14 @@ def crop(filename, crops, *, inplace=False):
     i = Image.open(filename)
     if len(crops) == 2:
         crops.extend(i.size)
+
+    if crops[0] < 0: crops[0] = i.size[0] + crops[0]
+    if crops[1] < 0: crops[1] = i.size[1] + crops[1]
+    if crops[2] < 0: crops[2] = i.size[0] + crops[2]
+    if crops[3] < 0: crops[3] = i.size[1] + crops[3]
+    if crops[2] == 0: crops[2] = i.size[0]
+    if crops[3] == 0: crops[3] = i.size[1]
+
     i = i.crop(crops)
     if inplace:
         newname = filename
