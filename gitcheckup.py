@@ -158,6 +158,10 @@ def git_pull():
     command = [GIT, 'pull', '--all']
     return check_output(command)
 
+def git_push():
+    command = [GIT, 'push']
+    return check_output(command)
+
 def git_rev_parse(rev):
     command = [GIT, 'rev-parse', rev]
     return check_output(command)
@@ -223,7 +227,7 @@ def checkup_pushed():
     details.pushed = (details.to_push, details.to_pull) == (0, 0)
     return details
 
-def gitcheckup(directory, do_fetch=False, do_pull=False):
+def gitcheckup(directory, do_fetch=False, do_pull=False, do_push=False):
     os.chdir(directory.absolute_path)
 
     if do_fetch:
@@ -231,6 +235,9 @@ def gitcheckup(directory, do_fetch=False, do_pull=False):
 
     if do_pull:
         git_pull()
+
+    if do_push:
+        git_push()
 
     try:
         commit_details = checkup_committed()
@@ -276,7 +283,7 @@ def gitcheckup_argparse(args):
         directories = read_directories_file()
 
     for directory in directories:
-        gitcheckup(directory, do_fetch=args.do_fetch, do_pull=args.do_pull)
+        gitcheckup(directory, do_fetch=args.do_fetch, do_pull=args.do_pull, do_push=args.do_push)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
@@ -284,6 +291,7 @@ def main(argv):
     parser.add_argument('directories', nargs='*')
     parser.add_argument('--fetch', dest='do_fetch', action='store_true')
     parser.add_argument('--pull', dest='do_pull', action='store_true')
+    parser.add_argument('--push', dest='do_push', action='store_true')
     parser.add_argument('--add', dest='add_directory')
     parser.add_argument('--remove', dest='remove_directory')
     parser.set_defaults(func=gitcheckup_argparse)
