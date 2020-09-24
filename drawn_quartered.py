@@ -43,7 +43,7 @@ def drawquarter_argparse(args):
 
     output_path = pathclass.Path(output_filename)
     output_directory = output_path.parent
-    os.makedirs(output_directory.absolute_path, exist_ok=True)
+    output_directory.makedirs(exist_ok=True)
     output_filename_format = output_path.basename
     output_filename_format = output_filename_format.rsplit('.', 1)[0]
     output_filename_format += '_%dx%d_{ycoord}-{xcoord}.' % (args.width, args.height)
