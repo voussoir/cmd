@@ -1,4 +1,5 @@
 import argparse
+import ast
 import os
 import sys
 import threading
@@ -20,9 +21,9 @@ def clean_url_list(urls):
 
         yield url
 
-def download_thread(url, filename, timeout=None):
+def download_thread(url, filename, *, headers=None, timeout=None):
     print(f' Starting "{filename}"')
-    downloady.download_file(url, filename, timeout=timeout)
+    downloady.download_file(url, filename, headers=headers, timeout=timeout)
     print(f'+Finished "{filename}"')
 
 def remove_finished(threads):
@@ -33,6 +34,7 @@ def threaded_dl(
         thread_count,
         filename_format,
         timeout=None,
+        headers=None,
     ):
     now = int(time.time())
     threads = []
@@ -67,13 +69,19 @@ def threaded_dl(
             print(f'Skipping existing file "{filename}"')
 
         else:
-            t = threading.Thread(target=download_thread, args=[url, filename, timeout], daemon=True)
+            kwargs = {
+                'url': url,
+                'filename': filename,
+                'timeout': timeout,
+                'headers': headers,
+            }
+            t = threading.Thread(target=download_thread, kwargs=kwargs, daemon=True)
             threads.append(t)
             t.start()
 
     while len(threads) > 0:
         threads = remove_finished(threads)
-        print('%d threads remaining\r' % len(threads), end='', flush=True)
+        print(f'{len(threads)} threads remaining\r', end='', flush=True)
         time.sleep(0.1)
 
 def threaded_dl_argparse(args):
@@ -85,10 +93,20 @@ def threaded_dl_argparse(args):
         urls = clipext.resolve(args.url_file)
     urls = urls.replace('\r', '').split('\n')
 
+    headers = args.headers
+    if headers is not None:
+        if len(headers) == 1 and headers[0].startswith('{'):
+            headers = ast.literal_eval(headers[0])
+        else:
+            keys = headers[::2]
+            vals = headers[1::2]
+            headers = {key: val for (key, val) in zip(keys, vals)}
+
     threaded_dl(
         urls,
-        thread_count=args.thread_count,
         filename_format=args.filename_format,
+        headers=headers,
+        thread_count=args.thread_count,
         timeout=args.timeout,
     )
 
@@ -99,6 +117,7 @@ def main(argv):
     parser.add_argument('thread_count', nargs='?', type=int, default=None)
     parser.add_argument('filename_format', nargs='?', default='{now}_{index}_{basename}')
     parser.add_argument('--timeout', dest='timeout', default=15)
+    parser.add_argument('--headers', dest='headers', nargs='+', default=None)
     parser.set_defaults(func=threaded_dl_argparse)
 
     args = parser.parse_args(argv)
