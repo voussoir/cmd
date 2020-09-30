@@ -38,17 +38,23 @@ def brename(transformation, autoyes=False, recurse=False):
     else:
         olds = [os.path.join(os.getcwd(), x) for x in os.listdir('.')]
 
-    news = []
-    for (index, x) in enumerate(olds):
-        directory = os.path.dirname(x)
-        basename = os.path.basename(x)
-        (noext, ext) = os.path.splitext(basename)
-        x = basename
-        x = eval(transformation)
-        x = os.path.join(directory, x)
-        news.append(x)
+    pairs = []
+    for (index, old) in enumerate(olds):
+        new = old
+        directory = os.path.dirname(new)
+        basename = os.path.basename(new)
+        new = basename
 
-    pairs = [(x, y) for (x, y) in zip(olds, news) if x != y]
+        # These variables are assigned so that you can use them in your
+        # transformation string.
+        (noext, ext) = os.path.splitext(basename)
+        x = new
+
+        new = eval(transformation)
+        new = os.path.join(directory, new)
+        if new == old:
+            continue
+        pairs.append((old, new))
 
     if not pairs:
         print('Nothing to replace')
@@ -57,7 +63,11 @@ def brename(transformation, autoyes=False, recurse=False):
     loop(pairs, dry=True)
 
     if autoyes or getpermission.getpermission('Is this correct?'):
-        pairs = reversed(pairs)
+        # Sort in reverse so that renaming a file inside a directory always
+        # occurs before renaming the directory itself. If you rename the
+        # directory first, then the path to the file is invalid by the time
+        # you want to rename it.
+        pairs = sorted(pairs, reverse=True)
         loop(pairs, dry=False)
 
 def excise(s, mark_left, mark_right):
