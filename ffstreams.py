@@ -13,6 +13,7 @@ AUDIO_EXTENSIONS = {
     'flac': 'flac',
     'mp3': 'mp3',
     'opus': 'opus',
+    'vorbis': 'ogg',
     '*': 'mka',
 }
 
