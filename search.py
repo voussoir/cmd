@@ -62,7 +62,7 @@ def search_contents_generic(filepath, content_args):
         return
 
     content_args['text'] = text
-    content_args['line_numbers'] = True
+    content_args['line_numbers'] = content_args.get('line_numbers', True)
 
     results = search(**content_args)
     results = list(results)
