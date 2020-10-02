@@ -1,5 +1,11 @@
 '''
 Batch rename files by replacing the first argument with the second.
+
+Note: If one of your arguments begins with a hyphen, it will confuse argparse
+and it will say "the following arguments are required". You have to add "--"
+before your from/to arguments, like this:
+
+breplace -- " - Copy" "-copy"
 '''
 import argparse
 import brename
