@@ -5,6 +5,7 @@ import sys
 import threading
 import time
 
+from voussoirkit import bytestring
 from voussoirkit import clipext
 from voussoirkit import downloady
 
@@ -21,9 +22,9 @@ def clean_url_list(urls):
 
         yield url
 
-def download_thread(url, filename, *, headers=None, timeout=None):
+def download_thread(url, filename, *, bytespersecond=None, headers=None, timeout=None):
     print(f' Starting "{filename}"')
-    downloady.download_file(url, filename, headers=headers, timeout=timeout)
+    downloady.download_file(url, filename, bytespersecond=bytespersecond, headers=headers, timeout=timeout)
     print(f'+Finished "{filename}"')
 
 def remove_finished(threads):
@@ -33,11 +34,16 @@ def threaded_dl(
         urls,
         thread_count,
         filename_format,
-        timeout=None,
+        bytespersecond=None,
         headers=None,
+        timeout=None,
     ):
     now = int(time.time())
     threads = []
+
+    bytespersecond_thread = bytespersecond
+    if bytespersecond_thread is not None:
+        bytespersecond_thread = int(bytespersecond_thread / thread_count)
 
     if filename_format != os.devnull:
         index_digits = len(str(len(urls)))
@@ -71,6 +77,7 @@ def threaded_dl(
         else:
             kwargs = {
                 'url': url,
+                'bytespersecond': bytespersecond_thread,
                 'filename': filename,
                 'timeout': timeout,
                 'headers': headers,
@@ -102,8 +109,13 @@ def threaded_dl_argparse(args):
             vals = headers[1::2]
             headers = {key: val for (key, val) in zip(keys, vals)}
 
+    bytespersecond = args.bytespersecond
+    if bytespersecond is not None:
+        bytespersecond = bytestring.parsebytes(bytespersecond)
+
     threaded_dl(
         urls,
+        bytespersecond=bytespersecond,
         filename_format=args.filename_format,
         headers=headers,
         thread_count=args.thread_count,
@@ -114,8 +126,9 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('url_file')
-    parser.add_argument('thread_count', nargs='?', type=int, default=None)
+    parser.add_argument('thread_count', type=int)
     parser.add_argument('filename_format', nargs='?', default='{now}_{index}_{basename}')
+    parser.add_argument('--bytespersecond', dest='bytespersecond', default=None)
     parser.add_argument('--timeout', dest='timeout', default=15)
     parser.add_argument('--headers', dest='headers', nargs='+', default=None)
     parser.set_defaults(func=threaded_dl_argparse)
