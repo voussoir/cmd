@@ -1,12 +1,13 @@
 import argparse
 import pyperclip
+import re
 import sys
 import time
 
 from voussoirkit import passwordy
 from voussoirkit import pathclass
 
-def loop_once(extension):
+def loop_once(extension, regex=None):
     try:
         text = pyperclip.paste()
     except Exception:
@@ -17,22 +18,27 @@ def loop_once(extension):
     if len(text.split(sep=None, maxsplit=1)) > 1:
         return
 
-    if 'http://' in text or 'https://' in text:
-        path = pathclass.Path(passwordy.urandom_hex(12)).add_extension(extension)
-        pyperclip.copy('')
-        print(path.basename, text)
-        h = path.open('w', encoding='utf-8')
-        h.write(text)
-        h.close()
+    if 'http://' not in text and 'https://' not in text:
+        return
 
-def loop_forever(extension):
+    if regex and not re.search(regex, text):
+        return
+
+    path = pathclass.Path(passwordy.urandom_hex(12)).add_extension(extension)
+    pyperclip.copy('')
+    print(path.basename, text)
+    h = path.open('w', encoding='utf-8')
+    h.write(text)
+    h.close()
+
+def loop_forever(extension, regex):
     while True:
-        loop_once(extension=extension)
+        loop_once(extension=extension, regex=regex)
         time.sleep(1)
 
 def watchforlinks_argparse(args):
     try:
-        loop_forever(extension=args.extension)
+        loop_forever(extension=args.extension, regex=args.regex)
     except KeyboardInterrupt:
         pass
 
@@ -40,6 +46,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('extension', nargs='?', default='generic')
+    parser.add_argument('--regex', dest='regex', default=None)
     parser.set_defaults(func=watchforlinks_argparse)
 
     args = parser.parse_args(argv)
