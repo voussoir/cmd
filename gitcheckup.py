@@ -133,7 +133,6 @@ def write_directories_file(directories):
     with handle:
         handle.write('\n'.join(directories))
 
-
 # GIT FUNCTIONS
 ################################################################################
 def git_commits_between(a, b):
@@ -239,11 +238,8 @@ def gitcheckup(directory, do_fetch=False, do_pull=False, do_push=False):
     if do_push:
         git_push()
 
-    try:
-        commit_details = checkup_committed()
-        push_details = checkup_pushed()
-    except subprocess.CalledProcessError as exc:
-        raise Exception(exc.output)
+    commit_details = checkup_committed()
+    push_details = checkup_pushed()
 
     committed = 'C' if commit_details.committed else ' '
     pushed = 'P' if push_details.pushed else ' '
@@ -282,8 +278,13 @@ def gitcheckup_argparse(args):
     else:
         directories = read_directories_file()
 
-    for directory in directories:
-        gitcheckup(directory, do_fetch=args.do_fetch, do_pull=args.do_pull, do_push=args.do_push)
+    try:
+        for directory in directories:
+            gitcheckup(directory, do_fetch=args.do_fetch, do_pull=args.do_pull, do_push=args.do_push)
+    except subprocess.CalledProcessError as exc:
+        sys.stdout.write(f'{exc.cmd} exited with status {exc.returncode}\n')
+        sys.stdout.write(exc.output.decode())
+        return 1
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
