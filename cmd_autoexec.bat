@@ -9,3 +9,4 @@ doskey .=cd.
 doskey ..=cd..
 doskey ...=start.
 doskey \=cd\
+doskey gc=gitcheckup $*
