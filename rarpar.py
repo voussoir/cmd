@@ -328,20 +328,7 @@ def rarpar(
 
     return status
 
-def rarpar_argparse(args):
-    return rarpar(
-        path=args.path,
-        volume=args.volume,
-        basename=args.basename,
-        dry=args.dry,
-        moveto=args.moveto,
-        par=args.par,
-        password=args.password,
-        rec=args.rec,
-        rev=args.rev,
-        recycle_original=args.recycle_original,
-        workdir=args.workdir,
-    )
+# COMMAND LINE #####################################################################################
 
 DOCSTRING = '''
 rarpar
@@ -397,6 +384,21 @@ path:
 --dry:
     Print the commands that will be run, but don't actually run them.
 '''
+
+def rarpar_argparse(args):
+    return rarpar(
+        path=args.path,
+        volume=args.volume,
+        basename=args.basename,
+        dry=args.dry,
+        moveto=args.moveto,
+        par=args.par,
+        password=args.password,
+        rec=args.rec,
+        rev=args.rev,
+        recycle_original=args.recycle_original,
+        workdir=args.workdir,
+    )
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
