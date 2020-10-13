@@ -1,4 +1,7 @@
 '''
+gitcheckup
+==========
+
 This program helps you check the commit and push status of your favorite git
 repositories. The output looks like this:
 
@@ -10,7 +13,10 @@ repositories. The output looks like this:
 To specify the list of git directories, you may either:
 - Create a gitcheckup.txt file in the same directory as this file, where every
   line contains an absolute path to the directory, or
-- Pass directories as a series of arguments to this program.
+- Pass directories as a series of positional arguments to this program.
+
+> gitcheckup.py <flags>
+> gitcheckup.py dir1 dir2 <flags>
 
 flags:
 --fetch:
@@ -18,6 +24,9 @@ flags:
 
 --pull:
     Run `git pull --all` in each directory.
+
+--push:
+    Run `git push` in each directory.
 
 --add path:
     Add path to the gitcheckup.txt file.
