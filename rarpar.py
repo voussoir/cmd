@@ -344,45 +344,50 @@ def rarpar_argparse(args):
     )
 
 DOCSTRING = '''
+rarpar
+======
+
+> rarpar path <flags>
+
 path:
     The input file or directory to rarpar.
 
---volume X | X% | min(A, B) | max(A, B)
+--volume X | X% | min(A, B) | max(A, B):
     Split rars into volumes of this many megabytes. Should be
     An integer number of megabytes, or;
     A percentage "X%" to calculate volumes as X% of the file size, down to
     a 1 MB minimum, or;
     A string "min(A, B)" or "max(A, B)" where A and B follow the above rules.
 
---rec X
+--rec X:
     A integer to generate X% recovery record in the rars.
     See winrar documentation for information about recovery records.
 
---rev X
+--rev X:
     A integer to generate X% recovery volumes.
     Note that winrar's behavior is the number of revs will always be less than
     the number of rars. If you don't split volumes, you will have 1 rar and
     thus 0 revs even if you ask for 100% rev.
     See winrar documentation for information about recovery volumes.
 
---par X
+--par X:
     A number to generate X% recovery with par2.
 
---basename
+--basename X:
     A basename for the rar and par files. You will end up with
     basename.partXX.rar and basename.par2.
     Without this argument, the default basename is "basename ({timestamp})".
     Your string may include {timestamp} including the braces to get the
     timestamp there.
 
---password
+--password X:
     A password with which to encrypt the rar files.
 
---workdir:
+--workdir X:
     The directory in which the rars and pars will be generated while the
     program is working.
 
---moveto:
+--moveto X:
     The directory to which the rars and pars will be moved after the program
     has finished working.
 
