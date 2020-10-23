@@ -23,7 +23,9 @@ def RARCOMMAND(
         path,
         basename,
         workdir,
+        compression=None,
         password=None,
+        profile=None,
         rec=None,
         rev=None,
         volume=None,
@@ -31,9 +33,12 @@ def RARCOMMAND(
     '''
     winrar
         a = make archive
+        -cp{profile} = use compression profile. this must come first so that
+                       all subsequent options override the ones provided by
+                       the profile.
         -ibck = run in the background
         -ma = rar5 mode
-        -m0 = compression level: store
+        -m{compression} = 0: store, 5: max
         -mt1 = thread count: 1
         -v{x}M = split into x megabyte volumes
         -ri x:y = x priority (lower is less pri) y ms sleep between ops
@@ -50,11 +55,19 @@ def RARCOMMAND(
     files to include
         input_pattern
     '''
-    command = [
-        'winrar',
-        'a -ibck -ma -m0 -mt1 -ri1:30 -ep1',
+    command = ['winrar', 'a']
+
+    if profile is not None:
+        command.append(f'-cp{profile}')
+
+    command.extend([
+        '-ibck -ma -mt1 -ri1:30 -ep1',
         '-y -xthumbs.db -xdesktop.ini',
-    ]
+    ])
+
+    if compression is not None:
+        command.append(f'-m{compression}')
+
     if volume is not None:
         command.append(f'-v{volume}M')
 
@@ -230,10 +243,12 @@ def rarpar(
         path,
         *,
         basename=None,
+        compression=None,
         dry=False,
         moveto=None,
         par=None,
         password=None,
+        rar_profile=None,
         recycle_original=False,
         rec=None,
         rev=None,
@@ -285,7 +300,9 @@ def rarpar(
     rarcommand = RARCOMMAND(
         path=path,
         basename=basename,
+        compression=compression,
         password=password,
+        profile=rar_profile,
         rec=rec,
         rev=rev,
         volume=volume,
@@ -394,6 +411,7 @@ def rarpar_argparse(args):
         moveto=args.moveto,
         par=args.par,
         password=args.password,
+        rar_profile=args.rar_profile,
         rec=args.rec,
         rev=args.rev,
         recycle_original=args.recycle_original,
@@ -410,6 +428,7 @@ def main(argv):
     parser.add_argument('--par', dest='par')
     parser.add_argument('--basename', dest='basename')
     parser.add_argument('--password', dest='password')
+    parser.add_argument('--profile', dest='rar_profile')
     parser.add_argument('--workdir', dest='workdir', default='.')
     parser.add_argument('--moveto', dest='moveto')
     parser.add_argument('--recycle', dest='recycle_original', action='store_true')
