@@ -13,6 +13,7 @@ def resize(
         *,
         inplace=False,
         nearest_neighbor=False,
+        only_shrink=False,
         scale=None,
     ):
     i = Image.open(filename)
@@ -26,9 +27,21 @@ def resize(
         new_y = int(image_height * scale)
 
     if new_x == 0:
-        (new_x, new_y) = imagetools.fit_into_bounds(image_width, image_height, 10000000, new_y)
+        (new_x, new_y) = imagetools.fit_into_bounds(
+            image_width,
+            image_height,
+            10000000,
+            new_y,
+            only_shrink=only_shrink,
+        )
     if new_y == 0:
-        (new_x, new_y) = imagetools.fit_into_bounds(image_width, image_height, new_x, 10000000)
+        (new_x, new_y) = imagetools.fit_into_bounds(
+            image_width,
+            image_height,
+            new_x,
+            10000000,
+            only_shrink=only_shrink,
+        )
 
     print(i.size, new_x, new_y)
     if nearest_neighbor:
@@ -54,6 +67,7 @@ def resize_argparse(args):
             args.new_y,
             inplace=args.inplace,
             nearest_neighbor=args.nearest_neighbor,
+            only_shrink=args.only_shrink,
             scale=args.scale,
         )
 
@@ -65,6 +79,7 @@ def main(argv):
     parser.add_argument('new_y', nargs='?', type=int, default=None)
     parser.add_argument('--inplace', dest='inplace', action='store_true')
     parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
+    parser.add_argument('--only_shrink', '--only-shrink', dest='only_shrink', action='store_true')
     parser.add_argument('--scale', dest='scale', type=float, default=None)
     parser.set_defaults(func=resize_argparse)
 
