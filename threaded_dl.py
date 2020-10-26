@@ -12,6 +12,10 @@ from voussoirkit import downloady
 
 def clean_url_list(urls):
     for url in urls:
+        if isinstance(url, (tuple, list)):
+            (url, filename) = url
+        else:
+            filename = None
         url = url.strip()
 
         if not url:
@@ -20,7 +24,10 @@ def clean_url_list(urls):
         if url.startswith('#'):
             continue
 
-        yield url
+        if filename:
+            yield (url, filename)
+        else:
+            yield url
 
 def download_thread(url, filename, *, bytespersecond=None, headers=None, timeout=None):
     print(f' Starting "{filename}"')
@@ -61,15 +68,18 @@ def threaded_dl(
             threads = remove_finished(threads)
             time.sleep(0.1)
 
-        basename = downloady.basename_from_url(url)
-        extension = os.path.splitext(basename)[1]
-        filename = filename_format.format(
-            basename=basename,
-            ext=extension,
-            extension=extension,
-            index=index,
-            now=now,
-        )
+        if isinstance(url, (tuple, list)):
+            (url, filename) = url
+        else:
+            basename = downloady.basename_from_url(url)
+            extension = os.path.splitext(basename)[1]
+            filename = filename_format.format(
+                basename=basename,
+                ext=extension,
+                extension=extension,
+                index=index,
+                now=now,
+            )
 
         if os.path.exists(filename):
             print(f'Skipping existing file "{filename}"')
@@ -99,6 +109,8 @@ def threaded_dl_argparse(args):
     else:
         urls = clipext.resolve(args.url_file)
     urls = urls.replace('\r', '').split('\n')
+
+    urls = [u.split(' ', 1) if ' ' in u else u for u in urls]
 
     headers = args.headers
     if headers is not None:
