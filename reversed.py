@@ -1,5 +1,5 @@
 '''
-Reverse a string.
+Print input lines in reverse order.
 '''
 import argparse
 import sys
@@ -7,12 +7,15 @@ import sys
 from voussoirkit import clipext
 
 def reverse_argparse(args):
-    print(''.join(reversed(args.string)))
+    lines = clipext.resolve(args.lines)
+    lines = lines.splitlines()
+    lines = reversed(lines)
+    print('\n'.join(lines))
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('string')
+    parser.add_argument('lines')
     parser.set_defaults(func=reverse_argparse)
 
     args = parser.parse_args(argv)
