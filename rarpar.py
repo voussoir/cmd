@@ -118,7 +118,7 @@ def assert_enough_space(pathsize, workdir, moveto, rec, rev, par):
     needed = pathsize * (1 + plus_percent)
     reserve = RESERVE_SPACE_ON_DRIVE + needed
 
-    workdir_drive = os.path.splitdrive(workdir.absolute_path)[0]
+    workdir_drive = os.path.splitdrive(workdir.absolute_path)[0] + os.sep
     free_space = shutil.disk_usage(workdir_drive).free
 
     if moveto is not None:
