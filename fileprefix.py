@@ -31,6 +31,7 @@ def fileprefix(
         sep='_',
         ctime=False,
         autoyes=False,
+        one_index=False,
     ):
     current_directory = pathclass.cwd()
 
@@ -66,7 +67,8 @@ def fileprefix(
 
     rename_pairs = []
 
-    for (index, filepath) in enumerate(filepaths):
+    start_index = 1 if one_index else 0
+    for (index, filepath) in enumerate(filepaths, start_index):
         extension = filepath.extension.with_dot
 
         newname = format.format(prefix=prefix, index=index, extension=extension)
@@ -83,10 +85,11 @@ def fileprefix(
 
 def fileprefix_argparse(args):
     return fileprefix(
+        autoyes=args.autoyes,
+        ctime=args.ctime,
+        one_index=args.one_index,
         prefix=args.prefix,
         sep=args.sep,
-        ctime=args.ctime,
-        autoyes=args.autoyes,
     )
 
 def main(argv):
@@ -96,6 +99,7 @@ def main(argv):
     parser.add_argument('--sep', dest='sep', default=' ', help='the character between the prefix and remainder')
     parser.add_argument('--ctime', dest='ctime', action='store_true', help='sort by ctime instead of filename')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
+    parser.add_argument('-1', dest='one_index', action='store_true')
     parser.set_defaults(func=fileprefix_argparse)
 
     args = parser.parse_args(argv)
