@@ -16,6 +16,9 @@ RESERVE_SPACE_ON_DRIVE = 30 * bytestring.GIBIBYTE
 class RarParException(Exception):
     pass
 
+class RarExists(RarParException):
+    pass
+
 class NotEnoughSpace(RarParException):
     pass
 
@@ -291,7 +294,7 @@ def rarpar(
 
     existing = winglob.glob(f'{basename}*.rar')
     if existing:
-        raise Exception(f'{existing[0]} already exists.')
+        raise RarExists(f'{existing[0]} already exists.')
 
     #### ####
 
