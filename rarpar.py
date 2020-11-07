@@ -3,6 +3,7 @@ import os
 import re
 import send2trash
 import shutil
+import subprocess
 import sys
 import time
 
@@ -10,6 +11,10 @@ from voussoirkit import betterhelp
 from voussoirkit import bytestring
 from voussoirkit import pathclass
 from voussoirkit import winglob
+from voussoirkit import winwhich
+
+WINRAR = winwhich.which('winrar')
+PAR2 = winwhich.which('phpar2')
 
 RESERVE_SPACE_ON_DRIVE = 30 * bytestring.GIBIBYTE
 
@@ -58,14 +63,14 @@ def RARCOMMAND(
     files to include
         input_pattern
     '''
-    command = ['winrar', 'a']
+    command = [WINRAR, 'a']
 
     if profile is not None:
         command.append(f'-cp{profile}')
 
     command.extend([
-        '-ibck -ma -mt1 -ri1:30 -ep1',
-        '-y -xthumbs.db -xdesktop.ini',
+        '-ibck', '-ma', '-mt1', '-ri1:30', '-ep1',
+        '-y', '-xthumbs.db', '-xdesktop.ini',
     ])
 
     if compression is not None:
@@ -91,10 +96,9 @@ def RARCOMMAND(
     else:
         input_pattern = path.absolute_path
 
-    command.append(f'"{workdir.absolute_path}{os.sep}{basename}.rar"')
-    command.append(f'"{input_pattern}"')
+    command.append(f'{workdir.absolute_path}{os.sep}{basename}.rar')
+    command.append(f'{input_pattern}')
 
-    command = ' '.join(command)
     return command
 
 def PARCOMMAND(workdir, basename, par):
@@ -107,13 +111,12 @@ def PARCOMMAND(workdir, basename, par):
         workdir/basename.par2
     '''
     command = [
-        'phpar2',
-        'c -t1',
+        PAR2,
+        'c', '-t1',
         f'-r{par}',
-        f'"{workdir.absolute_path}{os.sep}{basename}"',
-        f'"{workdir.absolute_path}{os.sep}{basename}*.rar"',
+        f'{workdir.absolute_path}{os.sep}{basename}',
+        f'{workdir.absolute_path}{os.sep}{basename}*.rar',
     ]
-    command = ' '.join(command)
     return command
 
 def assert_enough_space(pathsize, workdir, moveto, rec, rev, par):
@@ -234,6 +237,10 @@ def run_script(script, dry=False):
         print(command)
         if isinstance(command, str):
             status = os.system(command)
+        elif isinstance(command, list):
+            # sys.stdout is None indicates pythonw.
+            creationflags = subprocess.CREATE_NO_WINDOW if sys.stdout is None else 0
+            status = subprocess.run(command, creationflags=creationflags).returncode
         else:
             status = command()
         if status not in [0, None]:
