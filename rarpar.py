@@ -292,7 +292,12 @@ def rarpar(
     else:
         basename = basename.format(timestamp=timestamp)
 
-    existing = winglob.glob(f'{basename}*.rar')
+    existing = None
+    if workdir:
+        existing = existing or workdir.glob(f'{basename}*.rar')
+    if moveto:
+        existing = existing or moveto.glob(f'{basename}*.rar')
+
     if existing:
         raise RarExists(f'{existing[0]} already exists.')
 
