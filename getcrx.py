@@ -16,6 +16,8 @@ FILENAME_BADCHARS = '\\/:*?<>|"'
 WEBSTORE_URL = 'https://chrome.google.com/webstore/detail/x/{extension_id}'
 CRX_URL = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=83.0.4103.116&acceptformat=crx2,crx3&x=id%3D{extension_id}%26uc'
 
+session = requests.Session()
+
 def sanitize_filename(name):
     for c in FILENAME_BADCHARS:
         name = name.replace(c, '-')
@@ -23,7 +25,7 @@ def sanitize_filename(name):
 
 def get_webstore_name_version(extension_id):
     url = WEBSTORE_URL.format(extension_id=extension_id)
-    response = requests.get(url)
+    response = session.get(url)
     try:
         name = response.text
         name = name.split('meta property="og:title" content="')[1]
@@ -50,7 +52,7 @@ def get_crx_name_version(crx_bytes):
 
 def getcrx(extension_id, auto_overwrite=None):
     url = CRX_URL.format(extension_id=extension_id)
-    response = requests.get(url)
+    response = session.get(url)
     response.raise_for_status()
 
     (name, version) = get_webstore_name_version(extension_id)
