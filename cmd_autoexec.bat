@@ -11,3 +11,4 @@ doskey ...=start.
 doskey \=cd\
 doskey gc=gitcheckup $*
 doskey gp=git push $*
+doskey gpa=git remote ^| eval !i "f'git push {x} master'" ^| do_cmd
