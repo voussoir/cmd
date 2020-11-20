@@ -156,7 +156,19 @@ def move(pattern, directory):
         print(file)
         shutil.move(file, directory)
 
-def _normalize_percentage(rec):
+def normalize_password(password):
+    if password is None:
+        return None
+
+    if not isinstance(password, str):
+        raise TypeError(f'password must be a {str}, not {type(password)}')
+
+    if password == '':
+        return None
+
+    return password
+
+def normalize_percentage(rec):
     if rec is None:
         return None
 
@@ -172,18 +184,6 @@ def _normalize_percentage(rec):
         raise ValueError(f'rec, rev, par {rec} must be 0-100.')
 
     return rec
-
-def normalize_password(password):
-    if password is None:
-        return None
-
-    if not isinstance(password, str):
-        raise TypeError(f'password must be a {str}, not {type(password)}')
-
-    if password == '':
-        return None
-
-    return password
 
 def _normalize_volume(volume, pathsize):
     if volume is None:
@@ -297,9 +297,9 @@ def rarpar(
 
     pathsize = path.size
     volume = normalize_volume(volume, pathsize)
-    rec = _normalize_percentage(rec)
-    rev = _normalize_percentage(rev)
-    par = _normalize_percentage(par)
+    rec = normalize_percentage(rec)
+    rev = normalize_percentage(rev)
+    par = normalize_percentage(par)
 
     if RESERVE_SPACE_ON_DRIVE:
         assert_enough_space(
