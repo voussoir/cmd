@@ -276,20 +276,26 @@ def rarpar(
     ):
     path = pathclass.Path(path)
 
+    # Validation ###################################################################################
+
     path.assert_exists()
 
     workdir = pathclass.Path(workdir)
     workdir.assert_is_directory()
 
-    if moveto:
+    if moveto is not None:
         moveto = pathclass.Path(moveto)
         moveto.assert_is_directory()
 
-    pathsize = path.size
+    if compression not in [None, 0, 1, 2, 3, 4, 5]:
+        raise ValueError(f'compression must be 0-5 or None, not {compression}.')
 
     if type(solid) is not bool:
         raise TypeError(f'solid must be True or False, not {solid}.')
 
+    password = normalize_password(password)
+
+    pathsize = path.size
     volume = normalize_volume(volume, pathsize)
     rec = _normalize_percentage(rec)
     rev = _normalize_percentage(rev)
@@ -320,7 +326,7 @@ def rarpar(
     if existing:
         raise RarExists(f'{existing[0]} already exists.')
 
-    #### ####
+    # Script building ##############################################################################
 
     script = []
 
