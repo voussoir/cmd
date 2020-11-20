@@ -35,6 +35,7 @@ def RARCOMMAND(
         basename,
         workdir,
         compression=None,
+        dictionary_size=None,
         password=None,
         profile=None,
         rec=None,
@@ -51,6 +52,7 @@ def RARCOMMAND(
         -ibck = run in the background
         -ma = rar5 mode
         -m{compression} = 0: store, 5: max
+        -md{x}[kmg] = x kilobytes/megabytes/gigabytes dictionary size
         -mt1 = thread count: 1
         -v{x}M = split into x megabyte volumes
         -ri x:y = x priority (lower is less pri) y ms sleep between ops
@@ -80,6 +82,9 @@ def RARCOMMAND(
 
     if compression is not None:
         command.append(f'-m{compression}')
+
+    if dictionary_size is not None:
+        command.append(f'-md{dictionary_size}')
 
     if solid:
         command.append('-s')
@@ -155,6 +160,41 @@ def move(pattern, directory):
     for file in files:
         print(file)
         shutil.move(file, directory)
+
+def normalize_dictionary_size(dictionary):
+    if dictionary is None:
+        return None
+
+    dictionary = dictionary.strip().lower()
+
+    if not re.match(r'^\d+(k|m|g)?$', dictionary):
+        raise ValueError(f'dictionary_size {dictionary} is invalid.')
+
+    if re.match(r'^\d+$', dictionary):
+        dictionary += 'm'
+
+    # https://www.winrar-france.fr/winrar_instructions_for_use/source/html/HELPSwMD.htm
+    VALID = [
+        '128k',
+        '256k',
+        '512k',
+        '1m',
+        '2m',
+        '4m',
+        '8m',
+        '16m',
+        '32m',
+        '64m',
+        '128m',
+        '256m',
+        '512m',
+        '1g',
+    ]
+
+    if dictionary not in VALID:
+        raise ValueError(f'dictionary_size {dictionary} is invalid.')
+
+    return dictionary
 
 def normalize_password(password):
     if password is None:
@@ -262,6 +302,7 @@ def rarpar(
         *,
         basename=None,
         compression=None,
+        dictionary_size=None,
         dry=False,
         moveto=None,
         par=None,
@@ -289,6 +330,8 @@ def rarpar(
 
     if compression not in [None, 0, 1, 2, 3, 4, 5]:
         raise ValueError(f'compression must be 0-5 or None, not {compression}.')
+
+    dictionary_size = normalize_dictionary_size(dictionary_size)
 
     if type(solid) is not bool:
         raise TypeError(f'solid must be True or False, not {solid}.')
@@ -334,6 +377,7 @@ def rarpar(
         path=path,
         basename=basename,
         compression=compression,
+        dictionary_size=dictionary_size,
         password=password,
         profile=rar_profile,
         rec=rec,
@@ -441,6 +485,7 @@ def rarpar_argparse(args):
         path=args.path,
         volume=args.volume,
         basename=args.basename,
+        dictionary_size=args.dictionary_size,
         dry=args.dry,
         moveto=args.moveto,
         par=args.par,
@@ -467,6 +512,7 @@ def main(argv):
     parser.add_argument('--workdir', dest='workdir', default='.')
     parser.add_argument('--moveto', dest='moveto')
     parser.add_argument('--recycle', dest='recycle_original', action='store_true')
+    parser.add_argument('--dictionary', dest='dictionary_size')
     parser.add_argument('--solid', dest='solid', action='store_true')
     parser.add_argument('--dry', dest='dry', action='store_true')
     parser.set_defaults(func=rarpar_argparse)
