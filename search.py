@@ -25,6 +25,9 @@ if stat.S_ISFIFO(STDIN_MODE):
 else:
     STDIN_MODE = 'terminal'
 
+class NoTerms(Exception):
+    pass
+
 class HeaderedText:
     def __init__(self, header, text):
         self.header = header
@@ -125,7 +128,7 @@ def search(
     do_plain = not (do_glob or do_regex)
 
     if all(v == [] for v in terms.values()) and not content_args:
-        raise ValueError('No terms supplied')
+        raise NoTerms('No terms supplied')
 
     def term_matches(line, term):
         if not case_sensitive:
@@ -232,7 +235,7 @@ def argparse_to_dict(args):
         'text': text,
     }
 
-def search_argparse(args):
+def _search_argparse(args):
     generator = search(**argparse_to_dict(args))
     result_count = 0
     for result in generator:
@@ -240,6 +243,13 @@ def search_argparse(args):
         result_count += 1
     if args.show_count:
         print('%d items.' % result_count)
+
+def search_argparse(args):
+    try:
+        return _search_argparse(args)
+    except NoTerms:
+        print('You did not supply any search terms.')
+        return 1
 
 def main(argv):
     parser = argparse.ArgumentParser()
@@ -280,6 +290,7 @@ def main(argv):
         args.content_args = parser.parse_args(content_args)
     else:
         args.content_args = None
+
     return args.func(args)
 
 if __name__ == '__main__':
