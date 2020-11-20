@@ -220,7 +220,7 @@ def argparse_to_dict(args):
         content_args = None
 
     return {
-        'yes_all': args.yes_all,
+        'yes_all': args.yes_all_1 + args.yes_all_2,
         'yes_any': args.yes_any,
         'not_all': args.not_all,
         'not_any': args.not_any,
@@ -267,11 +267,14 @@ def main(argv):
     name_args.pop(0)
     content_args = [item for chunk in halves[2:] for item in chunk]
 
-    parser.add_argument('yes_all', nargs='*', default=None)
-    parser.add_argument('--all', dest='yes_all', nargs='+')
-    parser.add_argument('--any', dest='yes_any', nargs='+')
-    parser.add_argument('--not_all', '--not-all', dest='not_all', nargs='+')
-    parser.add_argument('--not_any', '--not-any', dest='not_any', nargs='+')
+    # argparse doesn't work well when an argument is both positional and
+    # named, so both of these yes_all will be combined into a single list
+    # during the gateway function.
+    parser.add_argument('yes_all_1', nargs='*', default=None)
+    parser.add_argument('--all', dest='yes_all_2', nargs='+', default=[])
+    parser.add_argument('--any', dest='yes_any', nargs='+', default=[])
+    parser.add_argument('--not_all', '--not-all', dest='not_all', nargs='+', default=[])
+    parser.add_argument('--not_any', '--not-any', dest='not_any', nargs='+', default=[])
 
     parser.add_argument('--strip', dest='do_strip', action='store_true')
     parser.add_argument('--case', dest='case_sensitive', action='store_true')
