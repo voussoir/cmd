@@ -39,6 +39,7 @@ def RARCOMMAND(
         profile=None,
         rec=None,
         rev=None,
+        solid=False,
         volume=None,
     ):
     '''
@@ -54,6 +55,7 @@ def RARCOMMAND(
         -v{x}M = split into x megabyte volumes
         -ri x:y = x priority (lower is less pri) y ms sleep between ops
         -r = include subdirectories
+        -s = solid
         -ep1 = arcnames will start relative to the main folder,
                instead of having the whole abspath of the input_pattern.
         -rr{x}% = x% recovery record
@@ -78,6 +80,9 @@ def RARCOMMAND(
 
     if compression is not None:
         command.append(f'-m{compression}')
+
+    if solid:
+        command.append('-s')
 
     if volume is not None:
         command.append(f'-v{volume}M')
@@ -265,6 +270,7 @@ def rarpar(
         recycle_original=False,
         rec=None,
         rev=None,
+        solid=False,
         volume=None,
         workdir='.',
     ):
@@ -280,6 +286,9 @@ def rarpar(
         moveto.assert_is_directory()
 
     pathsize = path.size
+
+    if type(solid) is not bool:
+        raise TypeError(f'solid must be True or False, not {solid}.')
 
     volume = normalize_volume(volume, pathsize)
     rec = _normalize_percentage(rec)
@@ -323,6 +332,7 @@ def rarpar(
         profile=rar_profile,
         rec=rec,
         rev=rev,
+        solid=solid,
         volume=volume,
         workdir=workdir,
     )
@@ -433,6 +443,7 @@ def rarpar_argparse(args):
         rec=args.rec,
         rev=args.rev,
         recycle_original=args.recycle_original,
+        solid=args.solid,
         workdir=args.workdir,
     )
 
@@ -450,6 +461,7 @@ def main(argv):
     parser.add_argument('--workdir', dest='workdir', default='.')
     parser.add_argument('--moveto', dest='moveto')
     parser.add_argument('--recycle', dest='recycle_original', action='store_true')
+    parser.add_argument('--solid', dest='solid', action='store_true')
     parser.add_argument('--dry', dest='dry', action='store_true')
     parser.set_defaults(func=rarpar_argparse)
 
