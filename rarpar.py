@@ -18,6 +18,9 @@ PAR2 = winwhich.which('phpar2')
 
 RESERVE_SPACE_ON_DRIVE = 30 * bytestring.GIBIBYTE
 
+COMPRESSION_STORE = 0
+COMPRESSION_MAX = 5
+
 class RarParException(Exception):
     pass
 
