@@ -7,6 +7,9 @@ import send2trash
 import sys
 import time
 
+from voussoirkit import backoff
+
+bo = backoff.Linear(m=1, b=5, max=300)
 
 def get_task_files():
     return [f for f in os.listdir() if (os.path.isfile(f) and f.endswith('.task'))]
@@ -27,9 +30,11 @@ def do_tasks_forever():
     while True:
         print(time.strftime('%H:%M:%S'), 'Looking for tasks.')
         task_files = get_task_files()
+        if task_files:
+            bo.reset()
         do_tasks(task_files)
         try:
-            time.sleep(10)
+            time.sleep(bo.next())
         except KeyboardInterrupt:
             break
 
