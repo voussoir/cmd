@@ -21,13 +21,23 @@ import unicodedata
 from voussoirkit import getpermission
 from voussoirkit import safeprint
 from voussoirkit import spinal
+from voussoirkit import stringtools
 
+# These variables are provided so that if you have any difficulty typing
+# literal quotes etc into your command line, you can just use these variable
+# names in your eval string.
 apostrophe = "'"
 dot = '.'
 hyphen = '-'
 quote = '"'
 space = ' '
 underscore = '_'
+
+# For backwards compatibility, these names which were once locally defined
+# functions are now just references to stringtools.
+excise = stringtools.excise
+title = stringtools.title_capitalize
+
 def unicode_normalize(s):
     return unicodedata.normalize('NFC', s)
 
@@ -70,18 +80,6 @@ def brename(transformation, autoyes=False, recurse=False):
         pairs = sorted(pairs, reverse=True)
         loop(pairs, dry=False)
 
-def excise(s, mark_left, mark_right):
-    '''
-    Remove the text between the left and right landmarks, inclusive, returning
-    the rest of the text.
-
-    excise('What a wonderful day [soundtrack].mp3', ' [', ']') ->
-    returns 'What a wonderful day.mp3'
-    '''
-    if mark_left in s and mark_right in s:
-        return s.split(mark_left)[0] + s.split(mark_right)[-1]
-    return s
-
 def longest_length(li):
     longest = 0
     for item in li:
@@ -95,23 +93,6 @@ def loop(pairs, dry=False):
             safeprint.safeprint(line)
         else:
             os.rename(old, new)
-
-def title(text):
-    (text, extension) = os.path.splitext(text)
-    text = text.title()
-    if ' ' in text:
-        (first, rest) = text.split(' ', 1)
-    else:
-        (first, rest) = (text, '')
-    rest = ' %s ' % rest
-    for article in ['The', 'A', 'An', 'At', 'To', 'In', 'Of', 'From', 'And']:
-        article = ' %s ' % article
-        rest = rest.replace(article, article.lower())
-    rest = rest.strip()
-    if rest != '':
-        rest = ' ' + rest
-    text = first + rest + extension
-    return text
 
 def brename_argparse(args):
     brename(args.transformation, autoyes=args.autoyes, recurse=args.recurse)
