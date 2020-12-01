@@ -1,19 +1,24 @@
-'''
-Keep the unique lines coming from stdin and print them.
-'''
-from voussoirkit import clipext
+import argparse
 import sys
 
-if len(sys.argv) > 1:
-    source = sys.argv[1]
-else:
-    source = '!input'
-lines = clipext.resolve(source, split_lines=True)
+from voussoirkit import pipeable
 
-new_text = []
-seen = set()
-for line in lines:
-    if line not in seen:
-        #new_text.append(line)
-        seen.add(line)
-        print(line)
+def unique_argparse(args):
+    lines = pipeable.input(args.source, read_files=True, skip_blank=True)
+    seen = set()
+    for line in lines:
+        if line not in seen:
+            pipeable.output(line)
+            seen.add(line)
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('source')
+    parser.set_defaults(func=unique_argparse)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))

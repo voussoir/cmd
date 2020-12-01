@@ -1,19 +1,28 @@
-'''
-Sort the lines coming from stdin and print them.
-'''
-from voussoirkit import clipext
+import argparse
 import sys
 
-if len(sys.argv) > 1:
-    text = clipext.resolve(sys.argv[1])
-else:
-    text = clipext.resolve('!input')
+from voussoirkit import pipeable
 
-text = text.split('\n')
-if '-l' in sys.argv:
-    text.sort(key=lambda x: x.lower())
-else:
-    text.sort()
+def sorted_argparse(args):
+    lines = pipeable.input(args.source, read_files=True, skip_blank=True, strip=True)
+    lines = list(lines)
+    if args.nocase:
+        lines.sort(key=lambda x: x.lower())
+    else:
+        lines.sort()
 
-new_text = '\n'.join(text)
-print(new_text)
+    for line in lines:
+        pipeable.output(line)
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('source')
+    parser.add_argument('--nocase', dest='nocase', action='store_true')
+    parser.set_defaults(func=sorted_argparse)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))
