@@ -6,6 +6,7 @@ import re
 import sys
 
 from voussoirkit import getpermission
+from voussoirkit import pipeable
 from voussoirkit import spinal
 from voussoirkit import winglob
 
@@ -36,6 +37,7 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
     with f:
         f.write(content)
 
+@pipeable.ctrlc_return1
 def contentreplace_argparse(args):
     if args.recurse:
         files = spinal.walk_generator('.')
