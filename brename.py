@@ -59,6 +59,8 @@ def brename(transformation, autoyes=False, recurse=False):
         # transformation string.
         (noext, ext) = os.path.splitext(basename)
         x = new
+        extension = ext
+        index1 = index + 1
 
         new = eval(transformation)
         new = os.path.join(directory, new)
