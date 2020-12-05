@@ -113,6 +113,8 @@ def search(
         do_strip=False,
         line_numbers=False,
         local_only=False,
+        only_dirs=False,
+        only_files=False,
         root_path='.',
         text=None,
     ):
@@ -176,6 +178,10 @@ def search(
         # if index % 10 == 0:
         #     print(index, end='\r', flush=True)
         if isinstance(search_object, pathclass.Path):
+            if only_files and not search_object.is_file:
+                continue
+            if only_dirs and not search_object.is_dir:
+                continue
             search_text = search_object.basename
             result_text = search_object.absolute_path
         elif isinstance(search_object, HeaderedText):
@@ -232,6 +238,8 @@ def argparse_to_dict(args):
         'do_strip': args.do_strip,
         'local_only': args.local_only,
         'line_numbers': args.line_numbers,
+        'only_dirs': args.only_dirs,
+        'only_files': args.only_files,
         'text': text,
     }
 
@@ -286,6 +294,8 @@ def main(argv):
     parser.add_argument('--local', dest='local_only', action='store_true')
     parser.add_argument('--regex', dest='do_regex', action='store_true')
     parser.add_argument('--text', dest='text', default=None)
+    parser.add_argument('--dirs', '--folders', dest='only_dirs', action='store_true')
+    parser.add_argument('--files', dest='only_files', action='store_true')
     parser.set_defaults(func=search_argparse)
 
     args = parser.parse_args(name_args)
