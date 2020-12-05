@@ -9,6 +9,7 @@ def backup_folder_argparse(args):
     date = time.strftime('%Y-%m-%d')
 
     folder = pathclass.Path(args.folder)
+    folder.correct_case()
     rar_name = f'{folder.basename} {date}'
 
     rarpar.rarpar(
