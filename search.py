@@ -13,6 +13,7 @@ except ImportError:
 from voussoirkit import clipext
 from voussoirkit import expressionmatch
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 from voussoirkit import safeprint
 from voussoirkit import spinal
 from voussoirkit import winglob
@@ -252,6 +253,7 @@ def _search_argparse(args):
     if args.show_count:
         print('%d items.' % result_count)
 
+@pipeable.ctrlc_return1
 def search_argparse(args):
     try:
         return _search_argparse(args)
