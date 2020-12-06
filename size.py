@@ -1,16 +1,20 @@
 import sys
 
-from voussoirkit import spinal
 from voussoirkit import pathclass
+from voussoirkit import pipeable
+from voussoirkit import spinal
 
-paths = sys.argv[1:]
-paths = [pathclass.Path(p) for p in paths]
+@pipeable.ctrlc_return1
+def main(argv):
+    total = 0
+    for path in pipeable.go():
+        path = pathclass.Path(path)
+        if path.is_file:
+            total += path.size
+        elif path.is_dir:
+            total += spinal.get_dir_size(path)
 
-total = 0
-for path in paths:
-    if path.is_file:
-        total += path.size
-    elif path.is_dir:
-        total += spinal.get_dir_size(path)
+    print(total)
 
-print(total)
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))
