@@ -22,22 +22,29 @@ def shortcut(lnk_name, target, start_in=None, icon=None):
         icon = pathclass.Path(icon)
         icon.assert_is_file()
 
-    lnk = winshell.Shortcut(lnk.absolute_path)
-    lnk.path = target.absolute_path
+    shortcut = winshell.Shortcut(lnk.absolute_path)
+    shortcut.path = target.absolute_path
     if start_in is not None:
-        lnk.working_directory = start_in.absolute_path
+        shortcut.working_directory = start_in.absolute_path
     if icon is not None:
-        lnk.icon_location = (icon.absolute_path, 0)
+        shortcut.icon_location = (icon.absolute_path, 0)
 
-    lnk.write()
+    shortcut.write()
+    return lnk
 
 def shortcut_argparse(args):
-    return shortcut(
-        lnk_name=args.lnk_name,
-        target=args.target,
-        start_in=args.start_in,
-        icon=args.icon,
-    )
+    try:
+        lnk = shortcut(
+            lnk_name=args.lnk_name,
+            target=args.target,
+            start_in=args.start_in,
+            icon=args.icon,
+        )
+        print(lnk.absolute_path)
+        return 0
+    except pathclass.Exists:
+        print(f'{args.lnk_name} already exists.')
+        return 1
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
