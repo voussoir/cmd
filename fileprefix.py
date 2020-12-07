@@ -10,7 +10,7 @@ import os
 import re
 import sys
 
-from voussoirkit import getpermission
+from voussoirkit import interactive
 from voussoirkit import pathclass
 from voussoirkit import safeprint
 
@@ -78,7 +78,7 @@ def fileprefix(
         message = f'{oldname} -> {newname}'
         safeprint.safeprint(message)
 
-    if autoyes or getpermission.getpermission('Is this correct?'):
+    if autoyes or interactive.getpermission('Is this correct?'):
         for (oldname, newname) in rename_pairs:
             os.rename(oldname, newname)
 

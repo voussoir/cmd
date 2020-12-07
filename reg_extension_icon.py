@@ -10,7 +10,7 @@ import argparse
 import sys
 import winreg
 
-from voussoirkit import getpermission
+from voussoirkit import interactive
 from voussoirkit import pathclass
 
 def extension_registry(ico_file, human_name=None):
@@ -32,7 +32,7 @@ def extension_registry(ico_file, human_name=None):
 
     prompt = '\n'.join(prompt)
 
-    if not getpermission.getpermission(prompt):
+    if not interactive.getpermission(prompt):
         return
 
     dot_key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, dot_ex)

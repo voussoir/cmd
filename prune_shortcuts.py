@@ -8,7 +8,7 @@ import send2trash
 import sys
 import winshell
 
-from voussoirkit import getpermission
+from voussoirkit import interactive
 from voussoirkit import pathclass
 from voussoirkit import spinal
 
@@ -38,7 +38,7 @@ def prune_shortcuts(recurse=False, autoyes=False):
         print(lnk.absolute_path)
     print()
 
-    if autoyes or getpermission.getpermission('Is that ok?'):
+    if autoyes or interactive.getpermission('Is that ok?'):
         for lnk in stale:
             print(lnk.absolute_path)
             send2trash.send2trash(lnk.absolute_path)

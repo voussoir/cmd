@@ -5,7 +5,7 @@ import pyperclip
 import re
 import sys
 
-from voussoirkit import getpermission
+from voussoirkit import interactive
 from voussoirkit import pipeable
 from voussoirkit import spinal
 from voussoirkit import winglob
@@ -25,7 +25,7 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
     if occurances == 0:
         return
 
-    if not (autoyes or getpermission.getpermission('Replace?')):
+    if not (autoyes or interactive.getpermission('Replace?')):
         return
 
     if do_regex:

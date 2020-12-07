@@ -9,7 +9,7 @@ import traceback
 import zipfile
 
 from voussoirkit import clipext
-from voussoirkit import getpermission
+from voussoirkit import interactive
 
 FILENAME_BADCHARS = '\\/:*?<>|"'
 
@@ -82,7 +82,7 @@ def getcrx(extension_id, auto_overwrite=None):
             permission = True
         if auto_overwrite is None:
             message = f'"{crx_filename}" already exists. Overwrite?'
-            permission = getpermission.getpermission(message)
+            permission = interactive.getpermission(message)
         else:
             permission = False
     else:

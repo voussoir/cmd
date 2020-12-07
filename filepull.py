@@ -5,7 +5,7 @@ import argparse
 import os
 import sys
 
-from voussoirkit import getpermission
+from voussoirkit import interactive
 from voussoirkit import spinal
 
 def filepull(pull_from='.', autoyes=False):
@@ -31,7 +31,7 @@ def filepull(pull_from='.', autoyes=False):
     for f in files:
         print(f.basename)
 
-    if autoyes or getpermission.getpermission(f'Move {len(files)} files?'):
+    if autoyes or interactive.getpermission(f'Move {len(files)} files?'):
         for f in files:
             local = os.path.join('.', f.basename)
             os.rename(f.absolute_path, local)

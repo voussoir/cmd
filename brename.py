@@ -18,7 +18,7 @@ import re
 import sys
 import unicodedata
 
-from voussoirkit import getpermission
+from voussoirkit import interactive
 from voussoirkit import safeprint
 from voussoirkit import spinal
 from voussoirkit import stringtools
@@ -74,7 +74,7 @@ def brename(transformation, autoyes=False, recurse=False):
 
     loop(pairs, dry=True)
 
-    if autoyes or getpermission.getpermission('Is this correct?'):
+    if autoyes or interactive.getpermission('Is this correct?'):
         # Sort in reverse so that renaming a file inside a directory always
         # occurs before renaming the directory itself. If you rename the
         # directory first, then the path to the file is invalid by the time
