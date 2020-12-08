@@ -1,15 +1,15 @@
+'''
+Given a target string to replace, rename files by prompting the user for input.
+'''
+import argparse
 import os
 import sys
 
-from voussoirkit import winglob
+from voussoirkit import pipeable
 
-import argparse
-import sys
-
+@pipeable.ctrlc_return1
 def inputrename_argparse(args):
-    pattern = f'*{args.keyword}*'
-
-    files = winglob.glob(pattern)
+    files = (file for file in os.listdir() if args.keyword in file)
     prev = None
     for file in files:
         print(file)
@@ -30,7 +30,4 @@ def main(argv):
     return args.func(args)
 
 if __name__ == '__main__':
-    try:
-        raise SystemExit(main(sys.argv[1:]))
-    except KeyboardInterrupt:
-        raise SystemExit(1)
+    raise SystemExit(main(sys.argv[1:]))
