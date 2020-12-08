@@ -38,15 +38,29 @@ underscore = '_'
 excise = stringtools.excise
 title = stringtools.title_capitalize
 
+def natural_sorter(x):
+    '''
+    Thank you Mark Byers
+    http://stackoverflow.com/a/11150413
+    '''
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split(r'([0-9]+)', key)]
+    return alphanum_key(x)
+
 def unicode_normalize(s):
     return unicodedata.normalize('NFC', s)
 
-def brename(transformation, autoyes=False, recurse=False):
+def brename(transformation, autoyes=False, do_naturalsort=False, recurse=False):
     if recurse:
         walker = spinal.walk_generator('.', yield_files=True, yield_directories=True)
         olds = [x.absolute_path for x in walker]
     else:
         olds = [os.path.join(os.getcwd(), x) for x in os.listdir('.')]
+
+    if do_naturalsort:
+        olds.sort(key=natural_sorter)
+    else:
+        olds.sort()
 
     pairs = []
     for (index, old) in enumerate(olds):
@@ -97,7 +111,12 @@ def loop(pairs, dry=False):
             os.rename(old, new)
 
 def brename_argparse(args):
-    brename(args.transformation, autoyes=args.autoyes, recurse=args.recurse)
+    return brename(
+        args.transformation,
+        autoyes=args.autoyes,
+        do_naturalsort=args.do_naturalsort,
+        recurse=args.recurse,
+    )
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
@@ -105,6 +124,7 @@ def main(argv):
     parser.add_argument('transformation', help='python command using x as variable name')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
     parser.add_argument('--recurse', dest='recurse', action='store_true', help='operate on subdirectories also')
+    parser.add_argument('--naturalsort', dest='do_naturalsort', action='store_true')
     parser.set_defaults(func=brename_argparse)
 
     args = parser.parse_args(argv)
