@@ -1,3 +1,4 @@
+import argparse
 import glob
 import math
 import os
@@ -6,10 +7,6 @@ import re
 import sys
 
 from voussoirkit import pipeable
-
-
-lines = pipeable.input(sys.argv[1])
-pattern = sys.argv[2]
 
 def quote(s):
     return '"%s"' % s
@@ -23,6 +20,20 @@ def random_hex(length=12):
     token = token[:length]
     return token
 
-for line in lines:
-    x = line
-    pipeable.output(eval(pattern))
+def eval_argparse(args):
+    for line in pipeable.input(args.lines):
+        x = line
+        pipeable.output(eval(args.eval_string))
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('lines')
+    parser.add_argument('eval_string')
+    parser.set_defaults(func=eval_argparse)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))
