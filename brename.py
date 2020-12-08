@@ -88,13 +88,15 @@ def brename(transformation, autoyes=False, do_naturalsort=False, recurse=False):
 
     loop(pairs, dry=True)
 
-    if autoyes or interactive.getpermission('Is this correct?'):
-        # Sort in reverse so that renaming a file inside a directory always
-        # occurs before renaming the directory itself. If you rename the
-        # directory first, then the path to the file is invalid by the time
-        # you want to rename it.
-        pairs = sorted(pairs, reverse=True)
-        loop(pairs, dry=False)
+    if not (autoyes or interactive.getpermission('Is this correct?')):
+        return
+
+    # Sort in reverse so that renaming a file inside a directory always
+    # occurs before renaming the directory itself. If you rename the
+    # directory first, then the path to the file is invalid by the time
+    # you want to rename it.
+    pairs = sorted(pairs, reverse=True)
+    loop(pairs, dry=False)
 
 def longest_length(li):
     longest = 0
