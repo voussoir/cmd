@@ -1,16 +1,49 @@
 '''
-Repeat the input as many times as you want
+Repeat the input as many times as you want.
 
 > repeat "hello" 8
 > echo hi | repeat !i 4
 '''
-
+import argparse
 import sys
 
 from voussoirkit import clipext
+from voussoirkit import pipeable
 
-text = clipext.resolve(sys.argv[1])
-repeat_times = int(sys.argv[2])
+def repeat_argparse(args):
+    text = clipext.resolve(args.text)
+    if args.times == 'inf':
+        try:
+            while True:
+                print(text)
+        except KeyboardInterrupt:
+            return 0
+    else:
+        try:
+            times = int(args.times)
+        except ValueError:
+            pipeable.stderr('times should be an integer >= 1.')
+            return 1
 
-for t in range(repeat_times):
-    print(text)
+        if times < 1:
+            pipeable.stderr('times should be >= 1.')
+            return 1
+
+        try:
+            for t in range(times):
+                print(text)
+        except KeyboardInterrupt:
+            return 1
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('text')
+    parser.add_argument('times')
+    parser.set_defaults(func=repeat_argparse)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))
