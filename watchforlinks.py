@@ -32,6 +32,7 @@ def loop_once(extension, regex=None):
     h.close()
 
 def loop_forever(extension, regex):
+    pyperclip.copy('')
     while True:
         loop_once(extension=extension, regex=regex)
         time.sleep(1)
