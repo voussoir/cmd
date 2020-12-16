@@ -8,3 +8,5 @@ Wherever you download this repository, don't forget to add that directory to you
 https://github.com/voussoir/cmd
 
 https://gitlab.com/voussoir/cmd
+
+https://codeberg.org/voussoir/cmd
