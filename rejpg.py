@@ -4,19 +4,15 @@ Recompress all jpg images in the current directory.
 import argparse
 import io
 import os
-import PIL.ExifTags
 import PIL.Image
 import PIL.ImageFile
 import string
 import sys
 
 from voussoirkit import bytestring
+from voussoirkit import imagetools
 
 PIL.ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-for (ORIENTATION_KEY, val) in PIL.ExifTags.TAGS.items():
-    if val == 'Orientation':
-        break
 
 def rejpg_argparse(args):
     if args.recurse:
@@ -37,19 +33,8 @@ def rejpg_argparse(args):
         print(''.join(c for c in filename if c in string.printable))
         bytesio = io.BytesIO()
         i = PIL.Image.open(filename)
-        exif = i._getexif()
 
-        # Preserve orientation according to exif
-        # Thank you Scabbiaza
-        # https://stackoverflow.com/a/26928142
-        if exif is None:
-            pass
-        elif exif[ORIENTATION_KEY] == 3:
-            i = i.rotate(180, expand=True)
-        elif exif[ORIENTATION_KEY] == 6:
-            i = i.rotate(270, expand=True)
-        elif exif[ORIENTATION_KEY] == 8:
-            i = i.rotate(90, expand=True)
+        i = imagetools.rotate_by_exif(i)
 
         i.save(bytesio, format='jpeg', quality=80)
 
