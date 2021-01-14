@@ -10,6 +10,7 @@ import time
 from voussoirkit import betterhelp
 from voussoirkit import bytestring
 from voussoirkit import pathclass
+from voussoirkit import subproctools
 from voussoirkit import vlogging
 from voussoirkit import winglob
 from voussoirkit import winwhich
@@ -279,13 +280,17 @@ def run_script(script, dry=False):
     '''
     status = 0
 
-    if dry:
-        for command in script:
-            print(command)
-        return status
-
     for command in script:
-        print(command)
+        if isinstance(command, str):
+            print(command)
+        elif isinstance(command, list):
+            subproctools.print_command(command)
+        else:
+            print(command)
+
+        if dry:
+            continue
+
         if isinstance(command, str):
             status = os.system(command)
         elif isinstance(command, list):
