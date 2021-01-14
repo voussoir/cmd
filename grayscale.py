@@ -26,7 +26,7 @@ def grayscale(filename, *, inplace=False):
 def grayscale_argparse(args):
     filenames = winglob.glob(args.pattern)
     for filename in filenames:
-        return grayscale(filename, inplace=args.inplace)
+        grayscale(filename, inplace=args.inplace)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
