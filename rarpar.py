@@ -10,8 +10,11 @@ import time
 from voussoirkit import betterhelp
 from voussoirkit import bytestring
 from voussoirkit import pathclass
+from voussoirkit import vlogging
 from voussoirkit import winglob
 from voussoirkit import winwhich
+
+log = vlogging.getLogger(__name__)
 
 WINRAR = winwhich.which('winrar')
 PAR2 = winwhich.which('phpar2')
@@ -150,7 +153,7 @@ def assert_enough_space(pathsize, workdir, moveto, rec, rev, par):
         f'Reserving {bytestring.bytestring(reserve)} /',
         f'{bytestring.bytestring(free_space)}.',
     ])
-    print(message)
+    log.debug(message)
 
     if reserve > free_space:
         raise NotEnoughSpace('Please leave more space')
@@ -499,6 +502,8 @@ def rarpar_argparse(args):
     )
 
 def main(argv):
+    argv = vlogging.set_level_by_argv(log, argv)
+
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('path')
