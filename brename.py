@@ -79,7 +79,7 @@ def brename(transformation, autoyes=False, do_naturalsort=False, recurse=False):
 
         new = eval(transformation)
         new = parent.with_child(new)
-        if new == old:
+        if new.basename == old.basename:
             continue
         pairs.append((old, new))
 
