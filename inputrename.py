@@ -14,7 +14,7 @@ def inputrename_argparse(args):
     if args.recurse:
         files = (file for file in spinal.walk_generator('.') if args.keyword in file.basename)
     else:
-        files = (file for file in pathclass.cwd().listdir() if args.keyword in file)
+        files = (file for file in pathclass.cwd().listdir() if args.keyword in file.basename)
     prev = None
     for file in files:
         print(file.relative_path)
