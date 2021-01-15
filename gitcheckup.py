@@ -220,7 +220,13 @@ def checkup_pushed():
         details.to_push = 0
         details.to_pull = 0
     else:
-        merge_base = git_merge_base()
+        try:
+            merge_base = git_merge_base()
+        except subprocess.CalledProcessError as exc:
+            # This happens when the repository has been completely rewritten
+            # with a new root.
+            details.error = 'Root commit has changed'
+            return details
 
         if my_head == merge_base:
             details.to_push = 0
@@ -232,7 +238,8 @@ def checkup_pushed():
             details.to_push = len(git_commits_between(merge_base, my_head))
             details.to_pull = len(git_commits_between(merge_base, remote_head))
 
-    details.pushed = (details.to_push, details.to_pull) == (0, 0)
+    all_pushed = (details.to_push, details.to_pull) == (0, 0)
+    details.pushed = all_pushed
     return details
 
 def gitcheckup(directory, do_fetch=False, do_pull=False, do_push=False):
