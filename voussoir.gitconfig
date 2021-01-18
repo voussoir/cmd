@@ -1,0 +1,18 @@
+[user]
+    email = git@voussoir.net
+    name = Ethan Dalool
+    signingkey = 5F7554F8C26DACCB
+[commit]
+    gpgsign = true
+[alias]
+    o = log --graph --oneline --decorate --all
+    on = log --graph --oneline --decorate --all @{u}~1..
+    upstream = clone --origin upstream
+[push]
+    default = simple
+[credential "helperselector"]
+    selected = manager
+[diff]
+    algorithm = histogram
+[gui]
+    diffopts = --patience
