@@ -1,3 +1,9 @@
+'''
+This program allows you to use your preferred text editor as an intermediate
+step in a processing pipeline. The user will use the text editor to edit a temp
+file, and when they close the editor the contents of the temp file will be sent
+to stdout.
+'''
 import argparse
 import os
 import shlex
