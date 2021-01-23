@@ -207,7 +207,11 @@ def checkup_committed():
 def checkup_pushed():
     details = dotdict.DotDict(default=None)
 
-    my_head = git_rev_parse('@')
+    try:
+        my_head = git_rev_parse('@')
+    except subprocess.CalledProcessError as exc:
+        details.error = 'No HEAD'
+        return details
 
     try:
         remote_head = git_rev_parse('@{u}')
