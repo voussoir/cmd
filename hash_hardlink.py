@@ -22,6 +22,7 @@ def hash_file(file):
             hasher.update(chunk)
     return hasher.hexdigest()
 
+@pipeable.ctrlc_return1
 def hash_hardlink_argparse(args):
     paths = [pathclass.Path(p) for p in pipeable.input_many(args.paths, strip=True, skip_blank=True)]
 
