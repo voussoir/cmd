@@ -6,6 +6,9 @@ import sys
 from voussoirkit import pathclass
 from voussoirkit import winglob
 from voussoirkit import winwhich
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__)
 
 AUDIO_EXTENSIONS = {
     'aac': 'm4a',
@@ -54,7 +57,7 @@ def make_maps(input_file, prefix, search_pattern, extension_map, moveto=None):
         extension = extension_map.get(codec, extension_map['*'])
         output_filename = input_file.replace_extension('')
         output_filename = output_filename.add_extension(f'{prefix}{stream_index}{language}.{extension}')
-        print(f'{stream_index}, codec={codec}, ext=.{extension}')
+        log.debug(f'{stream_index}, codec={codec}, ext=.{extension}')
 
         if moveto:
             output_filename = moveto.with_child(output_filename.basename)
@@ -110,7 +113,8 @@ def ffstreams(input_file, do_videos=False, do_audios=False, do_subtitles=False, 
         return
 
     command = [FFMPEG, '-i', input_file.absolute_path, *maps]
-    print(command)
+
+    log.info(command)
     if not dry:
         subprocess.run(command, stderr=subprocess.STDOUT)
 
@@ -128,8 +132,9 @@ def ffstreams_argparse(args):
             )
 
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    argv = vlogging.set_level_by_argv(log, argv)
 
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input_filename', nargs='+')
     parser.add_argument('--moveto', dest='moveto', default=None)
     parser.add_argument('--video', '--videos', dest='videos', action='store_true')
