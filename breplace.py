@@ -11,11 +11,16 @@ import argparse
 import brename
 import sys
 
+from voussoirkit import pipeable
+
 def breplace_argparse(args):
+    replace_from = ' '.join(pipeable.input(args.replace_from))
+    replace_to = ' '.join(pipeable.input(args.replace_to))
+
     if args.regex:
-        command = f're.sub(r"{args.replace_from}", r"{args.replace_to}", x)'
+        command = f're.sub(r"{replace_from}", r"{replace_to}", x)'
     else:
-        command = f'x.replace("{args.replace_from}", "{args.replace_to}")'
+        command = f'x.replace("{replace_from}", "{replace_to}")'
     brename.brename(command, autoyes=args.autoyes, recurse=args.recurse)
 
 def main(argv):
