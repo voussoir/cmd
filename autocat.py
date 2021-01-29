@@ -17,7 +17,7 @@ cat_file = tempfile.TemporaryFile('w', encoding='utf-8', delete=False)
 cat_file.write(cat_text)
 cat_file.close()
 
-cmd = f'ffmpeg -f concat -safe 0 -i {cat_file.name} -c copy "{output_filename}"'
+cmd = f'ffmpeg -f concat -safe 0 -i {cat_file.name} -map 0:v? -map 0:a? -map 0:s? -c copy "{output_filename}"'
 os.system(cmd)
 
 os.remove(cat_file.name)
