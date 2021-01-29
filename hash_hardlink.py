@@ -10,7 +10,7 @@ from voussoirkit import pipeable
 from voussoirkit import spinal
 from voussoirkit import vlogging
 
-log = vlogging.getLogger(__name__)
+log = vlogging.getLogger(__name__, 'hash_hardlink')
 
 def hash_file(file):
     hasher = hashlib.md5()

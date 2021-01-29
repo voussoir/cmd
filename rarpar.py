@@ -15,7 +15,7 @@ from voussoirkit import vlogging
 from voussoirkit import winglob
 from voussoirkit import winwhich
 
-log = vlogging.getLogger(__name__)
+log = vlogging.getLogger(__name__, 'rarpar')
 
 WINRAR = winwhich.which('winrar')
 PAR2 = winwhich.which('phpar2')

@@ -8,7 +8,7 @@ from voussoirkit import winglob
 from voussoirkit import winwhich
 from voussoirkit import vlogging
 
-log = vlogging.getLogger(__name__)
+log = vlogging.getLogger(__name__, 'ffstreams')
 
 AUDIO_EXTENSIONS = {
     'aac': 'm4a',
