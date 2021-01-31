@@ -10,7 +10,11 @@ def backup_folder_argparse(args):
 
     folder = pathclass.Path(args.folder)
     folder.correct_case()
-    rar_name = f'{folder.basename} {date}'
+    if args.basename:
+        basename = args.basename.strip()
+    else:
+        basename = folder.basename
+    rar_name = f'{basename} {date}'
 
     rarpar.rarpar(
         path=folder,
@@ -27,6 +31,7 @@ def main(argv):
 
     parser.add_argument('folder')
     parser.add_argument('destination_folder')
+    parser.add_argument('--basename', default=None)
     parser.set_defaults(func=backup_folder_argparse)
 
     args = parser.parse_args(argv)
