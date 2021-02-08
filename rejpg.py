@@ -11,20 +11,15 @@ import sys
 
 from voussoirkit import bytestring
 from voussoirkit import imagetools
+from voussoirkit import pipeable
+from voussoirkit import spinal
 
 PIL.ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def rejpg_argparse(args):
-    if args.recurse:
-        from voussoirkit import spinal
-        walker = spinal.walk_generator()
-        files = list(walker)
-    else:
-        from voussoirkit import pathclass
-        files = pathclass.cwd().listdir()
-        files = [f for f in files if f.is_file]
+    patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
+    files = spinal.walk(recurse=args.recurse, glob_filenames=patterns)
 
-    files = [f for f in files if f.extension in ['.jpg', '.jpeg']]
     files = [f.absolute_path for f in files]
 
     bytes_saved = 0
@@ -55,6 +50,7 @@ def rejpg_argparse(args):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
+    parser.add_argument('patterns', nargs='+', default={'*.jpg', '*.jpeg'})
     parser.add_argument('--recurse', dest='recurse', action='store_true')
     parser.set_defaults(func=rejpg_argparse)
 
