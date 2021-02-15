@@ -10,6 +10,9 @@ import sys
 
 from voussoirkit import passwordy
 from voussoirkit import pathclass
+from voussoirkit import pipeable
+from voussoirkit import spinal
+from voussoirkit import winglob
 
 def sole_lift(starting):
     starting = pathclass.Path(starting)
@@ -32,15 +35,17 @@ def sole_lift(starting):
 
     os.rmdir(temp_dir.absolute_path)
 
-    return 0
-
 def sole_lift_argparse(args):
-    return sole_lift(args.starting)
+    patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
+    directories = (pathclass.Path(d) for pattern in patterns for d in winglob.glob(pattern))
+    directories = (d for d in directories if d.is_dir)
+    for directory in directories:
+        sole_lift(directory)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('starting', nargs='?', default='.')
+    parser.add_argument('patterns', nargs='+', default='.')
     parser.set_defaults(func=sole_lift_argparse)
 
     args = parser.parse_args(argv)
