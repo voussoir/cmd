@@ -1,6 +1,5 @@
 import os
 import shutil
-import sys
 
 from voussoirkit import pipeable
 from voussoirkit import winglob

@@ -4,8 +4,6 @@ Reverse a string.
 import argparse
 import sys
 
-from voussoirkit import clipext
-
 def reverse_argparse(args):
     print(''.join(reversed(args.string)))
 

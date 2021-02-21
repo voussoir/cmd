@@ -117,7 +117,7 @@ def brename_argparse(args):
     return brename(
         args.transformation,
         autoyes=args.autoyes,
-        do_naturalsort=args.do_naturalsort,
+        do_naturalsort=args.naturalsort,
         recurse=args.recurse,
     )
 
@@ -163,8 +163,8 @@ def main(argv):
 
     parser.add_argument('transformation', help='python command using x as variable name')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true')
-    parser.add_argument('--recurse', dest='recurse', action='store_true')
-    parser.add_argument('--naturalsort', dest='do_naturalsort', action='store_true')
+    parser.add_argument('--recurse', action='store_true')
+    parser.add_argument('--naturalsort', action='store_true')
     parser.set_defaults(func=brename_argparse)
 
     return betterhelp.single_main(argv, parser, DOCSTRING)

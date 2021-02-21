@@ -39,15 +39,15 @@ def retry_argparse(args):
     return retry(
         command=args.command,
         limit=args.limit,
-        sleepy=args.sleepy,
+        sleepy=args.sleep,
     )
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('command', nargs='+')
-    parser.add_argument('--limit', dest='limit', type=int, default=None)
-    parser.add_argument('--sleep', dest='sleepy', type=float, default=None)
+    parser.add_argument('--limit', type=int, default=None)
+    parser.add_argument('--sleep', type=float, default=None)
     parser.set_defaults(func=retry_argparse)
 
     args = parser.parse_args(argv)

@@ -43,7 +43,7 @@ def main(argv):
 
     parser.add_argument('pattern')
     parser.add_argument('crops', nargs='+', type=int, default=None)
-    parser.add_argument('--inplace', dest='inplace', action='store_true')
+    parser.add_argument('--inplace', action='store_true')
     parser.set_defaults(func=crop_argparse)
 
     args = parser.parse_args(argv)

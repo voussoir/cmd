@@ -18,7 +18,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('source')
-    parser.add_argument('--lazy', dest='lazy', action='store_true')
+    parser.add_argument('--lazy', action='store_true')
     parser.set_defaults(func=linenumbers_argparse)
 
     args = parser.parse_args(argv)

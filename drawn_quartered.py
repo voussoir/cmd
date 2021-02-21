@@ -4,10 +4,8 @@ This script takes an image and splits it up into pieces as separate files.
 drawn_quartered test.jpg --width 2 --height 2
 drawn_quartered test.jpg outputname.jpg --width 3 --height 4
 '''
-
 import argparse
 import math
-import os
 import PIL.Image
 import sys
 
@@ -62,8 +60,8 @@ def main(argv):
 
     parser.add_argument('input_filename')
     parser.add_argument('output_filename', nargs='?', default=None)
-    parser.add_argument('--width', dest='width', type=int, default=2)
-    parser.add_argument('--height', dest='height', type=int, default=2)
+    parser.add_argument('--width', type=int, default=2)
+    parser.add_argument('--height', type=int, default=2)
     parser.set_defaults(func=drawquarter_argparse)
 
     args = parser.parse_args(argv)

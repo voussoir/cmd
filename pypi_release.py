@@ -408,11 +408,11 @@ def pypi_release_argparse(args):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('--major', dest='major', action='store_true')
-    parser.add_argument('--minor', dest='minor', action='store_true')
-    parser.add_argument('--patch', dest='patch', action='store_true')
-    parser.add_argument('--do_tag', '--do-tag', dest='do_tag', action='store_true')
-    parser.add_argument('--debug', dest='debug', action='store_true')
+    parser.add_argument('--major', action='store_true')
+    parser.add_argument('--minor', action='store_true')
+    parser.add_argument('--patch', action='store_true')
+    parser.add_argument('--do_tag', '--do-tag', action='store_true')
+    parser.add_argument('--debug', action='store_true')
     parser.set_defaults(func=pypi_release_argparse)
 
     args = parser.parse_args(argv)

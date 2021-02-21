@@ -78,9 +78,9 @@ def main(argv):
     parser.add_argument('replace_from')
     parser.add_argument('replace_to')
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
-    parser.add_argument('--recurse', dest='recurse', action='store_true')
+    parser.add_argument('--recurse', action='store_true')
     parser.add_argument('--regex', dest='do_regex', action='store_true')
-    parser.add_argument('--clip_prompt', '--clip-prompt', dest='clip_prompt', action='store_true')
+    parser.add_argument('--clip_prompt', '--clip-prompt', action='store_true')
     parser.set_defaults(func=contentreplace_argparse)
 
     args = parser.parse_args(argv)

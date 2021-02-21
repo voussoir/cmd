@@ -69,7 +69,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('filepath')
-    parser.add_argument('--rate', dest='rate', default=None, required=True, type=int)
+    parser.add_argument('--rate', default=None, required=True, type=int)
     parser.set_defaults(func=filetimelapse_argparse)
 
     args = parser.parse_args(argv)

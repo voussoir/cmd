@@ -77,10 +77,10 @@ def main(argv):
     parser.add_argument('pattern')
     parser.add_argument('new_x', nargs='?', type=int, default=None)
     parser.add_argument('new_y', nargs='?', type=int, default=None)
-    parser.add_argument('--inplace', dest='inplace', action='store_true')
+    parser.add_argument('--inplace', action='store_true')
     parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
-    parser.add_argument('--only_shrink', '--only-shrink', dest='only_shrink', action='store_true')
-    parser.add_argument('--scale', dest='scale', type=float, default=None)
+    parser.add_argument('--only_shrink', '--only-shrink', action='store_true')
+    parser.add_argument('--scale', type=float, default=None)
     parser.set_defaults(func=resize_argparse)
 
     args = parser.parse_args(argv)

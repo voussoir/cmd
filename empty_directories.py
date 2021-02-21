@@ -13,7 +13,7 @@ def empty_directories_argparse(args):
     else:
         directories = pathclass.cwd().listdir()
     directories = (d for d in directories if d.is_dir)
-    
+
     for directory in directories:
         if len(directory.listdir()) == 0:
             pipeable.stdout(directory.absolute_path)

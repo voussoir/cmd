@@ -49,7 +49,7 @@ def prune_shortcuts_argparse(args):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('--recurse', dest='recurse', action='store_true')
+    parser.add_argument('--recurse', action='store_true')
     parser.add_argument('--yes', dest='autoyes', action='store_true')
     parser.set_defaults(func=prune_shortcuts_argparse)
 

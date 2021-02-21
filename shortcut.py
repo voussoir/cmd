@@ -51,8 +51,8 @@ def main(argv):
 
     parser.add_argument('lnk_name')
     parser.add_argument('target')
-    parser.add_argument('--start_in', '--start-in', '--startin', dest='start_in', default=None)
-    parser.add_argument('--icon', dest='icon', default=None)
+    parser.add_argument('--start_in', '--start-in', '--startin', default=None)
+    parser.add_argument('--icon', default=None)
     parser.set_defaults(func=shortcut_argparse)
 
     args = parser.parse_args(argv)

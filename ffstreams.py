@@ -136,7 +136,7 @@ def main(argv):
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input_filename', nargs='+')
-    parser.add_argument('--moveto', dest='moveto', default=None)
+    parser.add_argument('--moveto', default=None)
     parser.add_argument('--video', '--videos', dest='videos', action='store_true')
     parser.add_argument('--audio', '--audios', dest='audios', action='store_true')
     parser.add_argument('--subtitles', '--subs', dest='subtitles', action='store_true')

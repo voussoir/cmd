@@ -11,7 +11,6 @@ import sys
 from voussoirkit import passwordy
 from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import spinal
 from voussoirkit import winglob
 
 def sole_lift(starting):

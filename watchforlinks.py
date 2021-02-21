@@ -47,7 +47,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('extension', nargs='?', default='generic')
-    parser.add_argument('--regex', dest='regex', default=None)
+    parser.add_argument('--regex', default=None)
     parser.set_defaults(func=watchforlinks_argparse)
 
     args = parser.parse_args(argv)

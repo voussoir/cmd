@@ -92,7 +92,7 @@ def hyphen_range(s):
     low = _unitconvert(low)
     high = _unitconvert(high)
     if low is not None and high is not None and low > high:
-        raise exceptions.OutOfOrder(range=s, min=low, max=high)
+        raise ValueError(s)
     return low, high
 
 def hms_to_seconds(hms):

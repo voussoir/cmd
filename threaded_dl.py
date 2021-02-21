@@ -140,9 +140,9 @@ def main(argv):
     parser.add_argument('url_file')
     parser.add_argument('thread_count', type=int)
     parser.add_argument('filename_format', nargs='?', default='{now}_{index}_{basename}')
-    parser.add_argument('--bytespersecond', dest='bytespersecond', default=None)
-    parser.add_argument('--timeout', dest='timeout', default=15)
-    parser.add_argument('--headers', dest='headers', nargs='+', default=None)
+    parser.add_argument('--bytespersecond', default=None)
+    parser.add_argument('--timeout', default=15)
+    parser.add_argument('--headers', nargs='+', default=None)
     parser.set_defaults(func=threaded_dl_argparse)
 
     args = parser.parse_args(argv)

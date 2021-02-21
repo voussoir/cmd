@@ -33,8 +33,8 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('hex_value')
-    parser.add_argument('--width', dest='width', type=int, default=1)
-    parser.add_argument('--height', dest='height', type=int, default=1)
+    parser.add_argument('--width', type=int, default=1)
+    parser.add_argument('--height', type=int, default=1)
     parser.set_defaults(func=hexpng_argparse)
 
     args = parser.parse_args(argv)

@@ -1,5 +1,4 @@
 import argparse
-import os
 import sys
 
 from voussoirkit import gentools
@@ -18,7 +17,7 @@ def main(argv):
 
     parser.add_argument('source')
     parser.add_argument('chunk_size', type=int)
-    parser.add_argument('--separator', dest='separator', default=',')
+    parser.add_argument('--separator', default=',')
     parser.set_defaults(func=groupsof_argparse)
 
     args = parser.parse_args(argv)

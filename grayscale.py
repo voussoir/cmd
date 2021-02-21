@@ -3,7 +3,6 @@ import PIL.Image
 import sys
 
 from voussoirkit import pathclass
-from voussoirkit import pipeable
 from voussoirkit import winglob
 
 def grayscale(filename, *, inplace=False):
@@ -32,7 +31,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('pattern')
-    parser.add_argument('--inplace', dest='inplace', action='store_true')
+    parser.add_argument('--inplace', action='store_true')
     parser.set_defaults(func=grayscale_argparse)
 
     args = parser.parse_args(argv)

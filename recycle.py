@@ -1,6 +1,5 @@
 import os
 import send2trash
-import sys
 
 from voussoirkit import pipeable
 from voussoirkit import winglob

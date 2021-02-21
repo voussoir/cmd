@@ -58,7 +58,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('ico_file')
-    parser.add_argument('--name', dest='name', default=None)
+    parser.add_argument('--name', default=None)
     parser.set_defaults(func=extension_registry_argparse)
 
     args = parser.parse_args(argv)

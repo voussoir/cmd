@@ -50,10 +50,10 @@ def main(argv):
     parser = argparse.ArgumentParser()
 
     parser.add_argument('filename')
-    parser.add_argument('--width', dest='width', default=DEFAULT_WIDTH, type=int)
-    parser.add_argument('--start', dest='start', default=None)
-    parser.add_argument('--end', dest='end', default=None)
-    parser.add_argument('--ellipse', dest='ellipse', action='store_true')
+    parser.add_argument('--width', default=DEFAULT_WIDTH, type=int)
+    parser.add_argument('--start', default=None)
+    parser.add_argument('--end', default=None)
+    parser.add_argument('--ellipse', action='store_true')
     parser.set_defaults(func=hexdump_argparse)
 
     args = parser.parse_args(argv)
