@@ -1,3 +1,4 @@
+import tkinter
 from tkinter import Button as tButton
 from tkinter import Tk, BOTH
 from tkinter.ttk import Frame, Style, Button
@@ -24,21 +25,31 @@ class PGUILauncher(Frame):
         self.style.theme_use("clam")
         self.pack(fill=BOTH, expand = 1)
 
-        x = 0
-        y = 0
+        self.filter_var = tkinter.StringVar()
+        self.filter_var.trace('w', self.filter)
+        self.filter_entry = tkinter.Entry(self, textvariable=self.filter_var)
+        self.filter_entry.grid(row=0, column=0, columnspan=999, sticky='ew')
+        self.filter_entry.bind('<Return>', self.launch_filtered)
+        self.filter_entry.focus()
 
+        x = 0
+        y = 1
+
+        self.buttons = []
         self.buttonwidth = 12
         shortcuts = load_programs()
         for (index, shortcut) in enumerate(shortcuts):
             print(y, x)
-            newButton = Button(
+            button = Button(
                 self,
                 text=shortcut.replace_extension('').basename,
                 command=lambda sc=shortcut: self.launch_program(sc),
             )
+            button.shortcut = shortcut
             print(f'Creating button for {shortcut.basename}')
-            newButton.configure(width=self.buttonwidth)
-            newButton.grid(row=y, column=x)
+            button.configure(width=self.buttonwidth)
+            button.grid(row=y, column=x)
+            self.buttons.append(button)
             x += 1
             if x >= 3 and (index != len(shortcuts)-1):
                 x = 0
@@ -47,6 +58,22 @@ class PGUILauncher(Frame):
 
         self.pack()
         self.update()
+
+    def filter(self, *args):
+        text = self.filter_entry.get().lower()
+        for button in self.buttons:
+            if text == '':
+                button['state'] = 'normal'
+            elif text not in button['text'].lower():
+                button['state'] = 'disabled'
+
+    def launch_filtered(self, *args):
+        enabled = [b for b in self.buttons if b['state'].string == 'normal']
+        if len(enabled) != 1:
+            return
+
+        button = enabled[0]
+        self.launch_program(button.shortcut)
 
     def launch_program(self, shortcut):
         print('opening application', shortcut.basename)
