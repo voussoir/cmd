@@ -1,7 +1,5 @@
 import tkinter
-from tkinter import Button as tButton
-from tkinter import Tk, BOTH
-from tkinter.ttk import Frame, Style, Button
+import tkinter.ttk
 import os
 import subprocess
 import sys
@@ -15,15 +13,15 @@ def load_programs():
     shortcuts = [pathclass.Path(p) for p in shortcuts]
     return shortcuts
 
-class PGUILauncher(Frame):
+class PGUILauncher(tkinter.ttk.Frame):
     def __init__(self, parent):
-        Frame.__init__(self, parent)
+        super().__init__(parent)
 
         self.parent = parent
 
-        self.style = Style()
+        self.style = tkinter.ttk.Style()
         self.style.theme_use("clam")
-        self.pack(fill=BOTH, expand = 1)
+        self.pack(fill=tkinter.BOTH, expand = 1)
 
         self.filter_var = tkinter.StringVar()
         self.filter_var.trace('w', self.filter)
@@ -40,7 +38,7 @@ class PGUILauncher(Frame):
         shortcuts = load_programs()
         for (index, shortcut) in enumerate(shortcuts):
             print(y, x)
-            button = Button(
+            button = tkinter.ttk.Button(
                 self,
                 text=shortcut.replace_extension('').basename,
                 command=lambda sc=shortcut: self.launch_program(sc),
@@ -84,7 +82,7 @@ class PGUILauncher(Frame):
 
 
 def main(argv):
-    root = Tk()
+    root = tkinter.Tk()
     root.title("PGUI")
     root.resizable(0,0)
 
