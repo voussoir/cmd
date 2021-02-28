@@ -1,15 +1,18 @@
 '''
 Batch rename files by providing a string to be `eval`ed, using variable `x` as
-the current filename.
-Yes I know this is weird, but for certain tasks it's just too quick and easy to pass up.
+the current filename. Yes I know this is weird, but for certain tasks it's just
+too quick and easy to pass up.
 
-For example:
+Examples:
 
 Prefix all the files:
-brename.py "'Test_' + x"
+brename.py "f'Test_{x}'"
+
+Rename files to their index with 0 padding:
+brename.py "f'{index1:>03}{dot_ext}'"
 
 Keep the first word and extension:
-brename.py "(x.split(' ')[0] + '.' + x.split('.')[-1]) if ' ' in x else x"
+brename.py "(x.split(' ')[0] + dot_ext) if ' ' in x else x"
 '''
 import argparse
 import os
@@ -74,7 +77,8 @@ def brename(transformation, autoyes=False, do_naturalsort=False, recurse=False):
         x = old.basename
         parent = old.parent
         noext = old.replace_extension('').basename
-        ext = old.extension.ext
+        ext = old.extension.no_dot
+        dot_ext = old.extension.with_dot
         index1 = index + 1
 
         new = eval(transformation)
