@@ -4,6 +4,7 @@ from PIL import Image
 import sys
 
 from voussoirkit import imagetools
+from voussoirkit import pathclass
 from voussoirkit import winglob
 
 def resize(
@@ -16,7 +17,8 @@ def resize(
         only_shrink=False,
         scale=None,
     ):
-    i = Image.open(filename)
+    file = pathclass.Path(filename)
+    i = Image.open(file.absolute_path)
 
     (image_width, image_height) = i.size
 
@@ -50,12 +52,17 @@ def resize(
         i = i.resize( (new_x, new_y), Image.ANTIALIAS)
 
     if inplace:
-        newname = filename
+        new_name = file
     else:
         suffix = '_{width}x{height}'.format(width=new_x, height=new_y)
-        (base, extension) = os.path.splitext(filename)
-        newname = base + suffix + extension
-    i.save(newname, quality=100)
+        base = file.replace_extension('').basename
+        new_name = base + suffix + file.extension.with_dot
+        new_name = file.parent.with_child(new_name)
+
+    if new_name.extension == '.jpg':
+        i = i.convert('RGB')
+
+    i.save(new_name.absolute_path, quality=100)
 
 
 def resize_argparse(args):
