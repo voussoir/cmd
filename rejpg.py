@@ -31,7 +31,7 @@ def rejpg_argparse(args):
 
         i = imagetools.rotate_by_exif(i)
 
-        i.save(bytesio, format='jpeg', quality=80)
+        i.save(bytesio, format='jpeg', quality=args.quality)
 
         bytesio.seek(0)
         new_bytes = bytesio.read()
@@ -51,6 +51,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('patterns', nargs='+', default={'*.jpg', '*.jpeg'})
+    parser.add_argument('--quality', type=int, default=80)
     parser.add_argument('--recurse', action='store_true')
     parser.set_defaults(func=rejpg_argparse)
 
