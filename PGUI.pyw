@@ -60,9 +60,9 @@ class PGUILauncher(tkinter.ttk.Frame):
     def filter(self, *args):
         text = self.filter_entry.get().lower()
         for button in self.buttons:
-            if text == '':
+            if text == '' or text in button['text'].lower():
                 button['state'] = 'normal'
-            elif text not in button['text'].lower():
+            else:
                 button['state'] = 'disabled'
 
     def launch_filtered(self, *args):
