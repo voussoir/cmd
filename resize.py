@@ -16,6 +16,7 @@ def resize(
         nearest_neighbor=False,
         only_shrink=False,
         scale=None,
+        quality=100,
     ):
     file = pathclass.Path(filename)
     i = Image.open(file.absolute_path)
@@ -62,7 +63,7 @@ def resize(
     if new_name.extension == '.jpg':
         i = i.convert('RGB')
 
-    i.save(new_name.absolute_path, quality=100)
+    i.save(new_name.absolute_path, quality=quality)
 
 
 def resize_argparse(args):
@@ -76,6 +77,7 @@ def resize_argparse(args):
             nearest_neighbor=args.nearest_neighbor,
             only_shrink=args.only_shrink,
             scale=args.scale,
+            quality=args.quality,
         )
 
 def main(argv):
@@ -88,6 +90,7 @@ def main(argv):
     parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
     parser.add_argument('--only_shrink', '--only-shrink', action='store_true')
     parser.add_argument('--scale', type=float, default=None)
+    parser.add_argument('--quality', type=int, default=100)
     parser.set_defaults(func=resize_argparse)
 
     args = parser.parse_args(argv)
