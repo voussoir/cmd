@@ -17,7 +17,7 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
         content = f.read()
 
     if do_regex:
-        occurances = len(re.findall(replace_from, content))
+        occurances = len(re.findall(replace_from, content, flags=re.MULTILINE))
     else:
         occurances = content.count(replace_from)
 
@@ -29,7 +29,7 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
         return
 
     if do_regex:
-        content = re.sub(replace_from, replace_to, content)
+        content = re.sub(replace_from, replace_to, content, flags=re.MULTILINE)
     else:
         content = content.replace(replace_from, replace_to)
 
