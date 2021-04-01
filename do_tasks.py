@@ -9,7 +9,7 @@ import time
 
 from voussoirkit import backoff
 
-bo = backoff.Linear(m=1, b=5, max=300)
+bo = backoff.Linear(m=1, b=5, max=1800)
 
 def get_task_files():
     return [f for f in os.listdir() if (os.path.isfile(f) and f.endswith('.task'))]
