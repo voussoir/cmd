@@ -28,6 +28,11 @@ flags:
 --push:
     Run `git push` in each directory.
 
+--run <command>:
+    Run `git <command>` in each directory. You can use \- to escape - in your
+    git arguments, since they would confuse this program's argparse.
+    If this is used, any --fetch, --pull, --push is ignored.
+
 --add path:
     Add path to the gitcheckup.txt file.
 
@@ -38,9 +43,11 @@ Examples:
 > gitcheckup
 > gitcheckup --fetch
 > gitcheckup D:\\Git\\cmd D:\\Git\\YCDL --pull
+> gitcheckup --run add README.md
 '''
 import argparse
 import os
+import re
 import subprocess
 import sys
 
@@ -246,17 +253,27 @@ def checkup_pushed():
     details.pushed = all_pushed
     return details
 
-def gitcheckup(directory, do_fetch=False, do_pull=False, do_push=False):
+def gitcheckup(
+        directory,
+        do_fetch=False,
+        do_pull=False,
+        do_push=False,
+        run_command=None,
+    ):
     os.chdir(directory.absolute_path)
 
-    if do_fetch:
-        git_fetch()
+    if run_command:
+        command = [GIT, *run_command]
+        check_output(command)
+    else:
+        if do_fetch:
+            git_fetch()
 
-    if do_pull:
-        git_pull()
+        if do_pull:
+            git_pull()
 
-    if do_push:
-        git_push()
+        if do_push:
+            git_push()
 
     commit_details = checkup_committed()
     push_details = checkup_pushed()
@@ -298,9 +315,18 @@ def gitcheckup_argparse(args):
     else:
         directories = read_directories_file()
 
+    if args.run_command:
+        args.run_command = [re.sub(r'^\\-', '-', arg) for arg in args.run_command]
+
     try:
         for directory in directories:
-            gitcheckup(directory, do_fetch=args.do_fetch, do_pull=args.do_pull, do_push=args.do_push)
+            gitcheckup(
+                directory,
+                do_fetch=args.do_fetch,
+                do_pull=args.do_pull,
+                do_push=args.do_push,
+                run_command=args.run_command,
+            )
     except subprocess.CalledProcessError as exc:
         sys.stdout.write(f'{exc.cmd} exited with status {exc.returncode}\n')
         sys.stdout.write(exc.output.decode())
@@ -314,6 +340,7 @@ def main(argv):
     parser.add_argument('--pull', dest='do_pull', action='store_true')
     parser.add_argument('--push', dest='do_push', action='store_true')
     parser.add_argument('--add', dest='add_directory')
+    parser.add_argument('--run', dest='run_command', nargs='+')
     parser.add_argument('--remove', dest='remove_directory')
     parser.set_defaults(func=gitcheckup_argparse)
 
