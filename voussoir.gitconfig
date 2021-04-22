@@ -16,3 +16,8 @@
     algorithm = histogram
 [gui]
     diffopts = --patience
+
+# In the user's .gitconfig file, inclue these lines at the top:
+# [include]
+#    path = ~/git/cmd/voussoir.gitconfig
+# and put additional configuration below.

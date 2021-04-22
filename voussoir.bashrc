@@ -13,3 +13,7 @@ alias copy=cp
 alias md=mkdir
 
 bind TAB:menu-complete
+
+# In the user's .bashrc file, include this line at the top:
+# [[ -r ~/git/cmd/voussoir.bashrc ]] && . ~/git/cmd/voussoir.bashrc
+# and put additional configuration below.
