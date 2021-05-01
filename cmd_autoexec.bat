@@ -9,6 +9,7 @@ doskey .=cd.
 doskey ..=cd..
 doskey ...=start.
 doskey \=cd\
+doskey which=where $*
 doskey gc=gitcheckup $*
 doskey gp=git push $*
 doskey gpa=git_push_all $*
