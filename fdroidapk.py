@@ -1,3 +1,29 @@
+'''
+fdroidapk - F-Droid APK downloader
+==================================
+
+> fdroidapk package_names <flags>
+
+package_names:
+    One or more package names to download, separated by spaces. You can find
+    the package name in the URL on f-droid.org.
+    For example, com.nutomic.syncthingandroid from the URL
+    https://f-droid.org/en/packages/com.nutomic.syncthingandroid/
+
+--destination path:
+    Alternative path to download the apk files to. Default is cwd.
+
+--folders:
+    If provided, each apk will be downloaded into a separate folder named after
+    the package.
+
+--debug:
+    Add this flag to see more detailed information.
+
+--operatornotify:
+    Add this flag to get any warning messages sent to your operatornotify.
+    See voussoirkit.operatornotify.py for details.
+'''
 import argparse
 import bs4
 import requests
@@ -7,10 +33,11 @@ import time
 from voussoirkit import backoff
 from voussoirkit import betterhelp
 from voussoirkit import downloady
+from voussoirkit import operatornotify
 from voussoirkit import pathclass
 from voussoirkit import vlogging
 
-log = vlogging.getLogger(__name__, 'fpk')
+log = vlogging.getLogger(__name__, 'fdroidapk')
 
 session = requests.Session()
 
@@ -33,7 +60,7 @@ def normalize_package_name(package_name):
     package_name = package_name.rsplit('/', 1)[-1]
     return package_name
 
-def retry_request(f, tries=5):
+def _retry_request(f, tries=5):
     bo = backoff.Linear(m=3, b=3, max=30)
     while tries > 0:
         try:
@@ -45,35 +72,21 @@ def retry_request(f, tries=5):
             time.sleep(bo.next())
         tries -= 1
 
-DOCSTRING = '''
-fpk - F-Droid APK downloader
-============================
-
-> fpk package_names <flags>
-
-package_names:
-    One or more package names to download, separated by spaces. You can find
-    the package name in the URL on f-droid.org.
-    For example, com.nutomic.syncthingandroid from the URL
-    https://f-droid.org/en/packages/com.nutomic.syncthingandroid/
-
---destination path:
-    Alternative path to download the apk files to. Default is cwd.
-
---folders:
-    If provided, each apk will be downloaded into a separate folder named after
-    the package.
-
---debug:
-    Add this flag to see more detailed information.
-'''
-
 def fpk_argparse(args):
     destination = pathclass.Path(args.destination)
     destination.assert_is_directory()
+
+    return_status = 0
+
     for package in args.packages:
         package = normalize_package_name(package)
-        apk_url = retry_request(lambda: get_apk_url(package))
+
+        try:
+            apk_url = _retry_request(lambda: get_apk_url(package))
+        except Exception:
+            log.error('%s was unable to get apk url.', package)
+            return_status = 1
+            continue
 
         apk_basename = downloady.basename_from_url(apk_url)
         if args.folders:
@@ -82,29 +95,40 @@ def fpk_argparse(args):
         else:
             this_dest = destination
         this_dest = this_dest.with_child(apk_basename)
+
         if this_dest.exists:
             log.info('%s exists.', this_dest.absolute_path)
             continue
 
-        log.info('Downloading %s', this_dest.absolute_path)
-        retry_request(lambda: downloady.download_file(
-            apk_url,
-            this_dest,
-            callback_progress=downloady.Progress2,
-            timeout=30,
-        ))
+        log.info('Downloading %s.', this_dest.absolute_path)
+
+        try:
+            _retry_request(lambda: downloady.download_file(
+                apk_url,
+                this_dest,
+                callback_progress=downloady.Progress2,
+                timeout=30,
+            ))
+        except Exception:
+            log.error('%s was unable to download apk.', package)
+            return_status = 1
+            continue
+
+    return return_status
 
 def main(argv):
     argv = vlogging.set_level_by_argv(log, argv)
+    (notify_context, argv) = operatornotify.main_log_context(argv, subject='fdroidapk warnings')
 
-    parser = argparse.ArgumentParser(description=DOCSTRING)
+    parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('packages', nargs='+')
     parser.add_argument('--folders', action='store_true')
     parser.add_argument('--destination', default='.')
     parser.set_defaults(func=fpk_argparse)
 
-    return betterhelp.single_main(argv, parser, DOCSTRING)
+    with notify_context:
+        return betterhelp.single_main(argv, parser, __doc__)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
