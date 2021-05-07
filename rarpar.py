@@ -6,9 +6,11 @@ import shutil
 import subprocess
 import sys
 import time
+import traceback
 
 from voussoirkit import betterhelp
 from voussoirkit import bytestring
+from voussoirkit import operatornotify
 from voussoirkit import pathclass
 from voussoirkit import subproctools
 from voussoirkit import vlogging
@@ -151,13 +153,13 @@ def assert_enough_space(pathsize, workdir, moveto, rec, rev, par):
 
     message = ' '.join([
         f'For {bytestring.bytestring(pathsize)},',
-        f'Reserving {bytestring.bytestring(reserve)} /',
-        f'{bytestring.bytestring(free_space)}.',
+        f'reserve {bytestring.bytestring(reserve)}',
+        f'out of {bytestring.bytestring(free_space)}.',
     ])
     log.debug(message)
 
     if reserve > free_space:
-        raise NotEnoughSpace('Please leave more space')
+        raise NotEnoughSpace(message)
 
 def move(pattern, directory):
     files = winglob.glob(pattern)
@@ -282,11 +284,11 @@ def run_script(script, dry=False):
 
     for command in script:
         if isinstance(command, str):
-            print(command)
+            log.info(command)
         elif isinstance(command, list):
-            subproctools.print_command(command)
+            log.info(subproctools.format_command(command))
         else:
-            print(command)
+            log.info(command)
 
         if dry:
             continue
@@ -300,7 +302,7 @@ def run_script(script, dry=False):
         else:
             status = command()
         if status not in [0, None]:
-            print('!!!! error status:', status)
+            log.error('!!!! error status: %s', status)
             break
 
     return status
@@ -328,6 +330,7 @@ def rarpar(
     # Validation ###################################################################################
 
     path.assert_exists()
+    path.correct_case()
 
     workdir = pathclass.Path(workdir)
     workdir.assert_is_directory()
@@ -362,11 +365,12 @@ def rarpar(
             par=par or 0,
         )
 
-    timestamp = time.strftime('%Y-%m-%d')
+    date = time.strftime('%Y-%m-%d')
+    timestamp = time.strftime('%Y-%m-%d_%H-%M-%S')
     if not basename:
         basename = f'{path.basename} ({timestamp})'
     else:
-        basename = basename.format(timestamp=timestamp)
+        basename = basename.format(basename=path.basename, date=date, timestamp=timestamp)
 
     existing = None
     if workdir:
@@ -375,7 +379,7 @@ def rarpar(
         existing = existing or moveto.glob(f'{basename}*.rar')
 
     if existing:
-        raise RarExists(f'{existing[0]} already exists.')
+        raise RarExists(f'{existing[0].absolute_path} already exists.')
 
     # Script building ##############################################################################
 
@@ -450,11 +454,11 @@ path:
     A string "min(A, B)" or "max(A, B)" where A and B follow the above rules.
 
 --rec X:
-    A integer to generate X% recovery record in the rars.
+    An integer to generate X% recovery record in the rars.
     See winrar documentation for information about recovery records.
 
 --rev X:
-    A integer to generate X% recovery volumes.
+    An integer to generate X% recovery volumes.
     Note that winrar's behavior is the number of revs will always be less than
     the number of rars. If you don't split volumes, you will have 1 rar and
     thus 0 revs even if you ask for 100% rev.
@@ -466,9 +470,12 @@ path:
 --basename X:
     A basename for the rar and par files. You will end up with
     basename.partXX.rar and basename.par2.
-    Without this argument, the default basename is "basename ({timestamp})".
-    Your string may include {timestamp} including the braces to get the
-    timestamp there.
+    Without this argument, the default basename is "{basename} ({timestamp})".
+    Your string may include {basename}, {timestamp} and/or {date} including the
+    braces to insert that value there.
+
+--compression X:
+    Level of compression. Can be "store" or "max" or integer 0-5.
 
 --password X:
     A password with which to encrypt the rar files.
@@ -489,25 +496,40 @@ path:
 '''
 
 def rarpar_argparse(args):
-    return rarpar(
-        path=args.path,
-        volume=args.volume,
-        basename=args.basename,
-        dictionary_size=args.dictionary_size,
-        dry=args.dry,
-        moveto=args.moveto,
-        par=args.par,
-        password=args.password,
-        rar_profile=args.rar_profile,
-        rec=args.rec,
-        rev=args.rev,
-        recycle_original=args.recycle_original,
-        solid=args.solid,
-        workdir=args.workdir,
-    )
+    compression = args.compression.lower() if args.compression is not None else None
+    if compression == 'max':
+        compression = COMPRESSION_MAX
+    if compression == 'store':
+        compression = COMPRESSION_STORE
+
+    status = 0
+    try:
+        return rarpar(
+            path=args.path,
+            volume=args.volume,
+            basename=args.basename,
+            compression=compression,
+            dictionary_size=args.dictionary_size,
+            dry=args.dry,
+            moveto=args.moveto,
+            par=args.par,
+            password=args.password,
+            rar_profile=args.rar_profile,
+            rec=args.rec,
+            rev=args.rev,
+            recycle_original=args.recycle_original,
+            solid=args.solid,
+            workdir=args.workdir,
+        )
+    except (RarExists, NotEnoughSpace) as exc:
+        log.fatal(exc)
+        status = 1
+
+    return status
 
 def main(argv):
     argv = vlogging.set_level_by_argv(log, argv)
+    (notify_context, argv) = operatornotify.main_log_context(argv, subject='rarpar warnings')
 
     parser = argparse.ArgumentParser(description=__doc__)
 
@@ -517,6 +539,7 @@ def main(argv):
     parser.add_argument('--rev')
     parser.add_argument('--par')
     parser.add_argument('--basename')
+    parser.add_argument('--compression')
     parser.add_argument('--password')
     parser.add_argument('--profile', dest='rar_profile')
     parser.add_argument('--workdir', default='.')
@@ -527,7 +550,8 @@ def main(argv):
     parser.add_argument('--dry', action='store_true')
     parser.set_defaults(func=rarpar_argparse)
 
-    return betterhelp.single_main(argv, parser, DOCSTRING)
+    with notify_context:
+        return betterhelp.single_main(argv, parser, DOCSTRING)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
