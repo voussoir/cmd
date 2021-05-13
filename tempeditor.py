@@ -1,8 +1,20 @@
 '''
+tempeditor
+==========
+
 This program allows you to use your preferred text editor as an intermediate
 step in a processing pipeline. The user will use the text editor to edit a temp
 file, and when they close the editor the contents of the temp file will be sent
 to stdout.
+
+Command line usage:
+
+> tempeditor [--text X]
+
+--text X:
+    The initial text in the document.
+    Uses pipeable to support !c clipboard, !i stdin.
+    If not provided, the user starts with a blank document.
 '''
 import argparse
 import os
@@ -11,6 +23,7 @@ import subprocess
 import sys
 import tempfile
 
+from voussoirkit import betterhelp
 from voussoirkit import pipeable
 from voussoirkit import subproctools
 from voussoirkit import winwhich
@@ -74,8 +87,7 @@ def main(argv):
     parser.add_argument('--text', dest='initial_text', default=None)
     parser.set_defaults(func=tempeditor_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.single_main(argv, parser, __doc__)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
