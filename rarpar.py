@@ -22,7 +22,7 @@ log = vlogging.getLogger(__name__, 'rarpar')
 WINRAR = winwhich.which('winrar')
 PAR2 = winwhich.which('phpar2')
 
-RESERVE_SPACE_ON_DRIVE = 30 * bytestring.GIBIBYTE
+RESERVE_SPACE_ON_DRIVE = 5 * bytestring.GIBIBYTE
 
 COMPRESSION_STORE = 0
 COMPRESSION_MAX = 5
