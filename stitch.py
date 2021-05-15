@@ -49,7 +49,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('image_files', nargs='+')
-    parser.add_argument('--output')
+    parser.add_argument('--output', required=True)
     parser.add_argument('--horizontal', action='store_true')
     parser.add_argument('--vertical', action='store_true')
     parser.add_argument('--gap', type=int, default=0)
