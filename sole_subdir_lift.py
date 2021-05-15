@@ -13,9 +13,6 @@ from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'sole_subdir_lift')
 
-def main(argv):
-    argv = vlogging.set_level_by_argv(log, argv)
-
 def sole_lift_argparse(args):
     starting = pathclass.Path(args.starting)
     queue = collections.deque()
