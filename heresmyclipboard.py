@@ -10,19 +10,20 @@ log = vlogging.getLogger(__name__, 'heresmyclipboard')
 
 site = flask.Flask(__name__)
 
+TEMPLATE = '''
+<html>
+<body>
+<pre>
+{{clip}}
+</pre>
+</body>
+</html>
+'''
+
 @site.route('/')
 def root():
     clip = pyperclip.paste()
-    template = '''
-    <html>
-    <body>
-    <pre>
-    {{clip}}
-    </pre>
-    </body>
-    </html>
-    '''
-    return flask.render_template_string(template, clip=clip)
+    return flask.render_template_string(TEMPLATE, clip=clip)
 
 def heresmyclipboard_argparse(args):
     log.info(f'Starting server on port {args.port}, pid={os.getpid()}')
