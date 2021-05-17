@@ -58,7 +58,6 @@ class SubtitleLine:
         srt += '\n' + self.text
         return srt
 
-
 class Point:
     def __init__(self, x, y=None):
         self.x = x
@@ -69,7 +68,6 @@ class Point:
 
     def __repr__(self):
         return f'Point({self.x}, {self.y})'
-
 
 def hms_to_seconds(hms):
     '''
@@ -137,7 +135,8 @@ def pointsync(input_filename, output_filename, input_landmarks):
         if old < 0 or new < 0:
             raise ValueError('No negative numbers!')
         if old in used_olds:
-            raise ValueError(f'Cant use the same old value {seconds_to_hms(old, force_hours=True)} twice.')
+            hms = seconds_to_hms(old, force_hours=True)
+            raise ValueError(f'Cant use the same old value {hms} twice.')
         used_olds.add(old)
         landmarks.append(Point(old, new))
     landmarks.sort()
@@ -177,7 +176,7 @@ def pointsync_argparse(args):
     input_filename = args.input_filename
     output_filename = args.output_filename
     if '.srt' not in output_filename:
-        raise ValueError('Output filename', output_filename)
+        raise ValueError('Output filename should be .srt.', output_filename)
 
     input_landmarks = args.landmarks
     return pointsync(input_filename, output_filename, input_landmarks)
