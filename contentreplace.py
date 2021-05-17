@@ -6,14 +6,17 @@ import re
 import sys
 
 from voussoirkit import interactive
+from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import spinal
+from voussoirkit import vlogging
 from voussoirkit import winglob
 
+log = vlogging.getLogger(__name__, 'contentreplace')
 
-def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=False):
-    f = open(filename, 'r', encoding='utf-8')
-    with f:
+def contentreplace(file, replace_from, replace_to, autoyes=False, do_regex=False):
+    file = pathclass.Path(file)
+    with file.open('r', encoding='utf-8') as f:
         content = f.read()
 
     if do_regex:
@@ -21,7 +24,7 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
     else:
         occurances = content.count(replace_from)
 
-    print(f'{filename}: Found {occurances} occurences.')
+    print(f'{file.absolute_path}: Found {occurances} occurences.')
     if occurances == 0:
         return
 
@@ -33,19 +36,17 @@ def contentreplace(filename, replace_from, replace_to, autoyes=False, do_regex=F
     else:
         content = content.replace(replace_from, replace_to)
 
-    f = open(filename, 'w', encoding='utf-8')
-    with f:
+    with file.open('w', encoding='utf-8') as f:
         f.write(content)
 
 @pipeable.ctrlc_return1
 def contentreplace_argparse(args):
     if args.recurse:
-        files = spinal.walk_generator('.')
+        files = spinal.walk('.', yield_files=True, yield_directories=False)
         files = (f for f in files if winglob.fnmatch(f.basename, args.filename_glob))
-        filenames = (f.absolute_path for f in files)
     else:
-        filenames = winglob.glob(args.filename_glob)
-        filenames = [f for f in filenames if os.path.isfile(f)]
+        files = pathclass.cwd().glob(args.filename_glob)
+        files = (f for f in files if f.is_file)
 
     if args.clip_prompt:
         replace_from = input('Ready from')
@@ -61,17 +62,21 @@ def contentreplace_argparse(args):
         else:
             replace_to = codecs.decode(args.replace_to, 'unicode_escape')
 
-    for filename in filenames:
-        print(filename)
-        contentreplace(
-            filename,
-            replace_from,
-            replace_to,
-            autoyes=args.autoyes,
-            do_regex=args.do_regex,
-        )
+    for file in files:
+        try:
+            contentreplace(
+                file,
+                replace_from,
+                replace_to,
+                autoyes=args.autoyes,
+                do_regex=args.do_regex,
+            )
+        except UnicodeDecodeError:
+            log.error('%s encountered unicode decode error.', file.absolute_path)
 
 def main(argv):
+    argv = vlogging.main_level_by_argv(argv)
+
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('filename_glob')
