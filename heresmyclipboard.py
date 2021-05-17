@@ -30,7 +30,7 @@ def heresmyclipboard_argparse(args):
     site.run(host='0.0.0.0', port=args.port)
 
 def main(argv):
-    argv = vlogging.set_level_by_argv(log, argv)
+    argv = vlogging.main_level_by_argv(argv)
 
     parser = argparse.ArgumentParser(description=__doc__)
 

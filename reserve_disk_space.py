@@ -57,7 +57,7 @@ def reserve_disk_space_argparse(args):
         return 1
 
 def main(argv):
-    argv = vlogging.set_level_by_argv(log, argv)
+    argv = vlogging.main_level_by_argv(argv)
 
     parser = argparse.ArgumentParser(description=__doc__)
 

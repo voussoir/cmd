@@ -47,7 +47,7 @@ def adbinstall_argparse(args):
         os.system(command)
 
 def main(argv):
-    argv = vlogging.set_level_by_argv(log, argv)
+    argv = vlogging.main_level_by_argv(argv)
 
     parser = argparse.ArgumentParser(description=__doc__)
 

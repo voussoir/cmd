@@ -528,7 +528,7 @@ def rarpar_argparse(args):
     return status
 
 def main(argv):
-    argv = vlogging.set_level_by_argv(log, argv)
+    argv = vlogging.main_level_by_argv(argv)
     (notify_context, argv) = operatornotify.main_log_context(argv, subject='rarpar warnings')
 
     parser = argparse.ArgumentParser(description=__doc__)
