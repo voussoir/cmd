@@ -12,7 +12,7 @@ from voussoirkit import spinal
 @pipeable.ctrlc_return1
 def inputrename_argparse(args):
     if args.recurse:
-        files = (file for file in spinal.walk_generator('.') if args.keyword in file.basename)
+        files = (file for file in spinal.walk('.') if args.keyword in file.basename)
     else:
         files = (file for file in pathclass.cwd().listdir() if args.keyword in file.basename)
     prev = None

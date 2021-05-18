@@ -17,7 +17,7 @@ from voussoirkit import pathclass
 
 def prune_dirs(starting):
     starting = pathclass.Path(starting)
-    walker = spinal.walk_generator(starting, yield_directories=True, yield_files=False)
+    walker = spinal.walk(starting, yield_directories=True, yield_files=False)
 
     double_check = set()
 

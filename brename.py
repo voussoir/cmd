@@ -60,7 +60,7 @@ def unicode_normalize(s):
 
 def brename(transformation, autoyes=False, do_naturalsort=False, recurse=False):
     if recurse:
-        walker = spinal.walk_generator('.', yield_files=True, yield_directories=True)
+        walker = spinal.walk('.', yield_files=True, yield_directories=True)
         olds = list(walker)
     else:
         olds = cwd.listdir()

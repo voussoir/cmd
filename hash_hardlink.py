@@ -35,7 +35,7 @@ def hash_hardlink_argparse(args):
         if path.is_file:
             files.append(path)
         elif path.is_dir:
-            files.extend(spinal.walk_generator(path))
+            files.extend(spinal.walk(path))
 
     inodes = set()
     hashes = {}

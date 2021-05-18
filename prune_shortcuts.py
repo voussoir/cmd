@@ -14,7 +14,7 @@ from voussoirkit import spinal
 
 def prune_shortcuts(recurse=False, autoyes=False):
     if recurse:
-        lnks = [file for file in spinal.walk_generator('.') if file.extension == 'lnk']
+        lnks = [file for file in spinal.walk('.') if file.extension == 'lnk']
     else:
         lnks = pathclass.cwd().glob('*.lnk')
 

@@ -9,7 +9,7 @@ from voussoirkit import interactive
 from voussoirkit import spinal
 
 def filepull(pull_from='.', autoyes=False):
-    files = list(spinal.walk_generator(pull_from))
+    files = list(spinal.walk(pull_from))
     cwd = os.getcwd()
     files = [f for f in files if os.path.split(f.absolute_path)[0] != cwd]
 

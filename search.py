@@ -165,7 +165,7 @@ def search(
         terms = {k: [x.lower() for x in v] for (k, v) in terms.items()}
 
     if text is None:
-        search_objects = spinal.walk_generator(
+        search_objects = spinal.walk(
             root_path,
             recurse=not local_only,
             yield_directories=True,

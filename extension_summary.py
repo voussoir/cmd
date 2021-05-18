@@ -4,7 +4,7 @@ from voussoirkit import spinal
 
 counts = collections.Counter()
 extensions = {}
-walker = spinal.walk_generator()
+walker = spinal.walk()
 for file in walker:
     extensions.setdefault(file.extension, []).append(file)
     counts[file.extension] += 1
