@@ -7,8 +7,8 @@ from voussoirkit import winglob
 for pattern in pipeable.go(skip_blank=True):
     for name in winglob.glob(pattern):
         if os.path.isfile(name):
-            pipeable.output(name)
+            pipeable.stdout(name)
             os.remove(name)
         elif os.path.isdir(name):
-            pipeable.output(name)
+            pipeable.stdout(name)
             shutil.rmtree(name)

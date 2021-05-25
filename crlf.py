@@ -21,7 +21,7 @@ def crlf(filename):
 def main(args):
     for line in pipeable.go(args, strip=True, skip_blank=True):
         for filename in winglob.glob(line):
-            pipeable.output(filename)
+            pipeable.stdout(filename)
             crlf(filename)
 
 if __name__ == '__main__':

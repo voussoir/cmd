@@ -10,7 +10,7 @@ def groupsof_argparse(args):
     chunks = gentools.chunk_generator(lines, args.chunk_size)
     for chunk in chunks:
         chunk = args.separator.join(chunk)
-        pipeable.output(chunk)
+        pipeable.stdout(chunk)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

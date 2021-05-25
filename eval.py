@@ -23,7 +23,7 @@ def random_hex(length=12):
 def eval_argparse(args):
     for line in pipeable.input(args.lines):
         x = line
-        pipeable.output(eval(args.eval_string))
+        pipeable.stdout(eval(args.eval_string))
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

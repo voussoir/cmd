@@ -12,7 +12,7 @@ def sorted_argparse(args):
         lines.sort()
 
     for line in lines:
-        pipeable.output(line)
+        pipeable.stdout(line)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

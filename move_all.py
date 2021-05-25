@@ -36,7 +36,7 @@ def moveall_argparse(args):
         return 1
 
     for (file, new_path) in pairs:
-        pipeable.output(new_path.absolute_path)
+        pipeable.stdout(new_path.absolute_path)
         shutil.move(file.absolute_path, new_path.absolute_path)
 
 def main(argv):

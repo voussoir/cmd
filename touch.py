@@ -15,11 +15,11 @@ def touch_argparse(args):
 
         if len(filenames) == 0 and not winglob.is_glob(pattern):
             open(pattern, 'a').close()
-            print(pattern)
+            pipeable.stdout(pattern)
 
         for filename in filenames:
             os.utime(filename)
-            print(filename)
+            pipeable.stdout(filename)
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

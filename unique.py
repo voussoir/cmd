@@ -8,7 +8,7 @@ def unique_argparse(args):
     seen = set()
     for line in lines:
         if line not in seen:
-            pipeable.output(line)
+            pipeable.stdout(line)
             seen.add(line)
 
 def main(argv):

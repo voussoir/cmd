@@ -72,7 +72,7 @@ def tempeditor_argparse(args):
     initial_text = '\n'.join(pipeable.input(args.initial_text)) if args.initial_text else None
     try:
         text = tempeditor(initial_text=initial_text)
-        pipeable.output(text)
+        pipeable.stdout(text)
         return 0
     except NoEditor as exc:
         pipeable.stderr(exc)
