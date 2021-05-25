@@ -31,11 +31,13 @@ def bitwise_or_argparse(args):
         log.fatal('Need at least two input files.')
         return 1
 
-    handles = [file.open('rb') for file in files]
-
     output = pathclass.Path(args.output)
     if output.is_dir:
         log.fatal('Output path "%s" is a directory.', args.output)
+        return 1
+
+    if any(output == file for file in files):
+        log.fatal('Output cannot be one of the inputs.')
         return 1
 
     if not output.exists:
@@ -45,6 +47,7 @@ def bitwise_or_argparse(args):
     elif not interactive.getpermission(f'Overwrite "{output.absolute_path}"?'):
         return 1
 
+    handles = [file.open('rb') for file in files]
     output_handle = output.open('wb')
     while True:
         chunk = 0
