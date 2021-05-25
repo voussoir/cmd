@@ -9,7 +9,7 @@ from voussoirkit import pipeable
 from voussoirkit import winglob
 
 def touch_argparse(args):
-    patterns = [pattern for arg in args.patterns for pattern in pipeable.input(arg)]
+    patterns = pipeable.input_many(args.patterns, skip_blank=True)
     for pattern in patterns:
         filenames = winglob.glob(pattern)
 
