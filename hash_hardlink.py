@@ -4,6 +4,7 @@ import os
 import send2trash
 import sys
 
+from voussoirkit import bytestring
 from voussoirkit import lazychain
 from voussoirkit import pathclass
 from voussoirkit import pipeable
@@ -25,7 +26,6 @@ def hash_file(file):
 @pipeable.ctrlc_return1
 def hash_hardlink_argparse(args):
     paths = [pathclass.Path(p) for p in pipeable.input_many(args.paths, strip=True, skip_blank=True)]
-
     drives = set(path.stat.st_dev for path in paths)
     if len(drives) != 1:
         raise ValueError('All paths must be on the same drive.')
@@ -40,9 +40,16 @@ def hash_hardlink_argparse(args):
     inodes = set()
     hashes = {}
 
+    if args.if_larger_than:
+        larger = bytestring.parsebytes(args.if_larger_than)
+    else:
+        larger = None
+
     for file in files:
         if file.stat.st_ino in inodes:
             # This file is already a hardlink of another file we've seen.
+            continue
+        if larger is not None and file.size < larger:
             continue
         inodes.add(file.stat.st_ino)
         h = hash_file(file)
@@ -64,6 +71,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('paths', nargs='+')
+    parser.add_argument('--if_larger_than', '--if-larger-than', default=None)
     parser.set_defaults(func=hash_hardlink_argparse)
 
     args = parser.parse_args(argv)
