@@ -27,11 +27,11 @@ def rejpg_argparse(args):
     for filename in files:
         print(''.join(c for c in filename if c in string.printable))
         bytesio = io.BytesIO()
-        i = PIL.Image.open(filename)
+        image = PIL.Image.open(filename)
 
-        i = imagetools.rotate_by_exif(i)
+        image = imagetools.rotate_by_exif(image)
 
-        i.save(bytesio, format='jpeg', quality=args.quality)
+        image.save(bytesio, format='jpeg', exif=image.info.get('exif', b''), quality=args.quality)
 
         bytesio.seek(0)
         new_bytes = bytesio.read()

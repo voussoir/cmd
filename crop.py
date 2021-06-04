@@ -3,22 +3,22 @@ import os
 from PIL import Image
 import sys
 
+from voussoirkit import pipeable
 from voussoirkit import winglob
 
 def crop(filename, crops, *, inplace=False):
-    print(crops)
-    i = Image.open(filename)
+    image = Image.open(filename)
     if len(crops) == 2:
-        crops.extend(i.size)
+        crops.extend(image.size)
 
-    if crops[0] < 0: crops[0] = i.size[0] + crops[0]
-    if crops[1] < 0: crops[1] = i.size[1] + crops[1]
-    if crops[2] < 0: crops[2] = i.size[0] + crops[2]
-    if crops[3] < 0: crops[3] = i.size[1] + crops[3]
-    if crops[2] == 0: crops[2] = i.size[0]
-    if crops[3] == 0: crops[3] = i.size[1]
+    if crops[0] < 0: crops[0] = image.size[0] + crops[0]
+    if crops[1] < 0: crops[1] = image.size[1] + crops[1]
+    if crops[2] < 0: crops[2] = image.size[0] + crops[2]
+    if crops[3] < 0: crops[3] = image.size[1] + crops[3]
+    if crops[2] == 0: crops[2] = image.size[0]
+    if crops[3] == 0: crops[3] = image.size[1]
 
-    i = i.crop(crops)
+    image = image.crop(crops)
     if inplace:
         newname = filename
     else:
@@ -26,8 +26,9 @@ def crop(filename, crops, *, inplace=False):
         suffix = f'_{suffix}'
         (base, extension) = os.path.splitext(filename)
         newname = base + suffix + extension
-    i.save(newname, quality=100)
 
+    pipeable.stdout(newname)
+    image.save(newname, exif=image.info.get('exif', b''), quality=100)
 
 def crop_argparse(args):
     filenames = winglob.glob(args.pattern)

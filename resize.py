@@ -5,7 +5,11 @@ import sys
 
 from voussoirkit import imagetools
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 from voussoirkit import winglob
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__, 'resize')
 
 def resize(
         filename,
@@ -19,9 +23,9 @@ def resize(
         quality=100,
     ):
     file = pathclass.Path(filename)
-    i = Image.open(file.absolute_path)
+    image = Image.open(file.absolute_path)
 
-    (image_width, image_height) = i.size
+    (image_width, image_height) = image.size
 
     if new_x is not None and new_y is not None:
         pass
@@ -46,11 +50,11 @@ def resize(
             only_shrink=only_shrink,
         )
 
-    print(i.size, new_x, new_y)
+    log.debug('Resizing %s to %dx%d.', file.absolute_path, new_x, new_y)
     if nearest_neighbor:
-        i = i.resize( (new_x, new_y), Image.NEAREST)
+        image = image.resize( (new_x, new_y), Image.NEAREST)
     else:
-        i = i.resize( (new_x, new_y), Image.ANTIALIAS)
+        image = image.resize( (new_x, new_y), Image.ANTIALIAS)
 
     if inplace:
         new_name = file
@@ -61,10 +65,10 @@ def resize(
         new_name = file.parent.with_child(new_name)
 
     if new_name.extension == '.jpg':
-        i = i.convert('RGB')
+        image = image.convert('RGB')
 
-    i.save(new_name.absolute_path, quality=quality)
-
+    pipeable.output(new_name.absolute_path)
+    image.save(new_name.absolute_path, exif=image.info.get('exif', b''), quality=quality)
 
 def resize_argparse(args):
     filenames = winglob.glob(args.pattern)
@@ -81,6 +85,8 @@ def resize_argparse(args):
         )
 
 def main(argv):
+    argv = vlogging.main_level_by_argv(argv)
+
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('pattern')

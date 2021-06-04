@@ -18,9 +18,10 @@ def grayscale(filename, *, inplace=False):
         basename += '_gray'
         new_filename = filename.parent.with_child(basename).add_extension(filename.extension)
 
-    image = PIL.Image.open(filename.absolute_path).convert('LA')
-    print(f'{new_filename.relative_path}')
-    image.save(new_filename.absolute_path)
+    image = PIL.Image.open(filename.absolute_path)
+    image = image.convert('LA').convert(image.mode)
+    print(f'{new_filename.absolute_path}')
+    image.save(new_filename.absolute_path, exif=image.info.get('exif', b''))
 
 def grayscale_argparse(args):
     filenames = winglob.glob(args.pattern)
