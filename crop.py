@@ -1,13 +1,13 @@
 import argparse
 import os
-from PIL import Image
+import PIL.Image
 import sys
 
 from voussoirkit import pipeable
 from voussoirkit import winglob
 
 def crop(filename, crops, *, inplace=False):
-    image = Image.open(filename)
+    image = PIL.Image.open(filename)
     if len(crops) == 2:
         crops.extend(image.size)
 

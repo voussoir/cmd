@@ -1,6 +1,6 @@
 import argparse
 import os
-from PIL import Image
+import PIL.Image
 import sys
 
 from voussoirkit import imagetools
@@ -23,7 +23,7 @@ def resize(
         quality=100,
     ):
     file = pathclass.Path(filename)
-    image = Image.open(file.absolute_path)
+    image = PIL.Image.open(file.absolute_path)
 
     (image_width, image_height) = image.size
 
@@ -52,9 +52,9 @@ def resize(
 
     log.debug('Resizing %s to %dx%d.', file.absolute_path, new_x, new_y)
     if nearest_neighbor:
-        image = image.resize( (new_x, new_y), Image.NEAREST)
+        image = image.resize( (new_x, new_y), PIL.Image.NEAREST)
     else:
-        image = image.resize( (new_x, new_y), Image.ANTIALIAS)
+        image = image.resize( (new_x, new_y), PIL.Image.ANTIALIAS)
 
     if inplace:
         new_name = file

@@ -86,14 +86,12 @@
 # |________|______________|_______________________________________________________|
 
 import os
+import PIL.Image
 import sys
-from PIL import Image
-
 
 ICO_HEADER_LENGTH = 6
 ICON_DIRECTORY_ENTRY_LENGTH = 16
 BMP_HEADER_LENGTH = 40
-
 
 def chunk_sequence(sequence, chunk_length, allow_incomplete=True):
     '''
@@ -135,10 +133,10 @@ def little(x, length):
     return x.to_bytes(length, byteorder='little')
 
 def load_image(filename):
-    image = Image.open(filename)
+    image = PIL.Image.open(filename)
     if min(image.size) > 256:
         (w, h) = image.size
-        image = image.resize(fit_into_bounds(w, h, 256, 256), resample=Image.ANTIALIAS)
+        image = image.resize(fit_into_bounds(w, h, 256, 256), resample=PIL.Image.ANTIALIAS)
     image = image.convert('RGBA')
     return image
 
