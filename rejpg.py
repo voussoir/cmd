@@ -29,9 +29,9 @@ def rejpg_argparse(args):
         bytesio = io.BytesIO()
         image = PIL.Image.open(filename)
 
-        image = imagetools.rotate_by_exif(image)
+        (image, exif) = imagetools.rotate_by_exif(image)
 
-        image.save(bytesio, format='jpeg', exif=image.info.get('exif', b''), quality=args.quality)
+        image.save(bytesio, format='jpeg', exif=exif, quality=args.quality)
 
         bytesio.seek(0)
         new_bytes = bytesio.read()
