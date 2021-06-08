@@ -25,7 +25,7 @@ def rejpg_argparse(args):
     bytes_saved = 0
     remaining_size = 0
     for filename in files:
-        print(''.join(c for c in filename if c in string.printable))
+        print(filename)
         bytesio = io.BytesIO()
         image = PIL.Image.open(filename)
 
