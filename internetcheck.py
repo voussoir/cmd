@@ -4,6 +4,10 @@ import sys
 import time
 
 from voussoirkit import hms
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__, 'internetcheck')
+vlogging.getLogger('threadpool').setLevel(vlogging.WARNING)
 
 sql = sqlite3.connect('internetcheck.db')
 cur = sql.cursor()
@@ -30,16 +34,18 @@ def percentage(items):
     return trues / len(items)
 
 def ping_lan():
+    ip = '192.168.1.1'
+    log.debug('Checking LAN at %s.', ip)
     try:
         socket.setdefaulttimeout(1)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(('192.168.1.1', 80))
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((ip, 80))
         return True
     except socket.error:
         return False
 
 def check_dns():
     def check(domain):
-        # print(domain)
+        log.debug('Checking DNS for %s.', domain)
         try:
             socket.getaddrinfo(domain, 53)
             return True
@@ -62,7 +68,7 @@ def check_dns():
 
 def check_ip():
     def check(ip):
-        # print(ip)
+        log.debug('Checking IP %s.', ip)
         try:
             socket.setdefaulttimeout(2)
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(('104.43.253.214', 80))
@@ -135,7 +141,12 @@ def check_forever():
             time.sleep(20)
 
 def main(argv):
-    check_forever()
+    argv = vlogging.main_level_by_argv(argv)
+
+    try:
+        check_forever()
+    except KeyboardInterrupt:
+        pass
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
