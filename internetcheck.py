@@ -4,6 +4,7 @@ import sys
 import time
 
 from voussoirkit import hms
+from voussoirkit import threadpool
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'internetcheck')
@@ -28,6 +29,7 @@ cur.executescript(DB_INIT)
 
 down = False
 outage_started = None
+thread_pool = threadpool.ThreadPool(10)
 
 def percentage(items):
     trues = sum(bool(i) for i in items)
@@ -63,7 +65,10 @@ def check_dns():
         'spectrum.com',
         'youtube.com',
     ]
-    checks = [check(name) for name in names]
+    thread_pool.pause()
+    jobs = [{'function': check, 'args': [name]} for name in names]
+    thread_pool.add_many(jobs)
+    checks = [job.value for job in thread_pool.result_generator()]
     return percentage(checks)
 
 def check_ip():
@@ -87,7 +92,10 @@ def check_ip():
         '35.165.194.49',
         '69.252.80.75',
     ]
-    checks = [check(ip) for ip in ips]
+    thread_pool.pause()
+    jobs = [{'function': check, 'args': [ip]} for ip in ips]
+    thread_pool.add_many(jobs)
+    checks = [job.value for job in thread_pool.result_generator()]
     return percentage(checks)
 
 def set_down(lan_ok, dns_ok, ip_ok):
