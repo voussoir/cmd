@@ -1,0 +1,10 @@
+# pip install -r voussoir.pips
+
+bcrypt
+bs4
+flask
+gevent
+requests
+send2trash
+tenacity
+voussoirkit
