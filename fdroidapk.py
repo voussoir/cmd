@@ -116,8 +116,8 @@ def fpk_argparse(args):
 
     return return_status
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
     (notify_context, argv) = operatornotify.main_log_context(argv, subject='fdroidapk warnings')
 
     parser = argparse.ArgumentParser(description=__doc__)

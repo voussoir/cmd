@@ -131,9 +131,8 @@ def ffstreams_argparse(args):
                 moveto=args.moveto,
             )
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input_filename', nargs='+')
     parser.add_argument('--moveto', default=None)

@@ -43,9 +43,8 @@ def stitch_argparse(args):
     log.info(args.output)
     final_image.save(args.output)
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('image_files', nargs='+')

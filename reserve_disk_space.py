@@ -56,9 +56,8 @@ def reserve_disk_space_argparse(args):
         log.fatal('Only %s available out of %s.', free, reserve)
         return 1
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('reserve')

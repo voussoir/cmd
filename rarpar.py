@@ -527,8 +527,8 @@ def rarpar_argparse(args):
 
     return status
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
     (notify_context, argv) = operatornotify.main_log_context(argv, subject='rarpar warnings')
 
     parser = argparse.ArgumentParser(description=__doc__)

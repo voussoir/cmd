@@ -55,9 +55,8 @@ def sole_lift_argparse(args):
         os.rmdir(temp_dir.absolute_path)
         queue.append(directory.parent)
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('starting', nargs='?', default='.')

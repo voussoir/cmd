@@ -148,9 +148,8 @@ def check_forever():
         else:
             time.sleep(20)
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     try:
         check_forever()
     except KeyboardInterrupt:

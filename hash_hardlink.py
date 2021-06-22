@@ -65,9 +65,8 @@ def hash_hardlink_argparse(args):
             send2trash.send2trash(follower.absolute_path)
             os.link(leader.absolute_path, follower.absolute_path)
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('paths', nargs='+')

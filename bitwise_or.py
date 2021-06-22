@@ -63,9 +63,8 @@ def bitwise_or_argparse(args):
         output_handle.write(chunk.to_bytes(length, 'big'))
     pipeable.stdout(output.absolute_path)
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('files', nargs='+')

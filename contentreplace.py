@@ -74,9 +74,8 @@ def contentreplace_argparse(args):
         except UnicodeDecodeError:
             log.error('%s encountered unicode decode error.', file.absolute_path)
 
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.main_level_by_argv(argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('filename_glob')
