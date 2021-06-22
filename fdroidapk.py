@@ -35,6 +35,7 @@ from voussoirkit import betterhelp
 from voussoirkit import downloady
 from voussoirkit import operatornotify
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'fdroidapk')
@@ -72,6 +73,7 @@ def _retry_request(f, tries=5):
             time.sleep(bo.next())
         tries -= 1
 
+@pipeable.ctrlc_return1
 def fpk_argparse(args):
     destination = pathclass.Path(args.destination)
     destination.assert_is_directory()
