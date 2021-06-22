@@ -116,10 +116,9 @@ def fpk_argparse(args):
 
     return return_status
 
+@operatornotify.main_decorator(subject='fdroidapk.py')
 @vlogging.main_decorator
 def main(argv):
-    (notify_context, argv) = operatornotify.main_log_context(argv, subject='fdroidapk warnings')
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('packages', nargs='+')
@@ -127,8 +126,7 @@ def main(argv):
     parser.add_argument('--destination', default='.')
     parser.set_defaults(func=fpk_argparse)
 
-    with notify_context:
-        return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.single_main(argv, parser, __doc__)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

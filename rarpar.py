@@ -527,10 +527,9 @@ def rarpar_argparse(args):
 
     return status
 
+@operatornotify.main_decorator(subject='rarpar.py')
 @vlogging.main_decorator
 def main(argv):
-    (notify_context, argv) = operatornotify.main_log_context(argv, subject='rarpar warnings')
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('path')
@@ -550,8 +549,7 @@ def main(argv):
     parser.add_argument('--dry', action='store_true')
     parser.set_defaults(func=rarpar_argparse)
 
-    with notify_context:
-        return betterhelp.single_main(argv, parser, DOCSTRING)
+    return betterhelp.single_main(argv, parser, DOCSTRING)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
