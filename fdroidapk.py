@@ -85,8 +85,8 @@ def fpk_argparse(args):
 
         try:
             apk_url = _retry_request(lambda: get_apk_url(package))
-        except Exception:
-            log.error('%s was unable to get apk url.', package)
+        except Exception as exc:
+            log.error('%s was unable to get apk url (%s).', package, exc)
             return_status = 1
             continue
 
@@ -111,8 +111,8 @@ def fpk_argparse(args):
                 callback_progress=downloady.Progress2,
                 timeout=30,
             ))
-        except Exception:
-            log.error('%s was unable to download apk.', package)
+        except Exception as exc:
+            log.error('%s was unable to download apk (%s).', package, exc)
             return_status = 1
             continue
 
