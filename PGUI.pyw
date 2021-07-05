@@ -28,6 +28,7 @@ class PGUILauncher(tkinter.ttk.Frame):
         self.filter_entry = tkinter.Entry(self, textvariable=self.filter_var)
         self.filter_entry.grid(row=0, column=0, columnspan=999, sticky='ew')
         self.filter_entry.bind('<Return>', self.launch_filtered)
+        self.filter_entry.bind('<Escape>', self.quit)
         self.filter_entry.focus()
 
         x = 0
@@ -79,6 +80,9 @@ class PGUILauncher(tkinter.ttk.Frame):
         command = f'"{shortcut.absolute_path}"'
         subprocess.Popen(command, shell=True)
         self.quit()
+
+    def quit(self, *args):
+        return super().quit()
 
 
 def main(argv):
