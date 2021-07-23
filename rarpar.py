@@ -499,8 +499,10 @@ def rarpar_argparse(args):
     compression = args.compression.lower() if args.compression is not None else None
     if compression == 'max':
         compression = COMPRESSION_MAX
-    if compression == 'store':
+    elif compression == 'store':
         compression = COMPRESSION_STORE
+    else:
+        compression = int(compression)
 
     status = 0
     try:
