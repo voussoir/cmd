@@ -54,7 +54,10 @@ import sys
 from voussoirkit import betterhelp
 from voussoirkit import dotdict
 from voussoirkit import pathclass
+from voussoirkit import vlogging
 from voussoirkit import winwhich
+
+log = vlogging.getLogger(__name__, 'gitcheckup')
 
 GIT = winwhich.which('git')
 
@@ -80,6 +83,7 @@ class NoUpstreamBranch(GitCheckupException):
 # HELPERS
 ################################################################################
 def check_output(command):
+    log.debug(subproctools.format_command(command))
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
     output = output.decode().strip()
     return output
@@ -260,6 +264,7 @@ def gitcheckup(
         do_push=False,
         run_command=None,
     ):
+    log.debug('gitcheckup in %s', directory.absolute_path)
     os.chdir(directory.absolute_path)
 
     if run_command:
@@ -332,6 +337,7 @@ def gitcheckup_argparse(args):
         sys.stdout.write(exc.output.decode())
         return 1
 
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
