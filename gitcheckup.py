@@ -54,6 +54,7 @@ import sys
 from voussoirkit import betterhelp
 from voussoirkit import dotdict
 from voussoirkit import pathclass
+from voussoirkit import subproctools
 from voussoirkit import vlogging
 from voussoirkit import winwhich
 
@@ -177,9 +178,24 @@ def git_pull():
     command = [GIT, 'pull', '--all']
     return check_output(command)
 
-def git_push():
+def git_push_all():
+    remotes = git_remotes()
+    branch = git_current_branch()
+    for remote in remotes:
+        git_push(remote, branch)
+
+def git_push(remote=None, branch=None):
     command = [GIT, 'push']
+    if remote:
+        command.append(remote)
+    if branch:
+        command.append(branch)
     return check_output(command)
+
+def git_remotes():
+    command = [GIT, 'remote']
+    remotes = check_output(command).splitlines()
+    return remotes
 
 def git_rev_parse(rev):
     command = [GIT, 'rev-parse', rev]
@@ -278,7 +294,7 @@ def gitcheckup(
             git_pull()
 
         if do_push:
-            git_push()
+            git_push_all()
 
     commit_details = checkup_committed()
     push_details = checkup_pushed()
