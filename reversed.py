@@ -4,12 +4,11 @@ Print input lines in reverse order.
 import argparse
 import sys
 
-from voussoirkit import clipext
+from voussoirkit import pipeable
 
 def reverse_argparse(args):
-    lines = clipext.resolve(args.lines)
-    lines = lines.splitlines()
-    lines = reversed(lines)
+    lines = list(pipeable.input(args.lines))
+    lines.reverse()
     print('\n'.join(lines))
 
 def main(argv):

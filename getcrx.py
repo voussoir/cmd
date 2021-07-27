@@ -8,7 +8,7 @@ import time
 import traceback
 import zipfile
 
-from voussoirkit import clipext
+from voussoirkit import pipeable
 from voussoirkit import interactive
 
 FILENAME_BADCHARS = '\\/:*?<>|"'
@@ -97,7 +97,7 @@ def getcrx_argparse(args):
     extension_ids = []
 
     if len(args.extension_ids) == 1:
-        extension_ids.extend(clipext.resolve(args.extension_ids[0], split_lines=True))
+        extension_ids.extend(pipeable.input(args.extension_ids[0]))
 
     elif args.extension_ids:
         extension_ids.extend(args.extension_ids)

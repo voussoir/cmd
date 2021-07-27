@@ -5,9 +5,9 @@ import sys
 import json
 import requests
 
-from voussoirkit import clipext
+from voussoirkit import pipeable
 
-urls = clipext.resolve(sys.argv[1], split_lines=True)
+urls = pipeable.input(sys.argv[1], skip_blank=True, strip=True)
 for url in urls:
     page = requests.head(url)
     headers = dict(page.headers)
