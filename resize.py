@@ -1,13 +1,45 @@
+'''
+resize
+======
+
+Resize image files.
+
+pattern:
+    Glob pattern for input files.
+
+new_w,
+new_h:
+    New dimensions for the image. If either of these is 0, then that
+    dimension will be calculated by resizing the other side while keeping the
+    aspect ratio.
+
+--inplace:
+    Overwrite the input files, instead of creating _WxH names.
+
+--nearest:
+    Use nearest-neighbor scaling to preserve pixelated images.
+
+--only_shrink:
+    If the input image is smaller than the requested dimensions, do nothing.
+    Useful when globbing in a directory with many differently sized images.
+
+--scale X:
+    Use this option instead of new_w, new_h. Scale the image by factor X.
+
+--quality X:
+    JPEG compression quality.
+'''
 import argparse
 import os
 import PIL.Image
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import imagetools
 from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import winglob
 from voussoirkit import vlogging
+from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'resize')
 
@@ -98,8 +130,7 @@ def main(argv):
     parser.add_argument('--quality', type=int, default=100)
     parser.set_defaults(func=resize_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.single_main(argv, parser, __doc__)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
