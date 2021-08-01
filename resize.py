@@ -13,8 +13,8 @@ log = vlogging.getLogger(__name__, 'resize')
 
 def resize(
         filename,
-        new_x=None,
-        new_y=None,
+        new_w=None,
+        new_h=None,
         *,
         inplace=False,
         nearest_neighbor=False,
@@ -27,39 +27,39 @@ def resize(
 
     (image_width, image_height) = image.size
 
-    if new_x is not None and new_y is not None:
+    if new_w is not None and new_h is not None:
         pass
     elif scale:
-        new_x = int(image_width * scale)
-        new_y = int(image_height * scale)
+        new_w = int(image_width * scale)
+        new_h = int(image_height * scale)
 
-    if new_x == 0:
-        (new_x, new_y) = imagetools.fit_into_bounds(
+    if new_w == 0:
+        (new_w, new_h) = imagetools.fit_into_bounds(
             image_width,
             image_height,
             10000000,
-            new_y,
+            new_h,
             only_shrink=only_shrink,
         )
-    if new_y == 0:
-        (new_x, new_y) = imagetools.fit_into_bounds(
+    if new_h == 0:
+        (new_w, new_h) = imagetools.fit_into_bounds(
             image_width,
             image_height,
-            new_x,
+            new_w,
             10000000,
             only_shrink=only_shrink,
         )
 
-    log.debug('Resizing %s to %dx%d.', file.absolute_path, new_x, new_y)
+    log.debug('Resizing %s to %dx%d.', file.absolute_path, new_w, new_h)
     if nearest_neighbor:
-        image = image.resize( (new_x, new_y), PIL.Image.NEAREST)
+        image = image.resize( (new_w, new_h), PIL.Image.NEAREST)
     else:
-        image = image.resize( (new_x, new_y), PIL.Image.ANTIALIAS)
+        image = image.resize( (new_w, new_h), PIL.Image.ANTIALIAS)
 
     if inplace:
         new_name = file
     else:
-        suffix = '_{width}x{height}'.format(width=new_x, height=new_y)
+        suffix = '_{width}x{height}'.format(width=new_w, height=new_h)
         base = file.replace_extension('').basename
         new_name = base + suffix + file.extension.with_dot
         new_name = file.parent.with_child(new_name)
@@ -75,8 +75,8 @@ def resize_argparse(args):
     for filename in filenames:
         resize(
             filename,
-            args.new_x,
-            args.new_y,
+            args.new_w,
+            args.new_h,
             inplace=args.inplace,
             nearest_neighbor=args.nearest_neighbor,
             only_shrink=args.only_shrink,
@@ -89,8 +89,8 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('pattern')
-    parser.add_argument('new_x', nargs='?', type=int, default=None)
-    parser.add_argument('new_y', nargs='?', type=int, default=None)
+    parser.add_argument('new_w', nargs='?', type=int, default=None)
+    parser.add_argument('new_h', nargs='?', type=int, default=None)
     parser.add_argument('--inplace', action='store_true')
     parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
     parser.add_argument('--only_shrink', '--only-shrink', action='store_true')
