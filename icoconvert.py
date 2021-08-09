@@ -89,6 +89,8 @@ import os
 import PIL.Image
 import sys
 
+from voussoirkit import imagetools
+
 ICO_HEADER_LENGTH = 6
 ICON_DIRECTORY_ENTRY_LENGTH = 16
 BMP_HEADER_LENGTH = 40
@@ -116,27 +118,14 @@ def chunk_sequence(sequence, chunk_length, allow_incomplete=True):
 
     return chunks
 
-def fit_into_bounds(iw, ih, fw, fh):
-    '''
-    Given the w+h of the image and the w+h of the frame,
-    return new w+h that fits the image into the frame
-    while maintaining the aspect ratio and leaving blank space
-    everywhere else
-    '''
-    ratio = min(fw/iw, fh/ih)
-
-    w = int(iw * ratio)
-    h = int(ih * ratio)
-    return (w, h)
-
 def little(x, length):
     return x.to_bytes(length, byteorder='little')
 
 def load_image(filename):
     image = PIL.Image.open(filename)
-    if min(image.size) > 256:
-        (w, h) = image.size
-        image = image.resize(fit_into_bounds(w, h, 256, 256), resample=PIL.Image.ANTIALIAS)
+    (w, h) = image.size
+    (new_w, new_h) = imagetools.fit_into_bounds(w, h, 256, 256, only_shrink=True)
+    image = image.resize((new_w, new_h), resample=PIL.Image.ANTIALIAS)
     image = image.convert('RGBA')
     return image
 
