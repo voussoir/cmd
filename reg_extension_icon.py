@@ -23,6 +23,9 @@ ico_file:
 --name:
     A human-friendly name string which will show on Explorer under the "Type"
     column and in the properties dialog.
+
+--shellopen:
+    A command-line string to use as the shell\open\command
 '''
 import argparse
 import sys
@@ -32,7 +35,13 @@ from voussoirkit import betterhelp
 from voussoirkit import interactive
 from voussoirkit import pathclass
 
-def extension_registry(ico_file, extension=None, human_name=None):
+def extension_registry(
+        ico_file,
+        extension=None,
+        human_name=None,
+        shellopen=None,
+        autoyes=False,
+    ):
     if ico_file.extension != 'ico':
         raise ValueError('Must provide a .ico file.')
 
@@ -52,9 +61,14 @@ def extension_registry(ico_file, extension=None, human_name=None):
     if human_name:
         prompt.append(f'Set {hash_ex} = {human_name}')
 
+    if shellopen:
+        prompt.append(f'Set {hash_ex}\\shell\\open\\command = {shellopen}')
+
     prompt = '\n'.join(prompt)
 
-    if not interactive.getpermission(prompt):
+    print(prompt)
+
+    if not autoyes and not interactive.getpermission('Okay?'):
         return
 
     dot_key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, dot_ex)
@@ -63,6 +77,10 @@ def extension_registry(ico_file, extension=None, human_name=None):
     hash_key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, hash_ex)
     if human_name:
         winreg.SetValueEx(hash_key, '', 0, winreg.REG_SZ, human_name)
+
+    if shellopen:
+        command = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, f'{hash_ex}\\shell\\open\\command')
+        winreg.SetValueEx(command, '', 0, winreg.REG_SZ, shellopen)
 
     icon_key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, f'{hash_ex}\\DefaultIcon')
     winreg.SetValueEx(icon_key, '', 0, winreg.REG_SZ, ico_file.absolute_path)
@@ -74,6 +92,8 @@ def extension_registry_argparse(args):
         ico_file=pathclass.Path(args.ico_file),
         extension=args.extension,
         human_name=args.name,
+        shellopen=args.shellopen,
+        autoyes=args.autoyes,
     )
 
 def main(argv):
@@ -82,6 +102,8 @@ def main(argv):
     parser.add_argument('ico_file')
     parser.add_argument('--extension', default=None)
     parser.add_argument('--name', default=None)
+    parser.add_argument('--shellopen', default=None)
+    parser.add_argument('--yes', dest='autoyes', action='store_true')
     parser.set_defaults(func=extension_registry_argparse)
 
     return betterhelp.single_main(argv, parser, __doc__)
