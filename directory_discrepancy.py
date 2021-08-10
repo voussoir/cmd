@@ -45,10 +45,8 @@ def directory_discrepancy_argparse(args):
     for discrepancy in sorted(files2.difference(files1)):
         print(discrepancy)
 
-
+@vlogging.main_decorator
 def main(argv):
-    argv = vlogging.set_level_by_argv(log, argv)
-
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('dir1')
