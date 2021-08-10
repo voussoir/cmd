@@ -154,7 +154,8 @@ def write_setup(setup_py):
 ################################################################################
 def git_assert_current_greater_than_latest(latest_release_version, new_version):
     if latest_release_version >= semver_split(new_version):
-        raise VersionOutOfOrder(f'New version should be {new_version} but {latest_release_version} already exists.')
+        msg = f'New version should be {new_version} but {latest_release_version} already exists.'
+        raise VersionOutOfOrder(msg)
 
 def git_assert_no_stashes():
     command = [GIT, 'stash', 'list']

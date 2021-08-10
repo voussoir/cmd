@@ -6,10 +6,8 @@ import sys
 
 from voussoirkit import passwordy
 from voussoirkit import pathclass
-from voussoirkit import pipeable
 from voussoirkit import spinal
 from voussoirkit import vlogging
-from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'sole_subdir_lift')
 

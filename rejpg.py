@@ -6,7 +6,6 @@ import io
 import os
 import PIL.Image
 import PIL.ImageFile
-import string
 import sys
 
 from voussoirkit import bytestring

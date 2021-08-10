@@ -27,7 +27,7 @@ def adbinstall_argparse(args):
     patterns = pipeable.input_many(args.apks, skip_blank=True, strip=True)
     apks = [file for pattern in patterns for file in winglob.glob(pattern)]
     installs = []
-    for apk in args.apks:
+    for apk in apks:
         apk = pathclass.Path(apk)
         if apk.is_dir:
             files = apk.glob('*.apk')

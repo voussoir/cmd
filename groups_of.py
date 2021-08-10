@@ -6,7 +6,7 @@ from voussoirkit import pipeable
 
 def groupsof_argparse(args):
     lines = pipeable.input(args.source, read_files=True, strip=True, skip_blank=True)
-    
+
     chunks = gentools.chunk_generator(lines, args.chunk_size)
     for chunk in chunks:
         chunk = args.separator.join(chunk)

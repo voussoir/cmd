@@ -30,7 +30,6 @@ new_h:
     JPEG compression quality.
 '''
 import argparse
-import os
 import PIL.Image
 import sys
 

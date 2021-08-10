@@ -11,7 +11,6 @@ flags:
 --recurse:
     Also check subdirectories.
 '''
-import os
 import argparse
 import sys
 

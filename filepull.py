@@ -23,7 +23,11 @@ def filepull(pull_from='.', autoyes=False):
         duplicate_count.setdefault(basename, [])
         duplicate_count[basename].append(f.absolute_path)
 
-    duplicates = ['\n'.join(sorted(copies)) for (basename, copies) in duplicate_count.items() if len(copies) > 1]
+    duplicates = [
+        '\n'.join(sorted(copies))
+        for (basename, copies) in duplicate_count.items()
+        if len(copies) > 1
+    ]
     duplicates = sorted(duplicates)
     if len(duplicates) > 0:
         raise Exception('duplicate names:\n' + '\n'.join(duplicates))

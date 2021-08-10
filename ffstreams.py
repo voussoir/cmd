@@ -98,7 +98,14 @@ def subtitle_maps(input_file, moveto=None):
         moveto=moveto,
     )
 
-def ffstreams(input_file, do_videos=False, do_audios=False, do_subtitles=False, dry=False, moveto=None):
+def ffstreams(
+        input_file,
+        do_videos=False,
+        do_audios=False,
+        do_subtitles=False,
+        dry=False,
+        moveto=None,
+    ):
     maps = []
     if do_videos:
         maps.extend(video_maps(input_file, moveto=moveto))

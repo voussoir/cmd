@@ -1,7 +1,8 @@
 '''
-Copy your file every few minutes while you work on it, so that you can have snapshots of its history.
-Not a replacement for real version control but could be applicable in very simple situations or in
-cases where e.g. git is not.
+Copy your file every few minutes while you work on it, so that you can have
+snapshots of its history.
+Not a replacement for real version control but could be applicable in very
+simple situations or in cases where e.g. git is not.
 '''
 import argparse
 import hashlib

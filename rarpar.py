@@ -6,7 +6,6 @@ import shutil
 import subprocess
 import sys
 import time
-import traceback
 
 from voussoirkit import betterhelp
 from voussoirkit import bytestring
@@ -410,8 +409,10 @@ def rarpar(
 
     def move_rars():
         move(f'{workdir.absolute_path}\\{basename}*.rar', f'{moveto.absolute_path}')
+
     def move_revs():
         move(f'{workdir.absolute_path}\\{basename}*.rev', f'{moveto.absolute_path}')
+
     def move_pars():
         move(f'{workdir.absolute_path}\\{basename}*.par2', f'{moveto.absolute_path}')
 

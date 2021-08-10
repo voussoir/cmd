@@ -31,7 +31,13 @@ def clean_url_list(urls):
 
 def download_thread(url, filename, *, bytespersecond=None, headers=None, timeout=None):
     print(f' Starting "{filename}"')
-    downloady.download_file(url, filename, bytespersecond=bytespersecond, headers=headers, timeout=timeout)
+    downloady.download_file(
+        url,
+        filename,
+        bytespersecond=bytespersecond,
+        headers=headers,
+        timeout=timeout,
+    )
     print(f'+Finished "{filename}"')
 
 def remove_finished(threads):
