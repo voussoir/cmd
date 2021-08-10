@@ -31,6 +31,9 @@ import sys
 from voussoirkit import betterhelp
 from voussoirkit import pathclass
 from voussoirkit import winwhich
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__, 'svgrender')
 
 def svgrender(filepath, scales, destination, scale_suffix=True, axis='x'):
     if isinstance(scales, int):
@@ -63,8 +66,12 @@ def svgrender(filepath, scales, destination, scale_suffix=True, axis='x'):
 
         inkscape = winwhich.which('inkscape')
         command = inkscape + ' "{svg}" --export-png="{png}" {dimension} --export-area-page'
-        command = command.format(svg=svg_path.absolute_path, png=png_path.absolute_path, dimension=dimension)
-        #print(command)
+        command = command.format(
+            svg=svg_path.absolute_path,
+            png=png_path.absolute_path,
+            dimension=dimension,
+        )
+        log.debug(command)
         status = os.system(command)
         if status:
             print('Uh oh...')
@@ -81,6 +88,7 @@ def svgrender_argparse(args):
             axis='y' if args.y else 'x',
         )
 
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
