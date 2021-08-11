@@ -22,6 +22,7 @@ import textwrap
 import time
 
 from voussoirkit import interactive
+from voussoirkit import niceprints
 from voussoirkit import passwordy
 from voussoirkit import vlogging
 from voussoirkit import winwhich
@@ -358,15 +359,7 @@ def pypi_release(do_tag=False, versionbump='patch'):
 
     (remote, branch) = git_current_remote_branch()
 
-    def linebreak():
-        cli_width = shutil.get_terminal_size()[0]
-        line = '#' * (cli_width - 1)
-        line += '\r'
-        line += f'# {name} {new_version} '
-        line = f'\n{line}\n'
-        slowprint(line)
-
-    linebreak()
+    print(niceprints.solid_hash_header(f'{name} {new_version}'))
 
     slowprint(f'Upgrading {name} from {old_version} --> {new_version}.')
     slowprint()
@@ -387,7 +380,7 @@ def pypi_release(do_tag=False, versionbump='patch'):
 
     slowprint(f'Release will be pushed to {remote} {branch}.')
 
-    linebreak()
+    print(niceprints.solid_hash_header(f'{name} {new_version}'))
 
     if not interactive.getpermission(f'READY TO RELEASE {name} {new_version}.'):
         return
