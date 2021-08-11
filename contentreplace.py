@@ -10,7 +10,6 @@ from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import spinal
 from voussoirkit import vlogging
-from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'contentreplace')
 
@@ -41,12 +40,10 @@ def contentreplace(file, replace_from, replace_to, autoyes=False, do_regex=False
 
 @pipeable.ctrlc_return1
 def contentreplace_argparse(args):
-    if args.recurse:
-        files = spinal.walk('.', yield_files=True, yield_directories=False)
-        files = (f for f in files if winglob.fnmatch(f.basename, args.filename_glob))
-    else:
-        files = pathclass.cwd().glob(args.filename_glob)
-        files = (f for f in files if f.is_file)
+    files = spinal.walk(
+        glob_filenames=args.filename_glob,
+        recurse=args.recurse,
+    )
 
     if args.clip_prompt:
         replace_from = input('Ready from')

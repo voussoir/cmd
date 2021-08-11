@@ -6,11 +6,8 @@ from voussoirkit import pipeable
 from voussoirkit import winglob
 
 def nonempty_directories_argparse(args):
-    if args.patterns:
-        patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
-        directories = (pathclass.Path(d) for pattern in patterns for d in winglob.glob(pattern))
-    else:
-        directories = pathclass.cwd().listdir()
+    patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
+    directories = (pathclass.Path(d) for pattern in patterns for d in winglob.glob(pattern))
     directories = (d for d in directories if d.is_dir)
 
     for directory in directories:
@@ -20,7 +17,7 @@ def nonempty_directories_argparse(args):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('patterns', nargs='*')
+    parser.add_argument('patterns', nargs='*', default=['*'])
     parser.set_defaults(func=nonempty_directories_argparse)
 
     args = parser.parse_args(argv)
