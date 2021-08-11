@@ -1,3 +1,18 @@
+'''
+pypi_release
+============
+
+This script helps me release voussoirkit on pypi.
+
+--major,
+--minor,
+--patch:
+    Pass only one of these. The version number of your package will increase by
+    1 in either the major, minor, or patch.
+
+--do-tag:
+    If this argument is passed, a git tag will be added to the release commit.
+'''
 import argparse
 import re
 import shutil
@@ -8,15 +23,16 @@ import time
 
 from voussoirkit import interactive
 from voussoirkit import passwordy
+from voussoirkit import vlogging
 from voussoirkit import winwhich
+
+log = vlogging.getLogger(__name__, 'pypi_release')
 
 GIT = winwhich.which('git')
 PY = winwhich.which('py')
 TWINE = winwhich.which('twine')
 
 BUMP_PATTERN = r'Bump to version (\d+\.\d+\.\d+)\.'
-
-DEBUG = False
 
 class PypiReleaseError(Exception):
     pass
@@ -51,14 +67,12 @@ def bump_version(version, versionbump):
     version = f'{major}.{minor}.{patch}'
     return version
 
-def check_call(command, show_command=True):
-    if DEBUG or show_command:
-        print_command(command)
+def check_call(command):
+    log.debug(format_command(command))
     return subprocess.check_call(command)
 
-def check_output(command, show_command=True):
-    if DEBUG or show_command:
-        print_command(command)
+def check_output(command):
+    log.debug(format_command(command))
     return subprocess.check_output(command, stderr=subprocess.STDOUT)
 
 def pick_versionbump(major, minor, patch):
@@ -86,7 +100,7 @@ def pick_versionbump(major, minor, patch):
 
     return versionbump
 
-def print_command(command):
+def format_command(command):
     cmd = [('"%s"' % x) if (' ' in x or x == '') else x for x in command]
     cmd = ' '.join(cmd)
     cmd = cmd.strip()
@@ -159,23 +173,23 @@ def git_assert_current_greater_than_latest(latest_release_version, new_version):
 
 def git_assert_no_stashes():
     command = [GIT, 'stash', 'list']
-    output = check_output(command, show_command=False)
+    output = check_output(command)
     lines = output.strip().splitlines()
     if len(lines) != 0:
         raise DirtyState('Please ensure there are no stashes.')
 
 def git_assert_pushable():
     command = [GIT, 'fetch', '--all']
-    check_output(command, show_command=False)
+    check_call(command)
 
     command = [GIT, 'merge-base', '@', '@{u}']
-    merge_base = check_output(command, show_command=False).strip()
+    merge_base = check_output(command).strip()
 
     command = [GIT, 'rev-parse', '@']
-    my_head = check_output(command, show_command=False).strip()
+    my_head = check_output(command).strip()
 
     command = [GIT, 'rev-parse', '@{u}']
-    remote_head = check_output(command, show_command=False).strip()
+    remote_head = check_output(command).strip()
 
     if my_head == remote_head:
         pass
@@ -190,10 +204,10 @@ def git_assert_pushable():
 
 def git_commit_bump(version):
     command = [GIT, 'add', 'setup.py']
-    check_output(command)
+    check_call(command)
 
     command = [GIT, 'commit', '-m', f'Bump to version {version}.']
-    check_output(command)
+    check_call(command)
 
 def git_commits_since(commit, show, inclusive=False):
     if commit:
@@ -204,15 +218,15 @@ def git_commits_since(commit, show, inclusive=False):
         command = [GIT, '--no-pager', 'log', '--oneline', '--graph']
 
     if show:
-        check_call(command, show_command=False)
+        check_call(command)
     else:
-        output = check_output(command, show_command=False)
+        output = check_output(command)
         lines = output.strip().splitlines()
         return lines
 
 def git_current_remote_branch():
     command = [GIT, 'rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}']
-    output = check_output(command, show_command=False)
+    output = check_output(command)
     output = output.strip().decode()
     (remote, branch) = output.split('/')
     return (remote, branch)
@@ -241,7 +255,7 @@ def git_determine_latest_release():
 
 def git_latest_bump_commit():
     command = [GIT, 'log', '--oneline', '--no-abbrev-commit', '--grep', 'Bump to version *.', '-1']
-    output = check_output(command, show_command=False)
+    output = check_output(command)
     output = output.strip()
     if not output:
         return (None, None)
@@ -253,7 +267,7 @@ def git_latest_bump_commit():
 
 def git_latest_tagged_commit():
     command = [GIT, 'log', '--oneline', '--no-abbrev-commit', '--tags=v*.*.*', '-1']
-    output = check_output(command, show_command=False)
+    output = check_output(command)
     output = output.strip()
     if not output:
         return (None, None)
@@ -273,15 +287,15 @@ def git_latest_tagged_commit():
 
 def git_push(remote, branch):
     command = [GIT, 'push', remote, branch]
-    check_output(command)
+    check_call(command)
 
 def git_push_tag(remote, tag):
     command = [GIT, 'push', remote, tag]
-    check_output(command)
+    check_call(command)
 
 def git_show_commit(commit):
     command = [GIT, 'show', '--oneline', '-s', commit]
-    check_call(command, show_command=False)
+    check_call(command)
 
 def git_stash_push():
     token = passwordy.urandom_hex(32)
@@ -296,15 +310,15 @@ def git_stash_push():
 
 def git_stash_restore():
     command = [GIT, 'stash', 'pop']
-    output = check_output(command)
+    check_call(command)
 
 def git_tag_version(tag):
     command = [GIT, 'tag', '-a', tag, '-m', '']
-    check_output(command)
+    check_call(command)
 
 def git_tags_on_commit(commit):
     command = [GIT, 'tag', '--points-at', commit]
-    output = check_output(command, show_command=False)
+    output = check_output(command)
     output = output.strip()
     if not output:
         return []
@@ -317,10 +331,10 @@ def pypi_upload(name):
     egg_dir = f'{name}.egg-info'
 
     command = [PY, 'setup.py', 'sdist']
-    check_output(command)
+    check_call(command)
 
     command = [TWINE, 'upload', '-r', 'pypi', 'dist\\*']
-    check_output(command)
+    check_call(command)
 
     shutil.rmtree('dist')
     shutil.rmtree(egg_dir)
@@ -396,9 +410,6 @@ def pypi_release(do_tag=False, versionbump='patch'):
     git_commits_since(latest_release_commit, show=True)
 
 def pypi_release_argparse(args):
-    global DEBUG
-    if args.debug:
-        DEBUG = True
     versionbump = pick_versionbump(args.major, args.minor, args.patch)
     try:
         return pypi_release(do_tag=args.do_tag, versionbump=versionbump)
@@ -406,6 +417,7 @@ def pypi_release_argparse(args):
         print(exc.output)
         return 1
 
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
@@ -413,7 +425,6 @@ def main(argv):
     parser.add_argument('--minor', action='store_true')
     parser.add_argument('--patch', action='store_true')
     parser.add_argument('--do_tag', '--do-tag', action='store_true')
-    parser.add_argument('--debug', action='store_true')
     parser.set_defaults(func=pypi_release_argparse)
 
     args = parser.parse_args(argv)
