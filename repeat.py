@@ -7,11 +7,10 @@ Repeat the input as many times as you want.
 import argparse
 import sys
 
-from voussoirkit import clipext
 from voussoirkit import pipeable
 
 def repeat_argparse(args):
-    text = clipext.resolve(args.text)
+    text = pipeable.input(args.text, split_lines=False)
     if args.times == 'inf':
         try:
             while True:

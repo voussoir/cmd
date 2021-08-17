@@ -69,7 +69,9 @@ def tempeditor(initial_text=None):
         raise BadStatus(subproctools.format_command(command), status)
 
 def tempeditor_argparse(args):
-    initial_text = '\n'.join(pipeable.input(args.initial_text)) if args.initial_text else None
+    if args.initial_text is not None:
+        initial_text = pipeable.input(args.initial_text, split_lines=False)
+
     try:
         text = tempeditor(initial_text=initial_text)
         pipeable.stdout(text)

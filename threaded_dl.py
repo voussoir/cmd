@@ -6,9 +6,8 @@ import threading
 import time
 
 from voussoirkit import bytestring
-from voussoirkit import clipext
 from voussoirkit import downloady
-
+from voussoirkit import pipeable
 
 def clean_url_list(urls):
     for url in urls:
@@ -108,14 +107,7 @@ def threaded_dl(
         time.sleep(0.1)
 
 def threaded_dl_argparse(args):
-    if os.path.isfile(args.url_file):
-        f = open(args.url_file, 'r')
-        with f:
-            urls = f.read()
-    else:
-        urls = clipext.resolve(args.url_file)
-    urls = urls.replace('\r', '').split('\n')
-
+    urls = pipeable.input(args.url_file, read_files=True, skip_blank=True, strip=True)
     urls = [u.split(' ', 1) if ' ' in u else u for u in urls]
 
     headers = args.headers

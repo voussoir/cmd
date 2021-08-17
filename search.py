@@ -1,4 +1,5 @@
 import argparse
+import inspect
 import itertools
 import os
 import re
@@ -10,7 +11,6 @@ try:
 except ImportError:
     winshell = None
 
-from voussoirkit import clipext
 from voussoirkit import expressionmatch
 from voussoirkit import pathclass
 from voussoirkit import pipeable
@@ -37,7 +37,6 @@ class HeaderedText:
     @property
     def with_header(self):
         return f'{self.header}: {self.text}'
-
 
 def all_terms_match(search_text, terms, match_function):
     matches = (
@@ -170,7 +169,7 @@ def search(
             recurse=not local_only,
             yield_directories=True,
         )
-    elif isinstance(text, (list, tuple)):
+    elif isinstance(text, (list, tuple)) or inspect.isgenerator(text):
         search_objects = text
     else:
         search_objects = text.splitlines()
@@ -217,9 +216,9 @@ def search(
 def argparse_to_dict(args):
     text = args.text
     if text is not None:
-        text = clipext.resolve(text)
+        text = pipeable.input(text)
     elif STDIN_MODE == 'pipe':
-        text = clipext.resolve('!i')
+        text = pipeable.multi_line_input()
 
     if hasattr(args, 'content_args') and args.content_args is not None:
         content_args = argparse_to_dict(args.content_args)
