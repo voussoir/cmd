@@ -2,8 +2,14 @@
 
 bcrypt
 bs4
+flake8
 flask
 gevent
+google-api-python-client
+isodate
+pillow
+pycryptodome
+qrcode
 requests
 send2trash
 tenacity
