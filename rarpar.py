@@ -55,6 +55,8 @@ def RARCOMMAND(
                        all subsequent options override the ones provided by
                        the profile.
         -ibck = run in the background
+        -dh = allow winrar to read files which are in use by another process.
+              Without this flag, winrar exits with status 6 in that case.
         -ma = rar5 mode
         -m{compression} = 0: store, 5: max
         -md{x}[kmg] = x kilobytes/megabytes/gigabytes dictionary size
@@ -82,6 +84,7 @@ def RARCOMMAND(
 
     command.extend([
         '-ibck',
+        '-dh',
         '-ma',
         '-mt1',
         '-ri1:30',
