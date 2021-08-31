@@ -375,6 +375,8 @@ def rarpar(
 
     date = time.strftime('%Y-%m-%d')
     timestamp = time.strftime('%Y-%m-%d_%H-%M-%S')
+
+    basename = re.sub(r'\.rar$', '', basename)
     if not basename:
         basename = f'{path.basename} ({timestamp})'
     else:
