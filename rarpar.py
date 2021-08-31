@@ -81,8 +81,14 @@ def RARCOMMAND(
         command.append(f'-cp{profile}')
 
     command.extend([
-        '-ibck', '-ma', '-mt1', '-ri1:30', '-ep1',
-        '-y', '-xthumbs.db', '-xdesktop.ini',
+        '-ibck',
+        '-ma',
+        '-mt1',
+        '-ri1:30',
+        '-ep1',
+        '-y',
+        '-xthumbs.db',
+        '-xdesktop.ini',
     ])
 
     if compression is not None:
