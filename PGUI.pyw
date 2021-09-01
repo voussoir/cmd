@@ -87,6 +87,7 @@ class PGUILauncher(tkinter.ttk.Frame):
 
 def main(argv):
     root = tkinter.Tk()
+    root.withdraw()
     root.title("PGUI")
     root.resizable(0,0)
 
@@ -98,6 +99,7 @@ def main(argv):
     y_offset = (root.winfo_screenheight() - height) / 2
 
     root.geometry('%dx%d+%d+%d' % (width, height, x_offset, y_offset-50))
+    root.deiconify()
     root.mainloop()
 
 if __name__ == '__main__':
