@@ -6,6 +6,8 @@ flake8
 flask
 gevent
 google-api-python-client
+# For BS4 parsing
+lxml
 isodate
 pillow
 pycryptodome
