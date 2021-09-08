@@ -4,6 +4,10 @@ export PYTHONDONTWRITEBYTECODE=1
 unset HISTFILE
 unset HISTFILESIZE
 
+export PYTHONPATH=~/pythonpath:${PYTHONPATH}
+export PATH=~/cmd:~/git/cmd:${PATH}
+export EDITOR=/usr/bin/vim
+
 alias ..='cd ..'
 alias ls='ls -a --color=auto --group-directories-first'
 alias ll='ls -l -a --color=auto --group-directories-first'
