@@ -6,12 +6,14 @@ flake8
 flask
 gevent
 google-api-python-client
-# For BS4 parsing
-lxml
 isodate
+lxml # For BS4 parsing
+mistune
 pillow
 pycryptodome
+pygments
 qrcode
+regex
 requests
 send2trash
 tenacity
