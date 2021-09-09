@@ -16,7 +16,8 @@ alias move=mv
 alias copy=cp
 alias md=mkdir
 
-bind TAB:menu-complete
+# This generates a warning in some non-interactive situations, like cron.
+bind TAB:menu-complete > /dev/null 2>&1
 
 # In the user's .bashrc file, include this line at the top:
 # [[ -r ~/git/cmd/voussoir.bashrc ]] && . ~/git/cmd/voussoir.bashrc
