@@ -10,6 +10,7 @@ isodate
 lxml # For BS4 parsing
 mistune
 pillow
+pyautogui
 pycryptodome
 pygments
 qrcode
