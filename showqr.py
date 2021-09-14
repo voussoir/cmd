@@ -24,6 +24,7 @@ def showqr_argparse(args):
     image = qrcode.make(text).get_image()
 
     root = tkinter.Tk()
+    root.withdraw()
     root.title("QR code")
     root.bind('<Escape>', lambda *args, **kwargs: root.quit())
     root.bind('<Control-s>', lambda *args, **kwargs: save_image(root, image))
@@ -38,6 +39,7 @@ def showqr_argparse(args):
     y_offset = (root.winfo_screenheight() - height) / 2
 
     root.geometry('%dx%d+%d+%d' % (width, height, x_offset, y_offset-50))
+    root.deiconify()
     root.mainloop()
     return 0
 
