@@ -175,6 +175,26 @@ def move(pattern, directory):
         print(file)
         shutil.move(file, directory)
 
+def normalize_compression(compression):
+    if compression is None:
+        return None
+
+    if isinstance(compression, str):
+        compression = compression.lower()
+        if compression == 'max':
+            return COMPRESSION_MAX
+        elif compression == 'store':
+            return COMPRESSION_STORE
+        else:
+            compression = int(compression)
+
+    if isinstance(compression, int):
+        if compression < COMPRESSION_STORE or compression > COMPRESSION_MAX:
+            raise ValueError(f'Compression level {compression} is invalid.')
+        return compression
+
+    raise TypeError(f'Compression should be an integer or max or store, not {type(compression)}.')
+
 def normalize_dictionary_size(dictionary):
     if dictionary is None:
         return None
@@ -347,8 +367,7 @@ def rarpar(
         moveto = pathclass.Path(moveto)
         moveto.assert_is_directory()
 
-    if compression not in [None, 0, 1, 2, 3, 4, 5]:
-        raise ValueError(f'compression must be 0-5 or None, not {compression}.')
+    compression = normalize_compression(compression)
 
     dictionary_size = normalize_dictionary_size(dictionary_size)
 
@@ -510,21 +529,13 @@ path:
 '''
 
 def rarpar_argparse(args):
-    compression = args.compression.lower() if args.compression is not None else None
-    if compression == 'max':
-        compression = COMPRESSION_MAX
-    elif compression == 'store':
-        compression = COMPRESSION_STORE
-    else:
-        compression = int(compression)
-
     status = 0
     try:
         return rarpar(
             path=args.path,
             volume=args.volume,
             basename=args.basename,
-            compression=compression,
+            compression=args.compression,
             dictionary_size=args.dictionary_size,
             dry=args.dry,
             moveto=args.moveto,
