@@ -98,7 +98,7 @@ def resize(
     if new_name.extension == '.jpg':
         image = image.convert('RGB')
 
-    pipeable.output(new_name.absolute_path)
+    pipeable.stdout(new_name.absolute_path)
     image.save(new_name.absolute_path, exif=image.info.get('exif', b''), quality=quality)
 
 def resize_argparse(args):
