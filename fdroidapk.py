@@ -61,7 +61,7 @@ def download_file(url, path):
 @my_tenacity
 def get_apk_url(package_name):
     url = f'https://f-droid.org/en/packages/{package_name}'
-    log.debug('Downloading page %s', url)
+    log.debug('Downloading page %s.', url)
     response = session.get(url, timeout=30)
     response.raise_for_status()
     soup = bs4.BeautifulSoup(response.text, 'html.parser')
@@ -102,6 +102,7 @@ def fpk_argparse(args):
 
     for package in packages:
         package = normalize_package_name(package)
+        log.info('Checking %s.', package)
 
         try:
             apk_url = get_apk_url(package)
@@ -119,7 +120,7 @@ def fpk_argparse(args):
         this_dest = this_dest.with_child(apk_basename)
 
         if this_dest.exists:
-            log.info('%s exists.', this_dest.absolute_path)
+            log.debug('%s exists.', this_dest.absolute_path)
             continue
 
         log.info('Downloading %s.', this_dest.absolute_path)
