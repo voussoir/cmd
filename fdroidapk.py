@@ -31,7 +31,6 @@ import sys
 import tenacity
 import time
 
-from voussoirkit import backoff
 from voussoirkit import betterhelp
 from voussoirkit import downloady
 from voussoirkit import operatornotify
@@ -40,10 +39,11 @@ from voussoirkit import pipeable
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'fdroidapk')
+vlogging.getLogger('urllib3').setLevel(vlogging.SILENT)
 
 session = requests.Session()
 my_tenacity = tenacity.retry(
-    retry=tenacity.retry_if_exception(requests.exceptions.ConnectionError),
+    retry=tenacity.retry_if_exception_type(requests.exceptions.ConnectionError),
     stop=tenacity.stop_after_attempt(5),
     wait=tenacity.wait_exponential(multiplier=2, min=3, max=60),
     reraise=True,
