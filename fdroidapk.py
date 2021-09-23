@@ -28,6 +28,7 @@ import argparse
 import bs4
 import requests
 import sys
+import tenacity
 import time
 
 from voussoirkit import backoff
@@ -41,7 +42,23 @@ from voussoirkit import vlogging
 log = vlogging.getLogger(__name__, 'fdroidapk')
 
 session = requests.Session()
+my_tenacity = tenacity.retry(
+    retry=tenacity.retry_if_exception(requests.exceptions.ConnectionError),
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_exponential(multiplier=2, min=3, max=60),
+    reraise=True,
+)
 
+@my_tenacity
+def download_file(url, path):
+    return downloady.download_file(
+        url,
+        path,
+        callback_progress=downloady.Progress2,
+        timeout=30,
+    )
+
+@my_tenacity
 def get_apk_url(package_name):
     url = f'https://f-droid.org/en/packages/{package_name}'
     log.debug('Downloading page %s', url)
@@ -60,18 +77,6 @@ def normalize_package_name(package_name):
     package_name = package_name.strip('/')
     package_name = package_name.rsplit('/', 1)[-1]
     return package_name
-
-def _retry_request(f, tries=5):
-    bo = backoff.Linear(m=3, b=3, max=30)
-    while tries > 0:
-        try:
-            return f()
-        except requests.exceptions.ConnectionError as exc:
-            if tries == 1:
-                raise exc
-            log.debug(exc)
-            time.sleep(bo.next())
-        tries -= 1
 
 def ls_packages(path):
     packages = set()
@@ -99,7 +104,7 @@ def fpk_argparse(args):
         package = normalize_package_name(package)
 
         try:
-            apk_url = _retry_request(lambda: get_apk_url(package))
+            apk_url = get_apk_url(package)
         except Exception as exc:
             log.error('%s was unable to get apk url (%s).', package, exc)
             return_status = 1
@@ -120,12 +125,7 @@ def fpk_argparse(args):
         log.info('Downloading %s.', this_dest.absolute_path)
 
         try:
-            _retry_request(lambda: downloady.download_file(
-                apk_url,
-                this_dest,
-                callback_progress=downloady.Progress2,
-                timeout=30,
-            ))
+            download_file(apk_url, this_dest)
         except Exception as exc:
             log.error('%s was unable to download apk (%s).', package, exc)
             return_status = 1
