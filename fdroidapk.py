@@ -71,13 +71,6 @@ def get_apk_url(package_name):
     apk_url = aa[0]['href']
     return apk_url
 
-def normalize_package_name(package_name):
-    package_name = package_name.strip()
-    # If it happens to be a URL.
-    package_name = package_name.strip('/')
-    package_name = package_name.rsplit('/', 1)[-1]
-    return package_name
-
 def ls_packages(path):
     packages = set()
     items = path.listdir()
@@ -88,6 +81,13 @@ def ls_packages(path):
             package = item.basename.split('-')[0]
             packages.add(package)
     return sorted(packages)
+
+def normalize_package_name(package_name):
+    package_name = package_name.strip()
+    # If it happens to be a URL.
+    package_name = package_name.strip('/')
+    package_name = package_name.rsplit('/', 1)[-1]
+    return package_name
 
 @pipeable.ctrlc_return1
 def fpk_argparse(args):
