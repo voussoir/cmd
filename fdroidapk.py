@@ -73,6 +73,17 @@ def _retry_request(f, tries=5):
             time.sleep(bo.next())
         tries -= 1
 
+def ls_packages(path):
+    packages = set()
+    items = path.listdir()
+    for item in items:
+        if item.is_dir and '.' in item.basename:
+            packages.add(item.basename)
+        elif item.is_file and item.extension == 'apk':
+            package = item.basename.split('-')[0]
+            packages.add(package)
+    return sorted(packages)
+
 @pipeable.ctrlc_return1
 def fpk_argparse(args):
     destination = pathclass.Path(args.destination)
@@ -80,7 +91,11 @@ def fpk_argparse(args):
 
     return_status = 0
 
-    for package in args.packages:
+    packages = args.packages
+    if packages == ['*']:
+        packages = ls_packages(pathclass.cwd())
+
+    for package in packages:
         package = normalize_package_name(package)
 
         try:
