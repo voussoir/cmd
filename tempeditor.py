@@ -72,11 +72,13 @@ def tempeditor(initial_text=None):
         raise BadStatus(subproctools.format_command(command), status)
 
 def tempeditor_argparse(args):
-    if args.initial_text is not None:
+    if args.initial_text is None:
+        initial_text = None
+    else:
         initial_text = pipeable.input(args.initial_text, split_lines=False)
 
     try:
-        text = tempeditor(initial_text=args.initial_text)
+        text = tempeditor(initial_text=initial_text)
         pipeable.stdout(text)
         return 0
     except NoEditor as exc:
