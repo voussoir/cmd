@@ -27,6 +27,9 @@ from voussoirkit import betterhelp
 from voussoirkit import pipeable
 from voussoirkit import subproctools
 from voussoirkit import winwhich
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__, 'tempeditor')
 
 class NoEditor(Exception):
     pass
@@ -73,16 +76,17 @@ def tempeditor_argparse(args):
         initial_text = pipeable.input(args.initial_text, split_lines=False)
 
     try:
-        text = tempeditor(initial_text=initial_text)
+        text = tempeditor(initial_text=args.initial_text)
         pipeable.stdout(text)
         return 0
     except NoEditor as exc:
-        pipeable.stderr(exc)
+        log.fatal(exc)
         return 1
     except BadStatus as exc:
-        pipeable.stderr(f'Command {exc.args[0]} returned status {exc.args[1]}.')
+        log.fatal(f'Command {exc.args[0]} returned status {exc.args[1]}.')
         return 1
 
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
