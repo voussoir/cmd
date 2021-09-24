@@ -88,6 +88,8 @@ def svgrender_argparse(args):
             axis='y' if args.y else 'x',
         )
 
+    return 0
+
 @vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

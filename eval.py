@@ -25,6 +25,8 @@ def eval_argparse(args):
         x = line
         pipeable.stdout(eval(args.eval_string))
 
+    return 0
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 

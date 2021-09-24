@@ -3,16 +3,16 @@ import sys
 
 from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import winglob
 
 def nonempty_directories_argparse(args):
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
-    directories = (pathclass.Path(d) for pattern in patterns for d in winglob.glob(pattern))
-    directories = (d for d in directories if d.is_dir)
+    directories = pathclass.glob_many(patterns, directories=True)
 
     for directory in directories:
         if len(directory.listdir()) != 0:
             pipeable.stdout(directory.absolute_path)
+
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

@@ -21,6 +21,8 @@ def touch_argparse(args):
             os.utime(filename)
             pipeable.stdout(filename)
 
+    return 0
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 

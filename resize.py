@@ -38,7 +38,6 @@ from voussoirkit import imagetools
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import vlogging
-from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'resize')
 
@@ -102,10 +101,11 @@ def resize(
     image.save(new_name.absolute_path, exif=image.info.get('exif', b''), quality=quality)
 
 def resize_argparse(args):
-    filenames = winglob.glob(args.pattern)
-    for filename in filenames:
+    patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)
+    files = pathclass.glob_many(patterns, files=True)
+    for file in files:
         resize(
-            filename,
+            file,
             args.new_w,
             args.new_h,
             inplace=args.inplace,
@@ -114,6 +114,8 @@ def resize_argparse(args):
             scale=args.scale,
             quality=args.quality,
         )
+
+    return 0
 
 @vlogging.main_decorator
 def main(argv):

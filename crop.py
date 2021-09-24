@@ -1,13 +1,12 @@
 import argparse
-import os
 import PIL.Image
 import sys
 
+from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import winglob
 
-def crop(filename, crops, *, inplace=False):
-    image = PIL.Image.open(filename)
+def crop(file, crops, *, inplace=False):
+    image = PIL.Image.open(file.absolute_path)
     if len(crops) == 2:
         crops.extend(image.size)
 
@@ -20,24 +19,27 @@ def crop(filename, crops, *, inplace=False):
 
     image = image.crop(crops)
     if inplace:
-        newname = filename
+        newname = file
     else:
         suffix = '_'.join(str(x) for x in crops)
         suffix = f'_{suffix}'
-        (base, extension) = os.path.splitext(filename)
-        newname = base + suffix + extension
+        base = file.replace_extension('').basename
+        newname = file.parent.with_child(base + suffix).add_extension(file.extension)
 
-    pipeable.stdout(newname)
-    image.save(newname, exif=image.info.get('exif', b''), quality=100)
+    pipeable.stdout(newname.absolute_path)
+    image.save(newname.absolute_path, exif=image.info.get('exif', b''), quality=100)
 
 def crop_argparse(args):
-    filenames = winglob.glob(args.pattern)
-    for filename in filenames:
+    patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)
+    files = pathclass.glob_many(patterns, files=True)
+
+    for file in files:
         crop(
-            filename,
+            file,
             crops=args.crops,
             inplace=args.inplace,
         )
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

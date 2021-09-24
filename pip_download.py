@@ -38,10 +38,11 @@ def pip_download(package):
             os.rename(os.path.join(tmpdir.name, filename), os.path.join(new_directory, filename))
     tmpdir.cleanup()
 
-
 def pip_download_argparse(args):
     for package in args.packages:
         pip_download(package)
+
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

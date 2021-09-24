@@ -9,15 +9,12 @@ import string
 import sys
 
 from voussoirkit import pathclass
-from voussoirkit import winglob
 
 argv = sys.argv[1:]
 
-for pattern in argv:
-    for path in winglob.glob(pattern):
-        path = pathclass.Path(path)
-        newname = [random.choice(string.ascii_lowercase) for x in range(9)]
-        newname = ''.join(newname) + path.dot_extension
-        newname = path.parent.with_child(newname)
-        os.rename(path.absolute_path, newname.absolute_path)
-        print('%s -> %s' % (path.absolute_path, newname.basename))
+for path in pathclass.glob_many(argv):
+    newname = [random.choice(string.ascii_lowercase) for x in range(9)]
+    newname = ''.join(newname) + path.dot_extension
+    newname = path.parent.with_child(newname)
+    os.rename(path.absolute_path, newname.absolute_path)
+    print('%s -> %s' % (path.absolute_path, newname.basename))

@@ -27,7 +27,11 @@ def root():
 
 def heresmyclipboard_argparse(args):
     log.info(f'Starting server on port {args.port}, pid={os.getpid()}')
-    site.run(host='0.0.0.0', port=args.port)
+    try:
+        site.run(host='0.0.0.0', port=args.port)
+    except KeyboardInterrupt:
+        pass
+    return 0
 
 @vlogging.main_decorator
 def main(argv):

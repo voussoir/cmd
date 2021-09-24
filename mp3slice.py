@@ -11,7 +11,6 @@ import sys
 
 from voussoirkit import bytestring
 
-
 def parse_rules(lines):
     rules = []
     for (times, title) in lines[::-1]:
@@ -125,7 +124,7 @@ def _unitconvert(value):
     else:
         return bytestring.parsebytes(value)
 
-def example_argparse(args):
+def mp3slice_argparse(args):
     if len(args.rules) == 1 and os.path.isfile(args.rules[0]):
         rules = read_rulefile(args.rules[0])
     else:
@@ -155,14 +154,14 @@ def example_argparse(args):
     command = 'ffmpeg -i "%s" %s' % (args.input_filename, outputters)
     print(command)
     os.system(command)
-
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser()
 
     parser.add_argument('input_filename')
     parser.add_argument('rules', nargs='+', default=None)
-    parser.set_defaults(func=example_argparse)
+    parser.set_defaults(func=mp3slice_argparse)
 
     args = parser.parse_args(argv)
     return args.func(args)

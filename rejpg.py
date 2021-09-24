@@ -12,6 +12,9 @@ from voussoirkit import bytestring
 from voussoirkit import imagetools
 from voussoirkit import pipeable
 from voussoirkit import spinal
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__, 'rejpg')
 
 PIL.ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -24,7 +27,7 @@ def rejpg_argparse(args):
     bytes_saved = 0
     remaining_size = 0
     for filename in files:
-        print(filename)
+        log.info('Processing %s.', filename)
         bytesio = io.BytesIO()
         image = PIL.Image.open(filename)
 
@@ -43,9 +46,11 @@ def rejpg_argparse(args):
             f.write(new_bytes)
             f.close()
 
-    print('Saved', bytestring.bytestring(bytes_saved))
-    print('Remaining are', bytestring.bytestring(remaining_size))
+    log.info('Saved', bytestring.bytestring(bytes_saved))
+    log.info('Remaining are', bytestring.bytestring(remaining_size))
+    return 0
 
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 

@@ -42,6 +42,7 @@ def watchforlinks_argparse(args):
         loop_forever(extension=args.extension, regex=args.regex)
     except KeyboardInterrupt:
         pass
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

@@ -1,6 +1,5 @@
 import argparse
 import codecs
-import os
 import pyperclip
 import re
 import sys
@@ -70,6 +69,8 @@ def contentreplace_argparse(args):
             )
         except UnicodeDecodeError:
             log.error('%s encountered unicode decode error.', file.absolute_path)
+
+    return 0
 
 @vlogging.main_decorator
 def main(argv):

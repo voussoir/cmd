@@ -2,6 +2,7 @@ import os
 import sys
 
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 
 def windows():
     paths = os.getenv('PATH').strip(' ;').split(';')
@@ -30,7 +31,9 @@ def main(argv):
         executables = linux()
 
     for executable in executables:
-        print(executable.absolute_path)
+        pipeable.stdout(executable.absolute_path)
+
+    return 0
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

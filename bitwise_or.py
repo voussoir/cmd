@@ -7,16 +7,13 @@ Merge two or more files by performing bitwise or on their bits.
 > bitwise_or file1 file2 --output file3
 '''
 import argparse
-import os
 import sys
 
 from voussoirkit import betterhelp
 from voussoirkit import interactive
-from voussoirkit import operatornotify
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import vlogging
-from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'bitwise_or')
 
@@ -24,8 +21,7 @@ CHUNK_SIZE = 2**20
 
 def bitwise_or_argparse(args):
     patterns = pipeable.input_many(args.files, skip_blank=True, strip=True)
-    files = [file for pattern in patterns for file in winglob.glob(pattern)]
-    files = [pathclass.Path(file) for file in files]
+    files = pathclass.glob_many(patterns, files=True)
 
     if len(files) < 2:
         log.fatal('Need at least two input files.')

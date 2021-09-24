@@ -131,43 +131,59 @@ def load_image(filename):
     return image
 
 def build_ico_header_blob(image_count):
-    datablob = (b''
-        + little(0, 2)  # reserved
-        + little(1, 2)  # 1 = ico type
-        + little(image_count, 2)
-    )
+    datablob = b''.join([
+        # reserved
+        little(0, 2),
+        # 1 = ico type
+        little(1, 2),
+        little(image_count, 2),
+    ])
     return datablob
 
 def build_icon_directory_blob(image, offset_from_start):
     (width, height) = image.size
-    datablob = (b''
-        + little(width if width < 256 else 0, 1)
-        + little(height if height < 256 else 0, 1)
-        + little(0, 1)  # colors in palette
-        + little(0, 1)  # reserved
-        + little(1, 2)  # color planes
-        + little(32, 2)  # bit depth
-        + little((width * height * 4) + BMP_HEADER_LENGTH, 4)  # image bytes length
-        + little(offset_from_start, 4)
-    )
+    datablob = b''.join([
+        little(width if width < 256 else 0, 1),
+        little(height if height < 256 else 0, 1),
+        # colors in palette
+        little(0, 1),
+        # reserved
+        little(0, 1),
+        # color planes
+        little(1, 2),
+        # bit depth
+        little(32, 2),
+        # image bytes length
+        little((width * height * 4) + BMP_HEADER_LENGTH, 4),
+        little(offset_from_start, 4),
+    ])
     return datablob
 
 def build_image_data_blob(image):
-    datablob = (b''
-        + little(40, 4)  # header size
-        + little(image.size[0], 4)
+    datablob = b''.join([
+        # header size
+        little(40, 4),
+        little(image.size[0], 4),
         # "Even if the AND mask is not supplied, if the image is in Windows BMP
         # format, the BMP header must still specify a doubled height." - wikipedia
-        + little(image.size[1] * 2, 4)
-        + little(1, 2)  # color planes
-        + little(32, 2)  # bit depth
-        + little(0, 4)  # no compression
-        + little(0, 4)  # bytes length, inferred
-        + little(0, 4)  # hor print
-        + little(0, 4)  # ver print
-        + little(0, 4)  # palette
-        + little(0, 4)  # important palette
-    )
+        little(image.size[1] * 2, 4),
+        # color planes
+        little(1, 2),
+        # bit depth
+        little(32, 2),
+        # no compression
+        little(0, 4),
+        # bytes length, inferred
+        little(0, 4),
+        # hor print
+        little(0, 4),
+        # ver print
+        little(0, 4),
+        # palette
+        little(0, 4),
+        # important palette
+        little(0, 4),
+    ])
     pixeldata = []
     # Image.getdata() is a list of (r, g, b, a) channels
     # But the BMP are written (b, g, r, a)
@@ -214,11 +230,10 @@ def images_to_ico(images):
     final_data = b''.join(datablobs)
     return final_data
 
-
 if __name__ == '__main__':
     try:
         inputfiles = sys.argv[1:]
-    except:
+    except Exception:
         print('Please provide an image file')
         raise SystemExit
     print('Iconifying', inputfiles)

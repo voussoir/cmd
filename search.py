@@ -251,6 +251,7 @@ def _search_argparse(args):
         result_count += 1
     if args.show_count:
         print('%d items.' % result_count)
+    return 0
 
 @pipeable.ctrlc_return1
 def search_argparse(args):

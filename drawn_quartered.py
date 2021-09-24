@@ -55,6 +55,8 @@ def drawquarter_argparse(args):
         print(output_filename.relative_path)
         piece.save(output_filename.absolute_path)
 
+    return 0
+
 def main(argv):
     parser = argparse.ArgumentParser()
 

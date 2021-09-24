@@ -13,6 +13,8 @@ def clipboard_argparse(args):
         text = text.replace('\r', '')
         print(text)
 
+    return 0
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 

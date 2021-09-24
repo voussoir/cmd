@@ -16,11 +16,10 @@ argv = sys.argv[1:]
 
 randname = [random.choice(string.digits) for x in range(12)]
 randname = int(''.join(randname))
-for pattern in argv:
-    for path in winglob.glob(pattern):
-        path = pathclass.Path(path)
-        newname = str(randname).rjust(12, '0') + path.dot_extension
-        randname += 1
-        newname = path.parent.with_child(newname)
-        os.rename(path.absolute_path, newname.absolute_path)
-        print('%s -> %s' % (path.absolute_path, newname.basename))
+
+for path in pathclass.glob_many(argv):
+    newname = str(randname).rjust(12, '0') + path.dot_extension
+    randname += 1
+    newname = path.parent.with_child(newname)
+    os.rename(path.absolute_path, newname.absolute_path)
+    print('%s -> %s' % (path.absolute_path, newname.basename))

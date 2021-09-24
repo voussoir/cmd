@@ -45,6 +45,8 @@ def directory_discrepancy_argparse(args):
     for discrepancy in sorted(files2.difference(files1)):
         print(discrepancy)
 
+    return 0
+
 @vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

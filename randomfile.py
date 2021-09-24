@@ -28,7 +28,6 @@ def make_randomfile(length, filename=None):
     f.close()
     print('Created %s' % filename)
 
-
 bytes = listget(sys.argv, 1, None)
 if bytes is None:
     bytes = 2 ** 10

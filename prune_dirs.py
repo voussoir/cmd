@@ -14,7 +14,6 @@ from voussoirkit import betterhelp
 from voussoirkit import spinal
 from voussoirkit import pathclass
 
-
 def prune_dirs(starting):
     starting = pathclass.Path(starting)
     walker = spinal.walk(starting, yield_directories=True, yield_files=False)
@@ -35,7 +34,6 @@ def prune_dirs(starting):
     while double_check:
         directory = double_check.pop()
         pruneme(directory)
-
 
 def prune_dirs_argparse(args):
     return prune_dirs(args.starting)

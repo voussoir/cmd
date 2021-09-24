@@ -8,8 +8,8 @@ from voussoirkit import pipeable
 
 def reverse_argparse(args):
     lines = list(pipeable.input(args.lines))
-    lines.reverse()
-    print('\n'.join(lines))
+    pipeable.stdout('\n'.join(reversed(lines)))
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

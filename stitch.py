@@ -2,10 +2,10 @@ import PIL.Image
 import argparse
 import sys
 
+from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import sentinel
 from voussoirkit import vlogging
-from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'stitch')
 
@@ -14,8 +14,8 @@ HORIZONTAL = sentinel.Sentinel('horizontal')
 
 def stitch_argparse(args):
     patterns = pipeable.input_many(args.image_files, skip_blank=True, strip=True)
-    files = [file for pattern in patterns for file in winglob.glob(pattern)]
-    images = [PIL.Image.open(file) for file in files]
+    files = pathclass.glob_many(patterns, files=True)
+    images = [PIL.Image.open(file.absolute_path) for file in files]
     if args.vertical:
         direction = VERTICAL
     else:
@@ -42,6 +42,7 @@ def stitch_argparse(args):
 
     log.info(args.output)
     final_image.save(args.output)
+    return 0
 
 @vlogging.main_decorator
 def main(argv):

@@ -10,6 +10,7 @@ def unique_argparse(args):
         if line not in seen:
             pipeable.stdout(line)
             seen.add(line)
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

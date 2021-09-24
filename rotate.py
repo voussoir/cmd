@@ -1,28 +1,29 @@
 import argparse
-import os
 import PIL.Image
 import sys
 
 from voussoirkit import imagetools
+from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import vlogging
-from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'rotate')
 
 def rotate_argparse(args):
     if args.angle is None and not args.exif:
-        pipeable.stderr('Either an angle or --exif must be provided.')
+        log.fatal('Either an angle or --exif must be provided.')
         return 1
 
-    filenames = winglob.glob(args.pattern)
-    for filename in filenames:
-        image = PIL.Image.open(filename)
+    patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)
+    files = pathclass.glob_many(patterns, files=True)
+
+    for file in files:
+        image = PIL.Image.open(file.absolute_path)
 
         if args.exif:
             (new_image, exif) = imagetools.rotate_by_exif(image)
             if new_image is image:
-                log.debug('%s doesn\'t need exif rotation.', filename)
+                log.debug('%s doesn\'t need exif rotation.', file.absolute_path)
                 continue
             image = new_image
         else:
@@ -30,16 +31,19 @@ def rotate_argparse(args):
             image = image.rotate(args.angle, expand=True)
 
         if args.inplace:
-            newname = filename
+            newname = file
         else:
             if args.exif:
                 suffix = f'_exifrot'
             else:
                 suffix = f'_{args.angle}'
-            (base, extension) = os.path.splitext(filename)
-            newname = base + suffix + extension
+
+            base = file.replace_extension('').basename
+            newname = base + suffix
+            newname = file.parent.with_child(newname).add_extension(file.extension)
+
         pipeable.stdout(newname)
-        image.save(newname, exif=exif, quality=args.quality)
+        image.save(file.absolute_path, exif=exif, quality=args.quality)
 
 @vlogging.main_decorator
 def main(argv):

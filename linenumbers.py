@@ -12,7 +12,9 @@ def linenumbers_argparse(args):
         digits = len(str(len(lines)))
         form = '{no:>0%d} | {line}' % digits
     for (index, line) in enumerate(lines):
-        print(form.format(no=index+1, line=line))
+        pipeable.stdout(form.format(no=index+1, line=line))
+
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

@@ -42,6 +42,7 @@ def filepull(pull_from='.', autoyes=False):
 
 def filepull_argparse(args):
     filepull(pull_from=args.pull_from, autoyes=args.autoyes)
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser()

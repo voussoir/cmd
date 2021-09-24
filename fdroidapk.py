@@ -29,7 +29,6 @@ import bs4
 import requests
 import sys
 import tenacity
-import time
 
 from voussoirkit import betterhelp
 from voussoirkit import downloady

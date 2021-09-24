@@ -11,6 +11,7 @@ def groupsof_argparse(args):
     for chunk in chunks:
         chunk = args.separator.join(chunk)
         pipeable.stdout(chunk)
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

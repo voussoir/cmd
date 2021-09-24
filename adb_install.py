@@ -1,37 +1,24 @@
 import argparse
 import os
-import re
 import sys
 
 from voussoirkit import interactive
 from voussoirkit import pathclass
 from voussoirkit import pipeable
+from voussoirkit import stringtools
 from voussoirkit import vlogging
-from voussoirkit import winglob
 
 log = vlogging.getLogger(__name__, 'adbinstall')
 
-def natural_sorter(x):
-    '''
-    Used for sorting files in 'natural' order instead of lexicographic order,
-    so that you get 1 2 3 4 5 6 7 8 9 10 11 12 13 ...
-    instead of 1 10 11 12 13 2 3 4 5 ...
-    Thank you Mark Byers
-    http://stackoverflow.com/a/11150413
-    '''
-    convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-    return alphanum_key(x)
-
 def adbinstall_argparse(args):
     patterns = pipeable.input_many(args.apks, skip_blank=True, strip=True)
-    apks = [file for pattern in patterns for file in winglob.glob(pattern)]
+    apks = pathclass.glob_many(patterns, files=True)
     installs = []
     for apk in apks:
         apk = pathclass.Path(apk)
         if apk.is_dir:
             files = apk.glob('*.apk')
-            files.sort(key=lambda x: natural_sorter(x.basename.lower()))
+            files.sort(key=lambda x: stringtools.natural_sorter(x.basename.lower()))
             apk = files[-1]
         installs.append(apk)
 
@@ -45,6 +32,8 @@ def adbinstall_argparse(args):
         command = f'adb install "{apk.absolute_path}"'
         log.info(command)
         os.system(command)
+
+    return 0
 
 @vlogging.main_decorator
 def main(argv):

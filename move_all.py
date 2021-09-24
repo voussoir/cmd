@@ -8,17 +8,15 @@ import sys
 
 from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import winglob
 
 def moveall_argparse(args):
-    files = (
-        pathclass.Path(file)
-        for pattern in pipeable.input(args.source)
-        for file in winglob.glob(pattern)
-    )
-    destination = pathclass.Path(args.destination)
+    patterns = pipeable.input(args.source, skip_blank=True, strip=True)
+    files = pathclass.glob_many(patterns)
 
-    if not destination.is_dir:
+    destination = pathclass.Path(args.destination)
+    try:
+        destination.assert_is_directory()
+    except pathclass.NotDirectory:
         pipeable.stderr('destination must be a directory.')
         return 1
 
@@ -38,6 +36,8 @@ def moveall_argparse(args):
     for (file, new_path) in pairs:
         pipeable.stdout(new_path.absolute_path)
         shutil.move(file.absolute_path, new_path.absolute_path)
+
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

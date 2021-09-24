@@ -1,26 +1,32 @@
 import argparse
-import os
 import sys
 import zlib
 
+from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import winglob
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__, 'crc32')
 
 def crc32_argparse(args):
-    files = (
-        file
-        for pattern in pipeable.input_many(args.patterns)
-        for file in winglob.glob(pattern)
-        if os.path.isfile(file)
-    )
+    return_status = 0
+
+    patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
+    files = pathclass.glob_many(patterns, files=True)
+
     for file in files:
         try:
             with open(file, 'rb') as handle:
                 crc = zlib.crc32(handle.read())
-            print(hex(crc)[2:].rjust(8, '0'), file)
+            crc = hex(crc)[2:].rjust(8, '0')
+            pipeable.stdout(f'{crc} {file}')
         except Exception as e:
-            print(file, e)
+            log.error('%s %s', file, e)
+            return_status = 1
 
+    return return_status
+
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 

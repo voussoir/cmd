@@ -3,7 +3,6 @@ lint_argparse_returns
 =====================
 '''
 import ast
-import argparse
 import sys
 
 from voussoirkit import pathclass

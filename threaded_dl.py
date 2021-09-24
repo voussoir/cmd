@@ -8,6 +8,10 @@ import time
 from voussoirkit import bytestring
 from voussoirkit import downloady
 from voussoirkit import pipeable
+from voussoirkit import vlogging
+
+log = vlogging.getLogger(__name__, 'threaded_dl')
+downloady.log.setLevel(vlogging.WARNING)
 
 def clean_url_list(urls):
     for url in urls:
@@ -29,7 +33,7 @@ def clean_url_list(urls):
             yield url
 
 def download_thread(url, filename, *, bytespersecond=None, headers=None, timeout=None):
-    print(f' Starting "{filename}"')
+    log.info(f'Starting "{filename}"')
     downloady.download_file(
         url,
         filename,
@@ -37,7 +41,7 @@ def download_thread(url, filename, *, bytespersecond=None, headers=None, timeout
         headers=headers,
         timeout=timeout,
     )
-    print(f'+Finished "{filename}"')
+    log.info(f'Finished "{filename}"')
 
 def remove_finished(threads):
     return [t for t in threads if t.is_alive()]
@@ -87,7 +91,7 @@ def threaded_dl(
             )
 
         if os.path.exists(filename):
-            print(f'Skipping existing file "{filename}"')
+            log.info(f'Skipping existing file "{filename}"')
 
         else:
             kwargs = {
@@ -103,7 +107,7 @@ def threaded_dl(
 
     while len(threads) > 0:
         threads = remove_finished(threads)
-        print(f'{len(threads)} threads remaining\r', end='', flush=True)
+        pipeable.stderr(f'{len(threads)} threads remaining\r', end='')
         time.sleep(0.1)
 
 def threaded_dl_argparse(args):
@@ -132,6 +136,9 @@ def threaded_dl_argparse(args):
         timeout=args.timeout,
     )
 
+    return 0
+
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 

@@ -12,6 +12,8 @@ def printstderr_argparse(args):
         for line in text:
             pipeable.stderr(line)
 
+    return 0
+
 @vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

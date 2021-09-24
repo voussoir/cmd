@@ -12,6 +12,8 @@ def shuffle_argparse(args):
     for line in lines:
         pipeable.stdout(line)
 
+    return 0
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 

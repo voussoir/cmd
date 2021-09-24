@@ -17,7 +17,7 @@ def inputrename_argparse(args):
         files = (file for file in pathclass.cwd().listdir() if args.keyword in file.basename)
     prev = None
     for file in files:
-        print(file.relative_path)
+        pipeable.stderr(file.relative_path)
         this = input('> ')
         if this == '' and prev is not None:
             this = prev
@@ -26,6 +26,8 @@ def inputrename_argparse(args):
             new_name = file.parent.with_child(new_name)
             os.rename(file.absolute_path, new_name.absolute_path)
         prev = this
+
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

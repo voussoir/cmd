@@ -23,6 +23,8 @@ def breplace_argparse(args):
         command = f'x.replace("{replace_from}", "{replace_to}")'
     brename.brename(command, autoyes=args.autoyes, recurse=args.recurse)
 
+    return 0
+
 def main(argv):
     parser = argparse.ArgumentParser(__doc__)
 

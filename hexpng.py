@@ -5,7 +5,6 @@ import argparse
 import PIL.Image
 import sys
 
-
 def full_hex(h):
     h = h.replace('#', '')
     if len(h) in [3, 4]:
@@ -28,6 +27,7 @@ def make_hexpng(h, width=1, height=1):
 
 def hexpng_argparse(args):
     make_hexpng(args.hex_value, width=args.width, height=args.height)
+    return 0
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)

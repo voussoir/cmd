@@ -14,7 +14,8 @@ def main(argv):
         elif path.is_dir:
             total += spinal.get_dir_size(path)
 
-    print(total)
+    pipeable.stdout(total)
+    return 0
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

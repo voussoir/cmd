@@ -4,9 +4,7 @@ import sys
 
 from voussoirkit import bytestring
 
-
 filename = os.path.abspath(sys.argv[1])
-
 
 def zerofile(filename, length):
     if os.path.exists(filename):
