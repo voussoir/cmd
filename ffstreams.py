@@ -126,17 +126,15 @@ def ffstreams(
         subprocess.run(command, stderr=subprocess.STDOUT)
 
 def ffstreams_argparse(args):
-    for pattern in args.input_filename:
-        for input_filename in winglob.glob(pattern):
-            input_file = pathclass.Path(input_filename)
-            ffstreams(
-                input_file,
-                do_videos=args.videos,
-                do_audios=args.audios,
-                do_subtitles=args.subtitles,
-                dry=args.dry,
-                moveto=args.moveto,
-            )
+    for input_file in pathclass.glob_many(args.input_filename):
+        ffstreams(
+            input_file,
+            do_videos=args.videos,
+            do_audios=args.audios,
+            do_subtitles=args.subtitles,
+            dry=args.dry,
+            moveto=args.moveto,
+        )
 
     return 0
 
