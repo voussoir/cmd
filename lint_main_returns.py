@@ -14,8 +14,12 @@ log = vlogging.getLogger(__name__, 'lint_argparse_returns')
 def main(argv):
     return_status = 0
 
-    files = pathclass.glob('*.py')
-    files = (f for f in files if f.is_file)
+    patterns = argv[:]
+    if patterns:
+        files = pathclass.glob_many(patterns, files=True)
+    else:
+        files = pathclass.glob('*.py', files=True)
+
     for file in files:
         no_py = file.replace_extension('').basename
         text = file.open('r', encoding='utf-8').read()
