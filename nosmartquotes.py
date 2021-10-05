@@ -7,13 +7,17 @@ Replace smart quotes and smart apostrophes with regular ASCII values.
 Just say no to smart quotes!
 '''
 import argparse
+import os
 import sys
 
 from voussoirkit import betterhelp
+from voussoirkit import pathclass
 from voussoirkit import spinal
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'nosmartquotes')
+
+THIS_FILE = os.path.abspath(__file__)
 
 def replace_smartquotes(text):
     text = text.replace('“', '"')
@@ -25,13 +29,12 @@ def replace_smartquotes(text):
 def nosmartquotes_argparse(args):
     files = spinal.walk(
         glob_filenames=args.filename_glob,
+        exclude_filenames={THIS_FILE},
         recurse=args.recurse,
     )
 
     for file in files:
-        handle = file.open('r', encoding='utf-8')
-        text = handle.read()
-        handle.close()
+        text = file.read('r', encoding='utf-8')
 
         original_text = text
         text = replace_smartquotes(text)
@@ -39,9 +42,7 @@ def nosmartquotes_argparse(args):
         if text == original_text:
             continue
 
-        handle = file.open('w', encoding='utf-8')
-        handle.write(text)
-        handle.close()
+        file.write('w', text, encoding='utf-8')
         print(file.absolute_path)
 
     return 0

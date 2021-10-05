@@ -25,9 +25,6 @@ def hash_file_md5(filepath):
     return hash_file(filepath, hasher=hashlib.md5())
 
 def read_filebytes(filepath, chunk_size=bytestring.MIBIBYTE):
-    '''
-    Yield chunks of bytes from the file between the endpoints.
-    '''
     filepath = pathclass.Path(filepath)
     if not filepath.is_file:
         raise FileNotFoundError(filepath)

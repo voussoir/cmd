@@ -14,8 +14,7 @@ log = vlogging.getLogger(__name__, 'contentreplace')
 
 def contentreplace(file, replace_from, replace_to, autoyes=False, do_regex=False):
     file = pathclass.Path(file)
-    with file.open('r', encoding='utf-8') as f:
-        content = f.read()
+    content = file.read('r', encoding='utf-8')
 
     if do_regex:
         occurances = len(re.findall(replace_from, content, flags=re.MULTILINE))
@@ -34,8 +33,7 @@ def contentreplace(file, replace_from, replace_to, autoyes=False, do_regex=False
     else:
         content = content.replace(replace_from, replace_to)
 
-    with file.open('w', encoding='utf-8') as f:
-        f.write(content)
+    file.write('w', content, encoding='utf-8')
 
 @pipeable.ctrlc_return1
 def contentreplace_argparse(args):

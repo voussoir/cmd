@@ -22,7 +22,7 @@ def main(argv):
 
     for file in files:
         no_py = file.replace_extension('').basename
-        text = file.open('r', encoding='utf-8').read()
+        text = file.read('r', encoding='utf-8')
         try:
             tree = ast.parse(text)
         except Exception:

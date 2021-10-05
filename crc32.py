@@ -16,10 +16,9 @@ def crc32_argparse(args):
 
     for file in files:
         try:
-            with open(file, 'rb') as handle:
-                crc = zlib.crc32(handle.read())
+            crc = zlib.crc32(file.read('rb'))
             crc = hex(crc)[2:].rjust(8, '0')
-            pipeable.stdout(f'{crc} {file}')
+            pipeable.stdout(f'{crc} {file.absolute_path}')
         except Exception as e:
             log.error('%s %s', file, e)
             return_status = 1

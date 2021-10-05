@@ -125,12 +125,9 @@ def read_directories_file():
     directories_file = pathclass.Path(__file__).parent.with_child('gitcheckup.txt')
 
     try:
-        handle = directories_file.open('r', encoding='utf-8')
+        directories = directories_file.readlines('r', encoding='utf-8')
     except FileNotFoundError as exc:
         raise NoConfigFile(exc.filename) from exc
-
-    with handle:
-        directories = handle.readlines()
 
     directories = [line.strip() for line in directories]
     directories = [line for line in directories if line]
@@ -149,10 +146,7 @@ def write_directories_file(directories):
 
     directories_file = pathclass.Path(__file__).parent.with_child('gitcheckup.txt')
 
-    handle = directories_file.open('w', encoding='utf-8')
-
-    with handle:
-        handle.write('\n'.join(directories))
+    directories_file.write('w', '\n'.join(directories), encoding='utf-8')
 
 # GIT FUNCTIONS
 ################################################################################

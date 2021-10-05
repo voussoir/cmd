@@ -49,12 +49,10 @@ def all_terms_match(search_text, terms, match_function):
 
 def search_contents_generic(filepath, content_args):
     try:
-        with filepath.open('r') as handle:
-            text = handle.read()
+        text = filepath.read('r')
     except UnicodeDecodeError:
         try:
-            with filepath.open('r', encoding='utf-8') as handle:
-                text = handle.read()
+            text = filepath.read('r', encoding='utf-8')
         except UnicodeDecodeError:
             #safeprint.safeprint(filepath.absolute_path)
             #traceback.print_exc()

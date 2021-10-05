@@ -12,8 +12,7 @@ LF = b'\x0A'
 CRLF = CR + LF
 
 def crlf(file):
-    with file.open('rb') as handle:
-        content = handle.read()
+    content = file.read('rb')
 
     original = content
     content = content.replace(CRLF, LF)
@@ -21,15 +20,14 @@ def crlf(file):
     if content == original:
         return
 
-    with file.open('wb') as handle:
-        handle.write(content)
+    file.write('wb', content)
 
 def crlf_argparse(args):
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
     files = pathclass.glob_many(patterns)
     for file in files:
         crlf(file)
-        pipeable.stdout(file)
+        pipeable.stdout(file.absolute_path)
 
     return 0
 
