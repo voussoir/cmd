@@ -15,6 +15,7 @@ alias dir='ls -l -a --color=auto --group-directories-first'
 alias move=mv
 alias copy=cp
 alias md=mkdir
+alias cls=clear
 
 # This generates a warning in some non-interactive situations, like cron.
 bind TAB:menu-complete > /dev/null 2>&1
