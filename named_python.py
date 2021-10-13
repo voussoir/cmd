@@ -26,15 +26,16 @@ from voussoirkit import pathclass
 from voussoirkit import winwhich
 
 def namedpython_argparse(args):
-    python = pathclass.Path(sys.executable)
+    this_python = pathclass.Path(sys.executable)
 
+    base = this_python.replace_extension('').basename.split('-', 1)[0]
     name = args.name.strip()
-
-    named_python = python.parent.with_child(f'python-{name}{python.extension.with_dot}')
+    extension = this_python.extension.with_dot
+    named_python = this_python.parent.with_child(f'{base}-{name}{extension}')
     if named_python.exists:
         return 0
 
-    os.link(python.absolute_path, named_python.absolute_path)
+    os.link(this_python.absolute_path, named_python.absolute_path)
     print(named_python.absolute_path)
     return 0
 
