@@ -46,8 +46,8 @@ def rejpg_argparse(args):
             f.write(new_bytes)
             f.close()
 
-    log.info('Saved', bytestring.bytestring(bytes_saved))
-    log.info('Remaining are', bytestring.bytestring(remaining_size))
+    log.info('Saved %s.', bytestring.bytestring(bytes_saved))
+    log.info('Remaining are %s.', bytestring.bytestring(remaining_size))
     return 0
 
 @vlogging.main_decorator
