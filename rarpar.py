@@ -141,6 +141,7 @@ def PARCOMMAND(workdir, basename, par):
         PAR2,
         'c', '-t1',
         f'-r{par}',
+        '--',
         f'{workdir.absolute_path}{os.sep}{basename}',
         f'{workdir.absolute_path}{os.sep}{basename}*.rar',
     ]
