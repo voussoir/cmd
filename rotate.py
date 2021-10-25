@@ -42,8 +42,8 @@ def rotate_argparse(args):
             newname = base + suffix
             newname = file.parent.with_child(newname).add_extension(file.extension)
 
-        pipeable.stdout(newname)
-        image.save(file.absolute_path, exif=exif, quality=args.quality)
+        pipeable.stdout(newname.absolute_path)
+        image.save(newname.absolute_path, exif=exif, quality=args.quality)
 
 @vlogging.main_decorator
 def main(argv):
