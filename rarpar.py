@@ -146,28 +146,23 @@ def PARCOMMAND(workdir, basename, par):
     ]
     return command
 
-def assert_enough_space(pathsize, workdir, moveto, rec, rev, par):
+def assert_enough_space(pathsize, drive, rec, rev, par):
     plus_percent = (rec + rev + par) / 100
     needed = pathsize * (1 + plus_percent)
     reserve = RESERVE_SPACE_ON_DRIVE + needed
 
-    workdir_drive = os.path.splitdrive(workdir.absolute_path)[0] + os.sep
-    free_space = shutil.disk_usage(workdir_drive).free
+    free_space = shutil.disk_usage(drive.absolute_path).free
 
-    if moveto is not None:
-        moveto_drive = os.path.splitdrive(moveto.absolute_path)[0]
-        moveto_drive = pathclass.Path(moveto_drive)
-        free_space = min(free_space, shutil.disk_usage(moveto_drive.absolute_path).free)
+    if reserve <= free_space:
+        return
 
     message = ' '.join([
         f'For {bytestring.bytestring(pathsize)},',
-        f'reserve {bytestring.bytestring(reserve)}',
-        f'out of {bytestring.bytestring(free_space)}.',
+        f'reserve {bytestring.bytestring(reserve)}.',
+        f'Only {bytestring.bytestring(free_space)} available',
+        f'on {drive.absolute_path}.',
     ])
-    log.debug(message)
-
-    if reserve > free_space:
-        raise NotEnoughSpace(message)
+    raise NotEnoughSpace(message)
 
 def move(pattern, directory):
     files = winglob.glob(pattern)
@@ -385,8 +380,15 @@ def rarpar(
     if RESERVE_SPACE_ON_DRIVE:
         assert_enough_space(
             pathsize,
-            workdir=workdir,
-            moveto=moveto,
+            drive=workdir.drive,
+            rec=rec or 0,
+            rev=rev or 0,
+            par=par or 0,
+        )
+    if RESERVE_SPACE_ON_DRIVE and moveto is not None:
+        assert_enough_space(
+            pathsize,
+            drive=moveto.drive,
             rec=rec or 0,
             rev=rev or 0,
             par=par or 0,
