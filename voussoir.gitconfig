@@ -6,7 +6,8 @@
     gpgsign = true
 [alias]
     o = log --graph --oneline --decorate --all
-    on = log --graph --oneline --decorate @{u}~1..
+    on = log --graph --oneline --decorate @{u}~1..HEAD
+    om = log --graph --oneline --decorate HEAD~1..@{u}
     upstream = clone --origin upstream
 [push]
     default = simple
