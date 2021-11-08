@@ -16,13 +16,6 @@ package_names:
 --folders:
     If provided, each apk will be downloaded into a separate folder named after
     the package.
-
---debug:
-    Add this flag to see more detailed information.
-
---operatornotify:
-    Add this flag to get any warning messages sent to your operatornotify.
-    See voussoirkit.operatornotify.py for details.
 '''
 import argparse
 import bs4
