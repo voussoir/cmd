@@ -1,9 +1,43 @@
+'''
+contentreplace - find-and-replace en masse
+==========================================
+
+> contentreplace filename_glob replace_from replace_to <flags>
+
+filename_glob:
+    A glob pattern that targets the files of interest.
+
+replace_from:
+    String to be replaced.
+
+replace_to:
+    String with which to replace.
+
+flags:
+--recurse:
+    If provided, we will recurse into subdirectories and look for glob matches
+    there too. If not provided, only files in the cwd are affected.
+
+--regex:
+    If provided, the given replace_from, replace_to will be treated as regex
+    strings. If not provided, we use regular str.replace
+
+--clip_prompt:
+    If you want to do contentreplace with unicode that is difficult to enter
+    into your terminal, or multi-line strings that don't work as command line
+    arguments, this option might help you. The program will wait for you to put
+    the text of interest into your clipboard and press Enter.
+
+--yes:
+    If provided, replacements will occur automatically without prompting.
+'''
 import argparse
 import codecs
 import pyperclip
 import re
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import interactive
 from voussoirkit import pathclass
 from voussoirkit import pipeable
@@ -77,14 +111,13 @@ def main(argv):
     parser.add_argument('filename_glob')
     parser.add_argument('replace_from')
     parser.add_argument('replace_to')
-    parser.add_argument('-y', '--yes', dest='autoyes', action='store_true', help='accept results without confirming')
+    parser.add_argument('--yes', dest='autoyes', action='store_true')
     parser.add_argument('--recurse', action='store_true')
     parser.add_argument('--regex', dest='do_regex', action='store_true')
     parser.add_argument('--clip_prompt', '--clip-prompt', action='store_true')
     parser.set_defaults(func=contentreplace_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.single_main(argv, parser, __doc__)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
