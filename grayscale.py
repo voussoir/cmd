@@ -25,7 +25,7 @@ def grayscale(filename, *, inplace=False):
 
 def grayscale_argparse(args):
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
-    files = pathclass.glob_many(patterns, files=True)
+    files = pathclass.glob_many_files(patterns)
     for file in files:
         new_filename = grayscale(file, inplace=args.inplace)
         if new_filename:

@@ -12,7 +12,7 @@ log = vlogging.getLogger(__name__, 'adbinstall')
 
 def adbinstall_argparse(args):
     patterns = pipeable.input_many(args.apks, skip_blank=True, strip=True)
-    apks = pathclass.glob_many(patterns, files=True)
+    apks = pathclass.glob_many_files(patterns)
     installs = []
     for apk in apks:
         apk = pathclass.Path(apk)

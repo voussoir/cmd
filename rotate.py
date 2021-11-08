@@ -15,7 +15,7 @@ def rotate_argparse(args):
         return 1
 
     patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)
-    files = pathclass.glob_many(patterns, files=True)
+    files = pathclass.glob_many_files(patterns)
 
     for file in files:
         image = PIL.Image.open(file.absolute_path)

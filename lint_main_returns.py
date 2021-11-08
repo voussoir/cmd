@@ -16,9 +16,9 @@ def main(argv):
 
     patterns = argv[:]
     if patterns:
-        files = pathclass.glob_many(patterns, files=True)
+        files = pathclass.glob_many_files(patterns)
     else:
-        files = pathclass.glob('*.py', files=True)
+        files = pathclass.glob_files('*.py')
 
     for file in files:
         no_py = file.replace_extension('').basename

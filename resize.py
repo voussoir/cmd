@@ -102,7 +102,7 @@ def resize(
 
 def resize_argparse(args):
     patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)
-    files = pathclass.glob_many(patterns, files=True)
+    files = pathclass.glob_many_files(patterns)
     for file in files:
         resize(
             file,

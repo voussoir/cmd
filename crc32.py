@@ -12,7 +12,7 @@ def crc32_argparse(args):
     return_status = 0
 
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
-    files = pathclass.glob_many(patterns, files=True)
+    files = pathclass.glob_many_files(patterns)
 
     for file in files:
         try:

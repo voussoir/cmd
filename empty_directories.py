@@ -6,7 +6,7 @@ from voussoirkit import pipeable
 
 def empty_directories_argparse(args):
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
-    directories = pathclass.glob_many(patterns, directories=True)
+    directories = pathclass.glob_many_directories(patterns)
 
     for directory in directories:
         if len(directory.listdir()) == 0:

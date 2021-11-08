@@ -7,7 +7,7 @@ from voussoirkit import pipeable
 
 def inodes_argparse(args):
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
-    files = pathclass.glob_many(patterns, files=True)
+    files = pathclass.glob_many_files(patterns)
     for file in files:
         pipeable.stdout(f'{file.stat.st_dev} {file.stat.st_ino} {file.relative_path}')
     return 0

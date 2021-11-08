@@ -14,7 +14,7 @@ HORIZONTAL = sentinel.Sentinel('horizontal')
 
 def stitch_argparse(args):
     patterns = pipeable.input_many(args.image_files, skip_blank=True, strip=True)
-    files = pathclass.glob_many(patterns, files=True)
+    files = pathclass.glob_many_files(patterns)
     images = [PIL.Image.open(file.absolute_path) for file in files]
     if args.vertical:
         direction = VERTICAL
