@@ -32,6 +32,7 @@ from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'fdroidapk')
 vlogging.getLogger('urllib3').setLevel(vlogging.SILENT)
+vlogging.getLogger('voussoirkit.downloady').setLevel(vlogging.WARNING)
 
 session = requests.Session()
 my_tenacity = tenacity.retry(
