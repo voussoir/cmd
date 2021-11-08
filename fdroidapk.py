@@ -93,6 +93,8 @@ def fpk_argparse(args):
     if packages == ['*']:
         packages = ls_packages(pathclass.cwd())
 
+    download_count = 0
+
     for package in packages:
         package = normalize_package_name(package)
         log.info('Checking %s.', package)
@@ -120,10 +122,13 @@ def fpk_argparse(args):
 
         try:
             download_file(apk_url, this_dest)
+            download_count += 1
         except Exception as exc:
             log.error('%s was unable to download apk (%s).', package, exc)
             return_status = 1
             continue
+
+    log.info('Downloaded %d apks.', download_count)
 
     return return_status
 
