@@ -21,7 +21,7 @@ CHUNK_SIZE = 2**20
 
 def bitwise_or_argparse(args):
     patterns = pipeable.input_many(args.files, skip_blank=True, strip=True)
-    files = pathclass.glob_many_files(patterns)
+    files = list(pathclass.glob_many_files(patterns))
 
     if len(files) < 2:
         log.fatal('Need at least two input files.')
