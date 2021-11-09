@@ -101,7 +101,7 @@ def resize(
         image = image.convert('RGB')
 
     pipeable.stdout(new_name.absolute_path)
-    image.save(new_name.absolute_path, exif=image.info.get('exif', b''), quality=quality)
+    image.save(new_name.absolute_path, exif=image.getexif(), quality=quality)
 
 def resize_argparse(args):
     patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)

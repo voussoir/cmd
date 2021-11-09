@@ -5,7 +5,7 @@ import sys
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 
-def crop(file, crops, *, inplace=False):
+def crop(file, crops, *, inplace=False, quality=100):
     image = PIL.Image.open(file.absolute_path)
     if len(crops) == 2:
         crops.extend(image.size)
@@ -27,7 +27,7 @@ def crop(file, crops, *, inplace=False):
         newname = file.parent.with_child(base + suffix).add_extension(file.extension)
 
     pipeable.stdout(newname.absolute_path)
-    image.save(newname.absolute_path, exif=image.info.get('exif', b''), quality=100)
+    image.save(newname.absolute_path, exif=image.getexif(), quality=quality)
 
 def crop_argparse(args):
     patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)
@@ -38,6 +38,7 @@ def crop_argparse(args):
             file,
             crops=args.crops,
             inplace=args.inplace,
+            quality=args.quality,
         )
     return 0
 
@@ -47,6 +48,7 @@ def main(argv):
     parser.add_argument('pattern')
     parser.add_argument('crops', nargs='+', type=int, default=None)
     parser.add_argument('--inplace', action='store_true')
+    parser.add_argument('--quality', type=int, default=100)
     parser.set_defaults(func=crop_argparse)
 
     args = parser.parse_args(argv)
