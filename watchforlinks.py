@@ -1,11 +1,31 @@
+'''
+watchforlinks
+=============
+
+This program will continuously watch your clipboard for URLs and save them to
+individual files. The files will have randomly generated names. The current
+contents of your clipboard will be erased.
+
+> watchforlinks [extension] <flags>
+
+extension:
+    The saved files will have this extension.
+    If not provided, the default is "generic".
+
+flags:
+--regex X:
+    A regex pattern. Only URLs that match this pattern will be saved.
+'''
 import argparse
 import pyperclip
 import re
 import sys
 import time
 
+from voussoirkit import betterhelp
 from voussoirkit import passwordy
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 
 def loop_once(extension, regex=None):
     try:
@@ -26,7 +46,7 @@ def loop_once(extension, regex=None):
 
     path = pathclass.Path(passwordy.urandom_hex(12)).add_extension(extension)
     pyperclip.copy('')
-    print(path.basename, text)
+    pipeable.stdout(path.basename, text)
     path.write('w', text, encoding='utf-8')
 
 def loop_forever(extension, regex):
@@ -36,6 +56,7 @@ def loop_forever(extension, regex):
         time.sleep(1)
 
 def watchforlinks_argparse(args):
+    pipeable.stderr('Watching clipboard... Press Ctrl+C to stop.')
     try:
         loop_forever(extension=args.extension, regex=args.regex)
     except KeyboardInterrupt:
@@ -49,8 +70,7 @@ def main(argv):
     parser.add_argument('--regex', default=None)
     parser.set_defaults(func=watchforlinks_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.single_main(argv, parser, __doc__)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
