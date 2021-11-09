@@ -4,6 +4,8 @@ resize
 
 Resize image files.
 
+> resize pattern new_w new_h <flags>
+
 pattern:
     Glob pattern for input files.
 
@@ -13,6 +15,7 @@ new_h:
     dimension will be calculated by resizing the other side while keeping the
     aspect ratio.
 
+flags:
 --inplace:
     Overwrite the input files, instead of creating _WxH names.
 
@@ -23,11 +26,11 @@ new_h:
     If the input image is smaller than the requested dimensions, do nothing.
     Useful when globbing in a directory with many differently sized images.
 
---scale X:
-    Use this option instead of new_w, new_h. Scale the image by factor X.
-
 --quality X:
     JPEG compression quality.
+
+--scale X:
+    Use this option instead of new_w, new_h. Scale the image by factor X.
 '''
 import argparse
 import PIL.Image
@@ -49,8 +52,8 @@ def resize(
         inplace=False,
         nearest_neighbor=False,
         only_shrink=False,
-        scale=None,
         quality=100,
+        scale=None,
     ):
     file = pathclass.Path(filename)
     image = PIL.Image.open(file.absolute_path)
@@ -111,8 +114,8 @@ def resize_argparse(args):
             inplace=args.inplace,
             nearest_neighbor=args.nearest_neighbor,
             only_shrink=args.only_shrink,
-            scale=args.scale,
             quality=args.quality,
+            scale=args.scale,
         )
 
     return 0
