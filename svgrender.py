@@ -10,6 +10,7 @@ should be on your PATH.
 scales:
     One or more integers. Each integer will be the size of one output file.
 
+flags:
 --destination:
     A path to a directory where the png files should be saved. By default,
     they go to the same folder as the svg file.
@@ -96,7 +97,7 @@ def main(argv):
 
     parser.add_argument('svg_filepath')
     parser.add_argument('scales', nargs='+')
-    parser.add_argument('--destination', nargs='?', default=None)
+    parser.add_argument('--destination', default=None)
     parser.add_argument('--y', dest='y', action='store_true')
     parser.add_argument('--basename_only', '--basename-only', dest='scale_suffix', action='store_false')
     parser.set_defaults(func=svgrender_argparse)
