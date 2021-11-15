@@ -16,6 +16,10 @@ new_h:
     aspect ratio.
 
 flags:
+--destination:
+    A path to a directory where the png files should be saved. By default,
+    they go to the same folder as the input file.
+
 --inplace:
     Overwrite the input files, instead of creating _WxH names.
 
@@ -49,6 +53,7 @@ def resize(
         new_w=None,
         new_h=None,
         *,
+        destination=None,
         inplace=False,
         nearest_neighbor=False,
         only_shrink=False,
@@ -89,13 +94,19 @@ def resize(
     else:
         image = image.resize( (new_w, new_h), PIL.Image.ANTIALIAS)
 
+    if destination is None:
+        destination = file.parent
+    else:
+        destination = pathclass.Path(destination)
+        destination.assert_is_directory()
+
     if inplace:
-        new_name = file
+        new_name = destination.with_child(file.basename)
     else:
         suffix = '_{width}x{height}'.format(width=new_w, height=new_h)
         base = file.replace_extension('').basename
         new_name = base + suffix + file.extension.with_dot
-        new_name = file.parent.with_child(new_name)
+        new_name = destination.with_child(new_name)
 
     if new_name.extension == '.jpg':
         image = image.convert('RGB')
@@ -111,6 +122,7 @@ def resize_argparse(args):
             file,
             args.new_w,
             args.new_h,
+            destination=args.destination,
             inplace=args.inplace,
             nearest_neighbor=args.nearest_neighbor,
             only_shrink=args.only_shrink,
@@ -127,6 +139,7 @@ def main(argv):
     parser.add_argument('pattern')
     parser.add_argument('new_w', nargs='?', type=int, default=None)
     parser.add_argument('new_h', nargs='?', type=int, default=None)
+    parser.add_argument('--destination', nargs='?', default=None)
     parser.add_argument('--inplace', action='store_true')
     parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
     parser.add_argument('--only_shrink', '--only-shrink', action='store_true')
