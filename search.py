@@ -16,7 +16,10 @@ from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import safeprint
 from voussoirkit import spinal
+from voussoirkit import vlogging
 from voussoirkit import winglob
+
+log = vlogging.get_logger(__name__, 'search')
 
 # Thanks georg
 # http://stackoverflow.com/a/13443424
@@ -259,6 +262,7 @@ def search_argparse(args):
         print('You did not supply any search terms.')
         return 1
 
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser()
 
