@@ -22,6 +22,7 @@ import bs4
 import requests
 import sys
 import tenacity
+import traceback
 
 from voussoirkit import betterhelp
 from voussoirkit import downloady
@@ -102,7 +103,8 @@ def fpk_argparse(args):
         try:
             apk_url = get_apk_url(package)
         except Exception as exc:
-            log.error('%s was unable to get apk url (%s).', package, exc)
+            exc = traceback.format_exc()
+            log.error('%s was unable to get apk url:\n%s', package, exc)
             return_status = 1
             continue
 
@@ -124,7 +126,8 @@ def fpk_argparse(args):
             download_file(apk_url, this_dest)
             download_count += 1
         except Exception as exc:
-            log.error('%s was unable to download apk (%s).', package, exc)
+            exc = traceback.format_exc()
+            log.error('%s was unable to download apk:\n%s', package, exc)
             return_status = 1
             continue
 
