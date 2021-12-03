@@ -1,5 +1,5 @@
 '''
-Recompress all jpg images in the current directory.
+Recompress jpeg images to save disk space.
 '''
 import argparse
 import io
