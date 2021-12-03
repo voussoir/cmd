@@ -123,7 +123,7 @@ def RARCOMMAND(
     else:
         input_pattern = path.absolute_path
 
-    command.append(f'{workdir.absolute_path}{os.sep}{basename}.rar')
+    command.append(workdir.with_child(f'{basename}.rar').absolute_path)
     command.append(f'{input_pattern}')
 
     return command
@@ -142,8 +142,8 @@ def PARCOMMAND(workdir, basename, par):
         'c', '-t1',
         f'-r{par}',
         '--',
-        f'{workdir.absolute_path}{os.sep}{basename}',
-        f'{workdir.absolute_path}{os.sep}{basename}*.rar',
+        workdir.with_child(f'{basename}').absolute_path,
+        workdir.with_child(f'{basename}*.rar').absolute_path,
     ]
     return command
 
