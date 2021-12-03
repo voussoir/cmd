@@ -21,5 +21,5 @@ for path in pathclass.glob_many(argv):
     newname = str(randname).rjust(12, '0') + path.dot_extension
     randname += 1
     newname = path.parent.with_child(newname)
-    os.rename(path.absolute_path, newname.absolute_path)
+    os.rename(path, newname)
     print('%s -> %s' % (path.absolute_path, newname.basename))

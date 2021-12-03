@@ -38,7 +38,7 @@ def filepull(pull_from='.', autoyes=False):
     if autoyes or interactive.getpermission(f'Move {len(files)} files?'):
         for f in files:
             local = os.path.join('.', f.basename)
-            os.rename(f.absolute_path, local)
+            os.rename(f, local)
 
 def filepull_argparse(args):
     filepull(pull_from=args.pull_from, autoyes=args.autoyes)

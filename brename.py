@@ -115,7 +115,7 @@ def loop(pairs, dry=False):
             line = f'{old.absolute_path}\n{new.absolute_path}\n'
             safeprint.safeprint(line)
         else:
-            os.rename(old.absolute_path, new.absolute_path)
+            os.rename(old, new)
 
 def brename_argparse(args):
     return brename(

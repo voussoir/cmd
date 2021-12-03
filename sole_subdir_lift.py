@@ -43,14 +43,14 @@ def sole_lift_argparse(args):
         # to lift don't have name conflicts with the child dir itself.
         # Consider .\abc\abc where the grandchild can't be moved.
         temp_dir = directory.with_child(passwordy.urandom_hex(32))
-        os.rename(child.absolute_path, temp_dir.absolute_path)
+        os.rename(child, temp_dir)
         for grandchild in temp_dir.listdir():
-            shutil.move(grandchild.absolute_path, directory.absolute_path)
+            shutil.move(grandchild, directory)
 
         if temp_dir.listdir():
             raise Exception()
 
-        os.rmdir(temp_dir.absolute_path)
+        os.rmdir(temp_dir)
         queue.append(directory.parent)
 
     return 0

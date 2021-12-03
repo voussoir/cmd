@@ -24,7 +24,7 @@ def inputrename_argparse(args):
         if this:
             new_name = file.basename.replace(args.keyword, this)
             new_name = file.parent.with_child(new_name)
-            os.rename(file.absolute_path, new_name.absolute_path)
+            os.rename(file, new_name)
         prev = this
 
     return 0
