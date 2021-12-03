@@ -1,6 +1,9 @@
 '''
-lint_argparse_returns
-=====================
+lint_main_returns
+=================
+
+Checks Python programs to make sure the main function and argparse functions
+have a return value, which should be an integer status code.
 '''
 import ast
 import sys
@@ -8,7 +11,7 @@ import sys
 from voussoirkit import pathclass
 from voussoirkit import vlogging
 
-log = vlogging.getLogger(__name__, 'lint_argparse_returns')
+log = vlogging.getLogger(__name__, 'lint_main_returns')
 
 @vlogging.main_decorator
 def main(argv):
