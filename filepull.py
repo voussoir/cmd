@@ -6,16 +6,17 @@ import os
 import sys
 
 from voussoirkit import interactive
+from voussoirkit import pathclass
+from voussoirkit import pipeable
 from voussoirkit import spinal
 
 def filepull(pull_from='.', autoyes=False):
-    files = list(spinal.walk(pull_from))
-    cwd = os.getcwd()
-    files = [f for f in files if os.path.split(f.absolute_path)[0] != cwd]
+    start = pathclass.Path(pull_from)
+    files = [file for d in start.listdir_directories() for file in d.walk_files()]
 
     if len(files) == 0:
-        print('No files to move')
-        return
+        pipeable.stderr('No files to move')
+        return 1
 
     duplicate_count = {}
     for f in files:
@@ -33,16 +34,18 @@ def filepull(pull_from='.', autoyes=False):
         raise Exception('duplicate names:\n' + '\n'.join(duplicates))
 
     for f in files:
-        print(f.basename)
+        pipeable.stdout(f.basename)
 
     if autoyes or interactive.getpermission(f'Move {len(files)} files?'):
         for f in files:
             local = os.path.join('.', f.basename)
             os.rename(f, local)
+        return 0
+    else:
+        return 1
 
 def filepull_argparse(args):
-    filepull(pull_from=args.pull_from, autoyes=args.autoyes)
-    return 0
+    return filepull(pull_from=args.pull_from, autoyes=args.autoyes)
 
 def main(argv):
     parser = argparse.ArgumentParser()
