@@ -1,78 +1,114 @@
 import tkinter
-import tkinter.ttk
 import os
 import subprocess
 import sys
 
 from voussoirkit import pathclass
+from voussoirkit import vlogging
+
+log = vlogging.get_logger(__name__, 'pgui')
+
+BUTTON_WIDTH = 12
+
+MAIN_BG = '#000'
+MAIN_FG = '#FFF'
+ENTRY_BG = '#222'
+BUTTON_BG_NORMAL = '#000'
+BUTTON_BG_HIGHLIGHT = '#00aa00'
 
 def load_programs():
-    directory = os.path.join(os.path.dirname(__file__), 'PGUI')
-    shortcuts = [os.path.join(directory, p) for p in os.listdir(directory)]
-    shortcuts = [p for p in shortcuts if p.lower().endswith('.lnk')]
-    shortcuts = [pathclass.Path(p) for p in shortcuts]
+    directory = pathclass.Path(__file__).parent.with_child('PGUI')
+    log.debug('Loading programs from %s.', directory.absolute_path)
+    shortcuts = directory.glob_files('*.lnk')
+    shortcuts.sort()
     return shortcuts
 
-class PGUILauncher(tkinter.ttk.Frame):
+class PGUILauncher(tkinter.Frame):
     def __init__(self, parent):
-        super().__init__(parent)
+        super().__init__(parent, bg=MAIN_BG)
 
-        self.parent = parent
+        self._init_filter_entry()
+        self._init_buttons()
 
-        self.style = tkinter.ttk.Style()
-        self.style.theme_use("clam")
-        self.pack(fill=tkinter.BOTH, expand = 1)
-
-        self.filter_var = tkinter.StringVar()
-        self.filter_var.trace('w', self.filter)
-        self.filter_entry = tkinter.Entry(self, textvariable=self.filter_var)
-        self.filter_entry.grid(row=0, column=0, columnspan=999, sticky='ew')
-        self.filter_entry.bind('<Return>', self.launch_filtered)
-        self.filter_entry.bind('<Escape>', self.quit)
-        self.filter_entry.focus()
-
-        x = 0
-        y = 1
-
-        self.buttons = []
-        self.buttonwidth = 12
-        shortcuts = load_programs()
-        for (index, shortcut) in enumerate(shortcuts):
-            print(y, x)
-            button = tkinter.ttk.Button(
-                self,
-                text=shortcut.replace_extension('').basename,
-                command=lambda sc=shortcut: self.launch_program(sc),
-            )
-            button.shortcut = shortcut
-            print(f'Creating button for {shortcut.basename}')
-            button.configure(width=self.buttonwidth)
-            button.grid(row=y, column=x)
-            self.buttons.append(button)
-            x += 1
-            if x >= 3 and (index != len(shortcuts)-1):
-                x = 0
-                y += 1
-        print(y, x)
+        self.ready_to_launch = None
 
         self.pack()
         self.update()
 
+    def _init_buttons(self):
+        shortcuts = load_programs()
+
+        # This keeps the grid looking mostly square regardless of input count.
+        column_count = int(len(shortcuts) ** 0.5)
+        column_count = max(column_count, 1)
+
+        self.buttons = []
+
+        for (index, shortcut) in enumerate(shortcuts):
+            button = tkinter.Button(
+                self,
+                bg=BUTTON_BG_NORMAL,
+                command=lambda sc=shortcut: self.launch_program(sc),
+                fg=MAIN_FG,
+                height=2,
+                text=shortcut.replace_extension('').basename,
+                width=BUTTON_WIDTH,
+            )
+            button.shortcut = shortcut
+            print(f'Creating button for {shortcut.basename}')
+            # Plus 1 because row 0 is the search box.
+            button.grid(
+                row=(index // column_count) + 1,
+                column=index % column_count,
+                padx=1,
+                pady=1,
+            )
+            self.buttons.append(button)
+
+    def _init_filter_entry(self):
+        # The only way to add padding around the text entry is to put it in its
+        # own frame element. Thanks Kevin
+        # https://stackoverflow.com/a/51823093/5430534
+        self.filter_var = tkinter.StringVar()
+        self.filter_var.trace('w', self.filter)
+        self.filter_frame = tkinter.Frame(self, bg=ENTRY_BG)
+        self.filter_entry = tkinter.Entry(
+            self.filter_frame,
+            bg=ENTRY_BG,
+            fg=MAIN_FG,
+            insertbackground=MAIN_FG,
+            relief=tkinter.FLAT,
+            textvariable=self.filter_var,
+        )
+        self.filter_entry.bind('<Return>', self.launch_filtered)
+        self.filter_entry.bind('<Escape>', self.quit)
+
+        self.filter_frame.grid(row=0, column=0, columnspan=999, sticky='ew', padx=8, pady=8)
+        self.filter_entry.pack(fill='both', expand=True, padx=2, pady=2)
+        return self.filter_entry
+
     def filter(self, *args):
         text = self.filter_entry.get().lower()
+        enabled = []
         for button in self.buttons:
+            button.configure(bg=BUTTON_BG_NORMAL)
             if text == '' or text in button['text'].lower():
                 button['state'] = 'normal'
+                enabled.append(button)
             else:
                 button['state'] = 'disabled'
 
+        if len(enabled) == 1:
+            enabled[0].configure(bg=BUTTON_BG_HIGHLIGHT)
+            self.ready_to_launch = enabled[0]
+        else:
+            self.ready_to_launch = None
+
     def launch_filtered(self, *args):
-        enabled = [b for b in self.buttons if b['state'].string == 'normal']
-        if len(enabled) != 1:
+        if self.ready_to_launch is None:
             return
 
-        button = enabled[0]
-        self.launch_program(button.shortcut)
+        self.launch_program(self.ready_to_launch.shortcut)
 
     def launch_program(self, shortcut):
         print('opening application', shortcut.basename)
@@ -84,14 +120,16 @@ class PGUILauncher(tkinter.ttk.Frame):
     def quit(self, *args):
         return super().quit()
 
-
+@vlogging.main_decorator
 def main(argv):
     root = tkinter.Tk()
     root.withdraw()
-    root.title("PGUI")
+    root.title('PGUI')
     root.resizable(0,0)
 
-    ex = PGUILauncher(root)
+    pgui = PGUILauncher(root)
+    pgui.pack(fill=tkinter.BOTH, expand=True)
+    pgui.filter_entry.focus()
 
     width = root.winfo_reqwidth()
     height = root.winfo_reqheight()
