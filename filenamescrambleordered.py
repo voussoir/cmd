@@ -1,7 +1,7 @@
 '''
 Drag multiple files on top of this .py file. The first file will have its
-name randomly scrambled into 12 digits. The others will increment that number b
-1.
+name randomly scrambled into 12 digits. The others will increment that number
+by 1.
 '''
 
 import os
