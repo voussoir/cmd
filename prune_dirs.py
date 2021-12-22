@@ -11,24 +11,30 @@ import os
 import sys
 
 from voussoirkit import betterhelp
-from voussoirkit import spinal
 from voussoirkit import pathclass
+from voussoirkit import pipeable
+from voussoirkit import spinal
+from voussoirkit import vlogging
+
+log = vlogging.get_logger(__name__, 'prune_dirs')
 
 def prune_dirs(starting):
     starting = pathclass.Path(starting)
     walker = spinal.walk(starting, yield_directories=True, yield_files=False)
+    directories = list(walker)
 
     double_check = set()
 
     def pruneme(directory):
+        log.debug('Checking %s.', directory.absolute_path)
         if directory == starting or directory not in starting:
             return
         if len(directory.listdir()) == 0:
-            print(directory.absolute_path)
-            os.rmdir(directory.absolute_path)
+            pipeable.stdout(directory.absolute_path)
+            os.rmdir(directory)
             double_check.add(directory.parent)
 
-    for directory in walker:
+    for directory in directories:
         pruneme(directory)
 
     while double_check:
@@ -38,6 +44,7 @@ def prune_dirs(starting):
 def prune_dirs_argparse(args):
     return prune_dirs(args.starting)
 
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
