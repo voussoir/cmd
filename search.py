@@ -167,6 +167,7 @@ def search(
     if text is None:
         search_objects = spinal.walk(
             root_path,
+            callback_permission_denied=spinal.do_nothing,
             recurse=not local_only,
             yield_directories=True,
         )
