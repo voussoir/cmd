@@ -31,10 +31,21 @@ class NotEnoughSpace(Exception):
         self.drive = drive
 
 def reserve_disk_space(reserve, drive):
+    '''
+    Returns a dotdict containing these values:
+    {
+        'free': integer number of free bytes,
+        'reserve': integer number of requested bytes,
+        'drive': path string representing the drive we checked
+    }
+
+    Raises NotEnoughSpace if the amount of free disk space on `drive` is less
+    than `free`.
+    '''
     drive = os.path.abspath(drive)
     drive = os.path.splitdrive(drive)[0]
 
-    log.debug('Checking drive %s', drive)
+    log.debug('Checking drive %s.', drive)
     free = shutil.disk_usage(drive).free
 
     if free < reserve:
