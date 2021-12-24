@@ -31,7 +31,6 @@ class NotEnoughSpace(Exception):
         self.drive = drive
 
 def reserve_disk_space(reserve, drive):
-    drive = drive.replace('\\', os.sep).replace('/', os.sep)
     drive = os.path.abspath(drive)
     drive = os.path.splitdrive(drive)[0]
 
