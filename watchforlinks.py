@@ -46,7 +46,7 @@ def loop_once(extension, regex=None):
 
     path = pathclass.Path(passwordy.urandom_hex(12)).add_extension(extension)
     pyperclip.copy('')
-    pipeable.stdout(path.basename, text)
+    pipeable.stdout(f'{path.basename} {text}')
     path.write('w', text, encoding='utf-8')
 
 def loop_forever(extension, regex):

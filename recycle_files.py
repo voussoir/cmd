@@ -8,4 +8,4 @@ for line in pipeable.go():
         pipeable.stdout(line)
         send2trash.send2trash(line)
     else:
-        pipeable.stderr('Not a file', line)
+        pipeable.stderr(f'Not a file {line}')
