@@ -11,10 +11,14 @@ from voussoirkit import spinal
 
 @pipeable.ctrlc_return1
 def inputrename_argparse(args):
+    cwd = pathclass.cwd()
     if args.recurse:
-        files = (file for file in spinal.walk('.') if args.keyword in file.basename)
+        files = cwd.walk_files()
     else:
-        files = (file for file in pathclass.cwd().listdir() if args.keyword in file.basename)
+        files = cwd.listdir_files()
+    files = (file for file in files if args.keyword in file.basename)
+    files = sorted(files)
+
     prev = None
     for file in files:
         pipeable.stderr(file.relative_path)
