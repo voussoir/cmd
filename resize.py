@@ -4,27 +4,49 @@ resize
 
 Resize image files.
 
-> resize pattern new_w new_h <flags>
+> resize patterns <flags>
 
-pattern:
-    Glob pattern for input files.
-
-new_w,
-new_h:
-    New dimensions for the image. If either of these is 0, then that
-    dimension will be calculated by resizing the other side while keeping the
-    aspect ratio.
+patterns:
+    One or more glob patterns for input files.
+    Uses pipeable to support !c clipboard, !i stdin lines of glob patterns.
 
 flags:
---destination:
-    A path to a directory where the png files should be saved. By default,
-    they go to the same folder as the input file.
+--width X:
+--height X:
+    New dimensions for the image. If either of these is omitted, then that
+    dimension will be calculated automatically based on the aspect ratio.
+
+--break_aspect_ratio:
+    If provided, the given --width and --height will be used exactly. You will
+    need to provide both --width and --height.
+
+    If omitted, the image will be resized to fit within the bounds provided by
+    --width and --height while preserving its aspect ratio.
+
+--output X:
+    A string that controls the output filename format. Suppose the input file
+    was myphoto.jpg. You can use these variables in your format string:
+    {base} = myphoto
+    {width} = an integer
+    {height} = an integer
+    {extension} = .jpg
+
+    You may omit {extension} from your format string and it will automatically
+    be added to the end, unless you already provided a different extension.
+
+    If your format string only designates a basename, output files will go to
+    the same directory as the corresponding input file. If your string contains
+    path separators, all output files will go to that directory.
+    The directory
+    part is not formatted with the variables.
 
 --inplace:
-    Overwrite the input files, instead of creating _WxH names.
+    Overwrite the input files. Cannot be used along with --output.
+    Be careful!
 
 --nearest:
-    Use nearest-neighbor scaling to preserve pixelated images.
+    If provided, use nearest-neighbor scaling to preserve pixelated images.
+    If omitted, use antialiased scaling.
 
 --only_shrink:
     If the input image is smaller than the requested dimensions, do nothing.
@@ -34,9 +56,11 @@ flags:
     JPEG compression quality.
 
 --scale X:
-    Use this option instead of new_w, new_h. Scale the image by factor X.
+    Scale the image by factor X.
+    Use this option instead of --width, --height.
 '''
 import argparse
+import os
 import PIL.Image
 import sys
 
@@ -44,91 +68,147 @@ from voussoirkit import betterhelp
 from voussoirkit import imagetools
 from voussoirkit import pathclass
 from voussoirkit import pipeable
+from voussoirkit import sentinel
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'resize')
 
+OUTPUT_INPLACE = sentinel.Sentinel('output inplace')
+DEFAULT_OUTPUT_FORMAT = '{base}_{width}x{height}{extension}'
+
+def resize_core(
+        image,
+        height=None,
+        only_shrink=False,
+        scale=None,
+        width=None,
+    ):
+    pass
+
 def resize(
         filename,
-        new_w=None,
-        new_h=None,
         *,
         destination=None,
-        inplace=False,
+        output_format=DEFAULT_OUTPUT_FORMAT,
+        height=None,
+        keep_aspect_ratio=True,
         nearest_neighbor=False,
         only_shrink=False,
         quality=100,
         scale=None,
+        width=None,
     ):
+    if scale and (width or height):
+        raise ValueError('Cannot use both scale and width/height.')
+
     file = pathclass.Path(filename)
     image = PIL.Image.open(file.absolute_path)
 
     (image_width, image_height) = image.size
 
-    if new_w is not None and new_h is not None:
+    if scale:
+        width = int(image_width * scale)
+        height = int(image_height * scale)
+    elif (width and height) and not keep_aspect_ratio:
+        # The given width and height will be used exactly.
         pass
-    elif scale:
-        new_w = int(image_width * scale)
-        new_h = int(image_height * scale)
-
-    if new_w == 0:
-        (new_w, new_h) = imagetools.fit_into_bounds(
-            image_width,
-            image_height,
-            10000000,
-            new_h,
+    elif (width and height) and keep_aspect_ratio:
+        (width, height) = imagetools.fit_into_bounds(
+            image_width=image_width,
+            image_height=image_height,
+            frame_width=width,
+            frame_height=height,
             only_shrink=only_shrink,
         )
-    if new_h == 0:
-        (new_w, new_h) = imagetools.fit_into_bounds(
-            image_width,
-            image_height,
-            new_w,
-            10000000,
+    elif (width and not height) and keep_aspect_ratio:
+        (width, height) = imagetools.fit_into_bounds(
+            image_width=image_width,
+            image_height=image_height,
+            frame_width=width,
+            frame_height=10000000,
             only_shrink=only_shrink,
         )
-
-    log.debug('Resizing %s to %dx%d.', file.absolute_path, new_w, new_h)
-    if nearest_neighbor:
-        image = image.resize( (new_w, new_h), PIL.Image.NEAREST)
+    elif (height and not width) and keep_aspect_ratio:
+        (width, height) = imagetools.fit_into_bounds(
+            image_width=image_width,
+            image_height=image_height,
+            frame_width=10000000,
+            frame_height=height,
+            only_shrink=only_shrink,
+        )
     else:
-        image = image.resize( (new_w, new_h), PIL.Image.ANTIALIAS)
+        raise ValueError('Insufficient parameters for resizing. Need width, height, or scale.')
 
-    if destination is None:
-        destination = file.parent
+    if output_format is OUTPUT_INPLACE:
+        output_file = file
     else:
-        destination = pathclass.Path(destination)
-        destination.assert_is_directory()
+        output_format = pathclass.normalize_sep(output_format)
+        if output_format.endswith(os.sep):
+            output_folder = pathclass.Path(output_format)
+            output_format = DEFAULT_OUTPUT_FORMAT
+        elif os.sep in output_format:
+            full = pathclass.Path(output_format)
+            output_folder = full.parent
+            output_format = full.basename
+        else:
+            output_folder = file.parent
 
-    if inplace:
-        new_name = destination.with_child(file.basename)
-    else:
-        suffix = '_{width}x{height}'.format(width=new_w, height=new_h)
+        output_folder.assert_is_directory()
+
         base = file.replace_extension('').basename
-        new_name = base + suffix + file.extension.with_dot
-        new_name = destination.with_child(new_name)
+        if '{extension}' not in output_format:
+            known_extensions = PIL.Image.registered_extensions()
+            known_extensions = {os.path.normcase(ext) for ext in known_extensions}
+            output_norm = os.path.normcase(output_format)
+            if not any(output_norm.endswith(ext) for ext in known_extensions):
+                output_format += '{extension}'
+        output_file = output_format.format(
+            base=base,
+            width=width,
+            height=height,
+            extension=file.extension.with_dot,
+        )
+        output_file = output_folder.with_child(output_file)
+        if output_file == file:
+            raise ValueError('Cannot overwrite input file without OUTPUT_INPLACE.')
 
-    if new_name.extension == '.jpg':
+    log.debug('Resizing %s to %dx%d.', file.absolute_path, width, height)
+    resampler = PIL.Image.NEAREST if nearest_neighbor else PIL.Image.ANTIALIAS
+    image = image.resize( (width, height), resampler)
+
+    if output_file.extension == '.jpg':
         image = image.convert('RGB')
 
-    pipeable.stdout(new_name.absolute_path)
-    image.save(new_name.absolute_path, exif=image.getexif(), quality=quality)
+    image.save(output_file.absolute_path, exif=image.getexif(), quality=quality)
+    return output_file
 
 def resize_argparse(args):
-    patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)
+    if args.inplace and args.output:
+        pipeable.stderr('Cannot have both --inplace and --output')
+        return 1
+
+    if args.inplace:
+        output_format = OUTPUT_INPLACE
+    elif args.output:
+        output_format = args.output
+    else:
+        output_format = DEFAULT_OUTPUT_FORMAT
+
+    patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
     files = pathclass.glob_many_files(patterns)
     for file in files:
-        resize(
+        output_file = resize(
             file,
-            args.new_w,
-            args.new_h,
-            destination=args.destination,
-            inplace=args.inplace,
+            height=args.height,
+            keep_aspect_ratio=not args.break_aspect_ratio,
             nearest_neighbor=args.nearest_neighbor,
             only_shrink=args.only_shrink,
+            output_format=output_format,
             quality=args.quality,
             scale=args.scale,
+            width=args.width,
         )
+        pipeable.stdout(output_file.absolute_path)
 
     return 0
 
@@ -136,13 +216,15 @@ def resize_argparse(args):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('pattern')
-    parser.add_argument('new_w', nargs='?', type=int, default=None)
-    parser.add_argument('new_h', nargs='?', type=int, default=None)
-    parser.add_argument('--destination', nargs='?', default=None)
+    parser.add_argument('patterns', nargs='+')
+    parser.add_argument('--width', type=int, default=None)
+    parser.add_argument('--height', type=int, default=None)
+    parser.add_argument('--destination', default=None)
     parser.add_argument('--inplace', action='store_true')
     parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
     parser.add_argument('--only_shrink', '--only-shrink', action='store_true')
+    parser.add_argument('--break_aspect_ratio', '--break-aspect-ratio', action='store_true')
+    parser.add_argument('--output', default=None)
     parser.add_argument('--scale', type=float, default=None)
     parser.add_argument('--quality', type=int, default=100)
     parser.set_defaults(func=resize_argparse)
