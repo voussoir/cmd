@@ -6,7 +6,6 @@ import sys
 
 from voussoirkit import passwordy
 from voussoirkit import pathclass
-from voussoirkit import spinal
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'sole_subdir_lift')
@@ -14,7 +13,7 @@ log = vlogging.getLogger(__name__, 'sole_subdir_lift')
 def sole_lift_argparse(args):
     starting = pathclass.Path(args.starting)
     queue = collections.deque()
-    queue.extend(spinal.walk(starting, yield_files=False, yield_directories=True))
+    queue.extend(starting.walk_directories())
     while len(queue) > 0:
         directory = queue.popleft()
 
@@ -48,7 +47,7 @@ def sole_lift_argparse(args):
             shutil.move(grandchild, directory)
 
         if temp_dir.listdir():
-            raise Exception()
+            raise Exception('The temp dir is supposed to be empty by this point.')
 
         os.rmdir(temp_dir)
         queue.append(directory.parent)
