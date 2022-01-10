@@ -299,7 +299,7 @@ def git_show_commit(commit):
     check_call(command)
 
 def git_stash_push():
-    token = passwordy.urandom_hex(32)
+    token = passwordy.random_hex(32)
     command = [GIT, 'stash', 'push', '--include-untracked', '--message', token]
     output = check_output(command)
 

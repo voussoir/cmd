@@ -42,7 +42,7 @@ def sole_lift_argparse(args):
         # child is renamed to random hex so that the grandchildren we are about
         # to lift don't have name conflicts with the child dir itself.
         # Consider .\abc\abc where the grandchild can't be moved.
-        temp_dir = directory.with_child(passwordy.urandom_hex(32))
+        temp_dir = directory.with_child(passwordy.random_hex(32))
         os.rename(child, temp_dir)
         for grandchild in temp_dir.listdir():
             shutil.move(grandchild, directory)
