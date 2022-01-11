@@ -29,7 +29,7 @@ class PGUILauncher(tkinter.Frame):
     def __init__(self, parent):
         super().__init__(parent, bg=MAIN_BG)
 
-        self._init_filter_entry()
+        self._init_upper_controls()
         self._init_buttons()
 
         self.ready_to_launch = None
@@ -67,7 +67,7 @@ class PGUILauncher(tkinter.Frame):
             )
             self.buttons.append(button)
 
-    def _init_filter_entry(self):
+    def _init_upper_controls(self):
         # The only way to add padding around the text entry is to put it in its
         # own frame element. Thanks Kevin
         # https://stackoverflow.com/a/51823093/5430534
