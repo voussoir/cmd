@@ -15,11 +15,13 @@ MAIN_FG = '#FFF'
 ENTRY_BG = '#222'
 BUTTON_BG_NORMAL = '#000'
 BUTTON_BG_HIGHLIGHT = '#00aa00'
+FOLDER_EMOJI = '\U0001F4C1'
+
+PGUI_FOLDER = pathclass.Path(__file__).parent.with_child('PGUI')
 
 def load_programs():
-    directory = pathclass.Path(__file__).parent.with_child('PGUI')
-    log.debug('Loading programs from %s.', directory.absolute_path)
-    shortcuts = directory.glob_files('*.lnk')
+    log.debug('Loading programs from %s.', PGUI_FOLDER.absolute_path)
+    shortcuts = PGUI_FOLDER.glob_files('*.lnk')
     shortcuts.sort()
     return shortcuts
 
@@ -71,9 +73,9 @@ class PGUILauncher(tkinter.Frame):
         # https://stackoverflow.com/a/51823093/5430534
         self.filter_var = tkinter.StringVar()
         self.filter_var.trace('w', self.filter)
-        self.filter_frame = tkinter.Frame(self, bg=ENTRY_BG)
+        self.upper_frame = tkinter.Frame(self, bg=ENTRY_BG)
         self.filter_entry = tkinter.Entry(
-            self.filter_frame,
+            self.upper_frame,
             bg=ENTRY_BG,
             fg=MAIN_FG,
             insertbackground=MAIN_FG,
@@ -83,8 +85,18 @@ class PGUILauncher(tkinter.Frame):
         self.filter_entry.bind('<Return>', self.launch_filtered)
         self.filter_entry.bind('<Escape>', self.quit)
 
-        self.filter_frame.grid(row=0, column=0, columnspan=999, sticky='ew', padx=8, pady=8)
-        self.filter_entry.pack(fill='both', expand=True, padx=2, pady=2)
+        self.open_folder_button = tkinter.Button(
+            self.upper_frame,
+            text=FOLDER_EMOJI,
+            bg=BUTTON_BG_NORMAL,
+            fg=MAIN_FG,
+            command=lambda: self.open_pgui_folder(),
+        )
+
+        self.upper_frame.columnconfigure(0, weight=1)
+        self.upper_frame.grid(row=0, column=0, columnspan=999, sticky='ew', padx=8, pady=8)
+        self.filter_entry.grid(row=0, column=0, sticky='news', padx=2, pady=2)
+        self.open_folder_button.grid(row=0, column=1, sticky='news', padx=2, pady=2)
         return self.filter_entry
 
     def filter(self, *args):
@@ -116,6 +128,13 @@ class PGUILauncher(tkinter.Frame):
         command = f'"{shortcut.absolute_path}"'
         subprocess.Popen(command, shell=True)
         self.quit()
+
+    def open_pgui_folder(self):
+        if os.name == 'nt':
+            command = ['explorer.exe', PGUI_FOLDER.absolute_path]
+        else:
+            command = ['xdg-open', PGUI_FOLDER.absolute_path]
+        subprocess.Popen(command, shell=True)
 
     def quit(self, *args):
         return super().quit()
