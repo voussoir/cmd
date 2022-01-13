@@ -27,6 +27,7 @@ flags:
     A string that controls the output filename format. Suppose the input file
     was myphoto.jpg. You can use these variables in your format string:
     {base} = myphoto
+    {filename} = myphoto.jpg
     {width} = an integer
     {height} = an integer
     {extension} = .jpg
@@ -88,7 +89,6 @@ def resize_core(
 def resize(
         filename,
         *,
-        destination=None,
         output_format=DEFAULT_OUTPUT_FORMAT,
         height=None,
         keep_aspect_ratio=True,
@@ -155,20 +155,21 @@ def resize(
 
         output_folder.assert_is_directory()
 
-        base = file.replace_extension('').basename
-        if '{extension}' not in output_format:
-            known_extensions = PIL.Image.registered_extensions()
-            known_extensions = {os.path.normcase(ext) for ext in known_extensions}
-            output_norm = os.path.normcase(output_format)
-            if not any(output_norm.endswith(ext) for ext in known_extensions):
-                output_format += '{extension}'
+        filename = file.basename
         output_file = output_format.format(
-            base=base,
-            width=width,
-            height=height,
+            base=file.replace_extension('').basename,
             extension=file.extension.with_dot,
+            filename=file.basename,
+            height=height,
+            width=width,
         )
         output_file = output_folder.with_child(output_file)
+
+        known_extensions = {os.path.normcase(ext) for ext in PIL.Image.registered_extensions()}
+        output_norm = output_file.normcase
+        if not any(output_norm.endswith(ext) for ext in known_extensions):
+            output_file = output_file.add_extension(file.extension)
+
         if output_file == file:
             raise ValueError('Cannot overwrite input file without OUTPUT_INPLACE.')
 
@@ -219,7 +220,6 @@ def main(argv):
     parser.add_argument('patterns', nargs='+')
     parser.add_argument('--width', type=int, default=None)
     parser.add_argument('--height', type=int, default=None)
-    parser.add_argument('--destination', default=None)
     parser.add_argument('--inplace', action='store_true')
     parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
     parser.add_argument('--only_shrink', '--only-shrink', action='store_true')
