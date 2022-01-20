@@ -118,10 +118,7 @@ def RARCOMMAND(
     if path.is_dir:
         command.append('-r')
 
-    if path.is_dir:
-        input_pattern = path.absolute_path + '\\*'
-    else:
-        input_pattern = path.absolute_path
+    input_pattern = path.absolute_path
 
     command.append(workdir.with_child(f'{basename}.rar').absolute_path)
     command.append(f'{input_pattern}')
