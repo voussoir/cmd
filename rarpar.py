@@ -144,23 +144,13 @@ def PARCOMMAND(workdir, basename, par):
     ]
     return command
 
-def assert_enough_space(pathsize, drive, rec, rev, par):
+def assert_enough_space(path, size, rec, rev, par):
     plus_percent = (rec + rev + par) / 100
-    needed = pathsize * (1 + plus_percent)
+    needed = size * (1 + plus_percent)
     reserve = RESERVE_SPACE_ON_DRIVE + needed
+    reserve = int(reserve)
 
-    free_space = shutil.disk_usage(drive.absolute_path).free
-
-    if reserve <= free_space:
-        return
-
-    message = ' '.join([
-        f'For {bytestring.bytestring(pathsize)},',
-        f'reserve {bytestring.bytestring(reserve)}.',
-        f'Only {bytestring.bytestring(free_space)} available',
-        f'on {drive.absolute_path}.',
-    ])
-    raise NotEnoughSpace(message)
+    path.assert_disk_space(reserve)
 
 def move(pattern, directory):
     files = winglob.glob(pattern)
@@ -377,16 +367,16 @@ def rarpar(
 
     if RESERVE_SPACE_ON_DRIVE:
         assert_enough_space(
-            pathsize,
-            drive=workdir.drive,
+            path=workdir,
+            size=pathsize,
             rec=rec or 0,
             rev=rev or 0,
             par=par or 0,
         )
     if RESERVE_SPACE_ON_DRIVE and moveto is not None:
         assert_enough_space(
-            pathsize,
-            drive=moveto.drive,
+            path=moveto,
+            size=pathsize,
             rec=rec or 0,
             rev=rev or 0,
             par=par or 0,
@@ -548,7 +538,7 @@ def rarpar_argparse(args):
             solid=args.solid,
             workdir=args.workdir,
         )
-    except (RarExists, NotEnoughSpace) as exc:
+    except (RarExists, pathclass.NotEnoughSpace) as exc:
         log.fatal(exc)
         status = 1
 
