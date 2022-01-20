@@ -16,6 +16,7 @@ import sys
 
 from voussoirkit import betterhelp
 from voussoirkit import pathclass
+from voussoirkit import niceprints
 from voussoirkit import operatornotify
 from voussoirkit import spinal
 from voussoirkit import vlogging
@@ -33,15 +34,13 @@ def directory_discrepancy_argparse(args):
     files1 = set(helper(args.dir1, recurse=args.recurse))
     files2 = set(helper(args.dir2, recurse=args.recurse))
 
-    print(f'In "{args.dir1}" but not in "{args.dir2}":')
-    print('=============================')
+    print(niceprints.equals_header(f'In "{args.dir1}" but not in "{args.dir2}"'))
     for discrepancy in sorted(files1.difference(files2)):
         print(discrepancy)
 
     print()
 
-    print(f'In "{args.dir2}" but not in "{args.dir1}":')
-    print('=============================')
+    print(niceprints.equals_header(f'In "{args.dir2}" but not in "{args.dir1}"'))
     for discrepancy in sorted(files2.difference(files1)):
         print(discrepancy)
 
