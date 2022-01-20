@@ -19,13 +19,17 @@ package_names:
 '''
 import argparse
 import bs4
+import io
+import json
 import requests
 import sys
 import tenacity
 import traceback
+import zipfile
 
 from voussoirkit import betterhelp
 from voussoirkit import downloady
+from voussoirkit import httperrors
 from voussoirkit import operatornotify
 from voussoirkit import pathclass
 from voussoirkit import pipeable
@@ -52,18 +56,17 @@ def download_file(url, path):
         timeout=30,
     )
 
-@my_tenacity
-def get_apk_url(package_name):
-    url = f'https://f-droid.org/en/packages/{package_name}'
-    log.debug('Downloading page %s.', url)
-    response = session.get(url, timeout=30)
-    response.raise_for_status()
-    soup = bs4.BeautifulSoup(response.text, 'html.parser')
-    li = soup.find('li', {'class': 'package-version'})
-    aa = li.find_all('a')
-    aa = [a for a in aa if a.get('href', '').endswith('.apk')]
-    apk_url = aa[0]['href']
-    return apk_url
+def get_fdroid_index():
+    '''
+    Download the index-v1.json and return it as a dict.
+    '''
+    log.info('Downloading F-Droid package index.')
+    url = 'https://f-droid.org/repo/index-v1.jar'
+    response = requests.get(url)
+    httperrors.raise_for_status(response)
+    zf = zipfile.ZipFile(io.BytesIO(response.content))
+    index = json.load(zf.open('index-v1.json', 'r'))
+    return index
 
 def ls_packages(path):
     packages = set()
@@ -96,19 +99,23 @@ def fpk_argparse(args):
 
     download_count = 0
 
+    index = get_fdroid_index()
+
     for package in packages:
         package = normalize_package_name(package)
-        log.info('Checking %s.', package)
 
         try:
-            apk_url = get_apk_url(package)
-        except Exception as exc:
-            exc = traceback.format_exc()
-            log.error('%s was unable to get apk url:\n%s', package, exc)
+            this_packages = index['packages'][package]
+        except KeyError:
+            log.error('%s is not in the package index.', package)
             return_status = 1
             continue
 
-        apk_basename = downloady.basename_from_url(apk_url)
+        most_recent = sorted(this_packages, key=lambda p: p['versionCode'])[-1]
+        apk_basename = most_recent['apkName']
+        log.debug('Most recent is %s', apk_basename)
+        apk_url = f'https://f-droid.org/repo/{apk_basename}'
+
         if args.folders:
             this_dest = destination.with_child(package)
             this_dest.makedirs(exist_ok=True)
