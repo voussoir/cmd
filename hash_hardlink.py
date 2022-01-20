@@ -8,7 +8,6 @@ from voussoirkit import bytestring
 from voussoirkit import lazychain
 from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import spinal
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'hash_hardlink')
@@ -25,7 +24,8 @@ def hash_file(file):
 
 @pipeable.ctrlc_return1
 def hash_hardlink_argparse(args):
-    paths = [pathclass.Path(p) for p in pipeable.input_many(args.paths, strip=True, skip_blank=True)]
+    patterns = pipeable.input_many(args.patterns, strip=True, skip_blank=True)
+    paths = list(pathclass.glob_many(patterns))
     drives = set(path.stat.st_dev for path in paths)
     if len(drives) != 1:
         raise ValueError('All paths must be on the same drive.')
@@ -34,22 +34,17 @@ def hash_hardlink_argparse(args):
     for path in paths:
         if path.is_file:
             files.append(path)
-        elif path.is_dir:
-            files.extend(spinal.walk(path))
+        else:
+            files.extend(path.walk_files())
+
+    files = (file for file in files if file.size >= args.if_larger_than)
 
     inodes = set()
     hashes = {}
 
-    if args.if_larger_than:
-        larger = bytestring.parsebytes(args.if_larger_than)
-    else:
-        larger = None
-
     for file in files:
         if file.stat.st_ino in inodes:
             # This file is already a hardlink of another file we've seen.
-            continue
-        if larger is not None and file.size < larger:
             continue
         inodes.add(file.stat.st_ino)
         h = hash_file(file)
@@ -71,8 +66,8 @@ def hash_hardlink_argparse(args):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('paths', nargs='+')
-    parser.add_argument('--if_larger_than', '--if-larger-than', default=None)
+    parser.add_argument('patterns', nargs='+')
+    parser.add_argument('--if_larger_than', '--if-larger-than', type=bytestring.parsebytes, default=-1)
     parser.set_defaults(func=hash_hardlink_argparse)
 
     args = parser.parse_args(argv)
