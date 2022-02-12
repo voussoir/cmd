@@ -50,22 +50,36 @@ def all_terms_match(search_text, terms, match_function):
     )
     return matches
 
-def search_contents_generic(filepath, content_args):
+def is_iterable(something):
     try:
-        text = filepath.read('r')
+        iter(something)
+        return True
+    except TypeError:
+        return False
+
+def search_contents_generic(filepath, content_args):
+    # We first test 1 MB of the file to see if it is text rather than binary.
+    try:
+        handle = filepath.open('r')
+        handle.read(2 ** 20)
     except UnicodeDecodeError:
         try:
-            text = filepath.read('r', encoding='utf-8')
+            handle.close()
+            handle = filepath.open('r', encoding='utf-8')
+            handle.read(2 ** 20)
         except UnicodeDecodeError:
-            #safeprint.safeprint(filepath.absolute_path)
-            #traceback.print_exc()
+            log.debug('%s could not be read with encoding=utf-8.', filepath)
             return
     except Exception:
         safeprint.safeprint(filepath.absolute_path)
         traceback.print_exc()
         return
 
-    content_args['text'] = text
+    # We keep the lines as a generator instead of using readlines,
+    # which makes a list.
+    handle.seek(0)
+    lines = (line.rstrip('\r\n') for line in handle)
+    content_args['text'] = lines
     content_args['line_numbers'] = True
 
     results = search(**content_args)
@@ -171,10 +185,12 @@ def search(
             recurse=not local_only,
             yield_directories=True,
         )
-    elif isinstance(text, (list, tuple)) or inspect.isgenerator(text):
+    elif isinstance(text, str):
+        search_objects = text.splitlines()
+    elif is_iterable(text):
         search_objects = text
     else:
-        search_objects = text.splitlines()
+        raise TypeError(f'Don\'t know how to search text={text}')
 
     for (index, search_object) in enumerate(search_objects):
         # if index % 10 == 0:
