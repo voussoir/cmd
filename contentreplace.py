@@ -1,36 +1,3 @@
-'''
-contentreplace - find-and-replace en masse
-==========================================
-
-> contentreplace filename_glob replace_from replace_to <flags>
-
-filename_glob:
-    A glob pattern that targets the files of interest.
-
-replace_from:
-    String to be replaced.
-
-replace_to:
-    String with which to replace.
-
-flags:
---recurse:
-    If provided, we will recurse into subdirectories and look for glob matches
-    there too. If not provided, only files in the cwd are affected.
-
---regex:
-    If provided, the given replace_from, replace_to will be treated as regex
-    strings. If not provided, we use regular str.replace
-
---clip_prompt:
-    If you want to do contentreplace with unicode that is difficult to enter
-    into your terminal, or multi-line strings that don't work as command line
-    arguments, this option might help you. The program will wait for you to put
-    the text of interest into your clipboard and press Enter.
-
---yes:
-    If provided, replacements will occur automatically without prompting.
-'''
 import argparse
 import codecs
 import pyperclip
@@ -106,18 +73,69 @@ def contentreplace_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument('filename_glob')
-    parser.add_argument('replace_from')
-    parser.add_argument('replace_to')
-    parser.add_argument('--yes', dest='autoyes', action='store_true')
-    parser.add_argument('--recurse', action='store_true')
-    parser.add_argument('--regex', dest='do_regex', action='store_true')
-    parser.add_argument('--clip_prompt', '--clip-prompt', action='store_true')
+    parser = argparse.ArgumentParser(
+        description='''
+        find-and-replace en masse
+        ''',
+    )
+    parser.add_argument(
+        'filename_glob',
+        help='''
+        A glob pattern that targets the files of interest.
+        ''',
+    )
+    parser.add_argument(
+        'replace_from',
+        help='''
+        String to be replaced. You can use backslash-escaped symbols like
+        \\n for newline.
+        ''',
+    )
+    parser.add_argument(
+        'replace_to',
+        help='''
+        String with which to replace. Can use backslash-escaped symbols.
+        ''',
+    )
+    parser.add_argument(
+        '--yes',
+        dest='autoyes',
+        action='store_true',
+        help='''
+        If provided, replacements will occur automatically without prompting.
+        ''',
+    )
+    parser.add_argument(
+        '--recurse',
+        action='store_true',
+        help='''
+        If provided, we will recurse into subdirectories and look for glob matches
+        there too. If not provided, only files in the cwd are affected.
+        ''',
+    )
+    parser.add_argument(
+        '--regex',
+        dest='do_regex',
+        action='store_true',
+        help='''
+        If provided, the given replace_from, replace_to will be treated as regex
+        strings. If not provided, we use regular str.replace.
+        ''',
+    )
+    parser.add_argument(
+        '--clip_prompt',
+        '--clip-prompt',
+        action='store_true',
+        help='''
+        If you want to do contentreplace with unicode that is difficult to enter
+        into your terminal, or multi-line strings that don't work as command line
+        arguments, this option might help you. The program will wait for you to put
+        the text of interest into your clipboard and press Enter.
+        ''',
+    )
     parser.set_defaults(func=contentreplace_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

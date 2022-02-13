@@ -1,16 +1,3 @@
-'''
-directory_discrepancy
-=====================
-
-This program compares two directory and shows which files exist in each
-directory that do not exist in the other.
-
-> directory_discrepancy dir1 dir2
-
-flags:
---recurse:
-    Also check subdirectories.
-'''
 import argparse
 import sys
 
@@ -48,14 +35,24 @@ def directory_discrepancy_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
-
+    parser = argparse.ArgumentParser(
+        description='''
+        This program compares two directory and shows which files exist in each
+        directory that do not exist in the other.
+        ''',
+    )
     parser.add_argument('dir1')
     parser.add_argument('dir2')
-    parser.add_argument('--recurse', action='store_true')
+    parser.add_argument(
+        '--recurse',
+        action='store_true',
+        help='''
+        Also check subdirectories.
+        ''',
+    )
     parser.set_defaults(func=directory_discrepancy_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

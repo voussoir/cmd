@@ -1,17 +1,3 @@
-'''
-reserve_disk_space
-==================
-
-Exits with status of 0 if the disk has the requested amount of space, 1 if not.
-
-> reserve_disk_space reserve [drive]
-
-reserve:
-    A string like "50g" or "100 gb"
-
-drive:
-    Filepath to the drive you want to check. Defaults to cwd drive.
-'''
 import argparse
 import sys
 
@@ -39,13 +25,29 @@ def reserve_disk_space_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument('reserve')
-    parser.add_argument('drive', nargs='?', default='.')
+    parser = argparse.ArgumentParser(
+        description='''
+        Exits with status of 0 if the disk has the requested amount of space, 1 if not.
+        ''',
+    )
+    parser.add_argument(
+        'reserve',
+        type=str,
+        help='''
+        A string like "50g" or "100 gb"
+        ''',
+    )
+    parser.add_argument(
+        'drive',
+        nargs='?',
+        default='.',
+        help='''
+        Filepath to the drive you want to check.
+        ''',
+    )
     parser.set_defaults(func=reserve_disk_space_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

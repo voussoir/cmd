@@ -1,22 +1,3 @@
-'''
-fdroidapk - F-Droid APK downloader
-==================================
-
-> fdroidapk package_names <flags>
-
-package_names:
-    One or more package names to download, separated by spaces. You can find
-    the package name in the URL on f-droid.org.
-    For example, com.nutomic.syncthingandroid from the URL
-    https://f-droid.org/en/packages/com.nutomic.syncthingandroid/
-
---destination path:
-    Alternative path to download the apk files to. Default is cwd.
-
---folders:
-    If provided, each apk will be downloaded into a separate folder named after
-    the package.
-'''
 import argparse
 import bs4
 import io
@@ -33,6 +14,7 @@ from voussoirkit import httperrors
 from voussoirkit import operatornotify
 from voussoirkit import pathclass
 from voussoirkit import pipeable
+from voussoirkit import progressbars
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'fdroidapk')
@@ -52,7 +34,7 @@ def download_file(url, path):
     return downloady.download_file(
         url,
         path,
-        callback_progress=downloady.Progress2,
+        progressbar=progressbars.bar1_bytestring,
         timeout=30,
     )
 
@@ -88,8 +70,7 @@ def normalize_package_name(package_name):
 
 @pipeable.ctrlc_return1
 def fpk_argparse(args):
-    destination = pathclass.Path(args.destination)
-    destination.assert_is_directory()
+    args.destination.assert_is_directory()
 
     return_status = 0
 
@@ -117,10 +98,10 @@ def fpk_argparse(args):
         apk_url = f'https://f-droid.org/repo/{apk_basename}'
 
         if args.folders:
-            this_dest = destination.with_child(package)
+            this_dest = args.destination.with_child(package)
             this_dest.makedirs(exist_ok=True)
         else:
-            this_dest = destination
+            this_dest = args.destination
         this_dest = this_dest.with_child(apk_basename)
 
         if this_dest.exists:
@@ -145,14 +126,39 @@ def fpk_argparse(args):
 @operatornotify.main_decorator(subject='fdroidapk.py')
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description='F-Droid APK downloader.')
 
-    parser.add_argument('packages', nargs='+')
-    parser.add_argument('--folders', action='store_true')
-    parser.add_argument('--destination', default='.')
+    parser.add_argument(
+        'packages',
+        nargs='+',
+        type=str,
+        help='''
+        One or more package names to download, separated by spaces. You can find
+        the package name in the URL on f-droid.org.
+        For example, com.nutomic.syncthingandroid from the URL
+        https://f-droid.org/en/packages/com.nutomic.syncthingandroid/
+        ''',
+    )
+    parser.add_argument(
+        '--folders',
+        action='store_true',
+        help='''
+        If provided, each apk will be downloaded into a separate folder named after
+        the package.
+        If omitted, the apks are downloaded into the destination folder directly.
+        ''',
+    )
+    parser.add_argument(
+        '--destination',
+        default=pathclass.cwd(),
+        type=pathclass.Path,
+        help='''
+        Alternative path to download the apk files to. Default is cwd.
+        ''',
+    )
     parser.set_defaults(func=fpk_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

@@ -1,32 +1,3 @@
-'''
-reg_extension_icon
-==================
-
-This script edits the windows registry HKEY_CLASSES_ROOT to assign a file
-extension icon and optionally a human-friendly name string.
-
-Must run as administrator.
-
-WARNING, if the extension is already associated with a program, or is otherwise
-connected to a progid, this will break it.
-
-> reg_extension_icon ico_file <flags>
-
-ico_file:
-    Filepath of the icon file.
-
---extension:
-    If you omit this option, your file should be named "png.ico" or "py.ico" to
-    set the icon for png and py types. If the name of your ico file is not the
-    name of the extension you want to control, specify the extension here.
-
---name:
-    A human-friendly name string which will show on Explorer under the "Type"
-    column and in the properties dialog.
-
---shellopen:
-    A command-line string to use as the shell\open\command
-'''
 import argparse
 import sys
 import winreg
@@ -97,16 +68,56 @@ def extension_registry_argparse(args):
     )
 
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        This script edits the windows registry HKEY_CLASSES_ROOT to assign a file
+        extension icon and optionally a human-friendly name string.
 
-    parser.add_argument('ico_file')
-    parser.add_argument('--extension', default=None)
-    parser.add_argument('--name', default=None)
-    parser.add_argument('--shellopen', default=None)
-    parser.add_argument('--yes', dest='autoyes', action='store_true')
+        Must run as administrator.
+
+        WARNING, if the extension is already associated with a program, or is otherwise
+        connected to a progid, this will break it.
+        ''',
+    )
+    parser.add_argument(
+        'ico_file',
+        help='''
+        Filepath of the icon file.
+        ''',
+    )
+    parser.add_argument(
+        '--extension',
+        default=None,
+        help='''
+        If you omit this option, your file should be named "png.ico" or "py.ico" to
+        set the icon for png and py types. If the name of your ico file is not the
+        name of the extension you want to control, specify the extension here.
+        ''',
+    )
+    parser.add_argument(
+        '--name',
+        type=str,
+        default=None,
+        help='''
+        A human-friendly name string which will show on Explorer under the "Type"
+        column and in the properties dialog.
+        ''',
+    )
+    parser.add_argument(
+        '--shellopen',
+        default=None,
+        help='''
+        A command-line string to use as the shell\\open\\command
+        ''',
+    )
+    parser.add_argument(
+        '--yes',
+        dest='autoyes',
+        action='store_true',
+    )
     parser.set_defaults(func=extension_registry_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

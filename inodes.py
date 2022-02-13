@@ -13,12 +13,22 @@ def inodes_argparse(args):
     return 0
 
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument('patterns', nargs='+')
+    parser = argparse.ArgumentParser(
+        description='''
+        Show the st_dev, st_ino of files.
+        ''',
+    )
+    parser.add_argument(
+        'patterns',
+        nargs='+',
+        help='''
+        One or more glob patterns. Supports pipeable !c clipboard, !i stdin
+        lines of patterns.
+        ''',
+    )
     parser.set_defaults(func=inodes_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

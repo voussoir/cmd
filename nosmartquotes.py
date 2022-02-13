@@ -1,17 +1,10 @@
-'''
-no smart quotes
-===============
-
-Replace smart quotes and smart apostrophes with regular ASCII values.
-
-Just say no to smart quotes!
-'''
 import argparse
 import os
 import sys
 
 from voussoirkit import betterhelp
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 from voussoirkit import spinal
 from voussoirkit import vlogging
 
@@ -27,8 +20,9 @@ def replace_smartquotes(text):
     return text
 
 def nosmartquotes_argparse(args):
+    globs = list(pipeable.input_many(args.patterns))
     files = spinal.walk(
-        glob_filenames=args.filename_glob,
+        glob_filenames=globs,
         exclude_filenames={THIS_FILE},
         recurse=args.recurse,
     )
@@ -43,19 +37,39 @@ def nosmartquotes_argparse(args):
             continue
 
         file.write('w', text, encoding='utf-8')
-        print(file.absolute_path)
+        pipeable.stdout(file.absolute_path)
 
     return 0
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        Replace smart quotes and smart apostrophes with regular ASCII values.
 
-    parser.add_argument('filename_glob')
-    parser.add_argument('--recurse', action='store_true')
+        Just say no to smart quotes!
+        ''',
+    )
+    parser.examples = [
+        '*.md --recurse',
+    ]
+    parser.add_argument(
+        'patterns',
+        nargs='+',
+        help='''
+        One or more glob patterns for input files.
+        ''',
+    )
+    parser.add_argument(
+        '--recurse',
+        action='store_true',
+        help='''
+        If provided, recurse into subdirectories and process those files too.
+        ''',
+    )
     parser.set_defaults(func=nosmartquotes_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

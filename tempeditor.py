@@ -1,21 +1,3 @@
-'''
-tempeditor
-==========
-
-This program allows you to use your preferred text editor as an intermediate
-step in a processing pipeline. The user will use the text editor to edit a temp
-file, and when they close the editor the contents of the temp file will be sent
-to stdout.
-
-Command line usage:
-
-> tempeditor [--text X]
-
---text X:
-    The initial text in the document.
-    Uses pipeable to support !c clipboard, !i stdin.
-    If not provided, the user starts with a blank document.
-'''
 import argparse
 import os
 import shlex
@@ -90,12 +72,29 @@ def tempeditor_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        This program allows you to use your preferred text editor as an
+        intermediate step in a processing pipeline. The user will use the text
+        editor to edit a temp file, and when they close the editor the contents
+        of the temp file will be sent to stdout.
+        ''',
+    )
 
-    parser.add_argument('--text', dest='initial_text', default=None)
+    parser.add_argument(
+        '--text',
+        dest='initial_text',
+        default=None,
+        type=str,
+        help='''
+        The initial text in the document.
+        Uses pipeable to support !c clipboard, !i stdin.
+        If not provided, the user starts with a blank document.
+        ''',
+    )
     parser.set_defaults(func=tempeditor_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

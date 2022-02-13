@@ -1,21 +1,3 @@
-'''
-watchforlinks
-=============
-
-This program will continuously watch your clipboard for URLs and save them to
-individual files. The files will have randomly generated names. The current
-contents of your clipboard will be erased.
-
-> watchforlinks [extension] <flags>
-
-extension:
-    The saved files will have this extension.
-    If not provided, the default is "generic".
-
-flags:
---regex X:
-    A regex pattern. Only URLs that match this pattern will be saved.
-'''
 import argparse
 import pyperclip
 import re
@@ -64,13 +46,35 @@ def watchforlinks_argparse(args):
     return 0
 
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        This program will continuously watch your clipboard for http:// and
+        https:// URLs and save them to individual files. The files will have
+        randomly generated names. The current contents of your clipboard will
+        be erased.
+        ''',
+    )
 
-    parser.add_argument('extension', nargs='?', default='generic')
-    parser.add_argument('--regex', default=None)
+    parser.add_argument(
+        'extension',
+        nargs='?',
+        type=str,
+        default='generic',
+        help='''
+        The saved files will have this extension.
+        ''',
+    )
+    parser.add_argument(
+        '--regex',
+        type=str,
+        default=None,
+        help='''
+        A regex pattern. Only URLs that match this pattern will be saved.
+        ''',
+    )
     parser.set_defaults(func=watchforlinks_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

@@ -38,29 +38,6 @@ def shortcut(lnk_name, target, start_in=None, icon=None):
     shortcut.write()
     return lnk
 
-DOCSTRING = '''
-shortcut
-========
-
-> shortcut lnk_path target <flags>
-
-lnk_path:
-    The filepath of the lnk file you want to create.
-
-target:
-    The filepath of the target file and any additional arguments separated
-    by spaces. If you want to include an argument that starts with hyphens,
-    consider putting this last and use `--` to indicate the end of named
-    arguments. For example:
-    > shortcut game.lnk --icon game.ico -- javaw.exe -jar game.jar
-
---start-in:
-    Directory to use as CWD for the program.
-
---icon:
-    Path to an .ico file.
-'''
-
 def shortcut_argparse(args):
     try:
         lnk = shortcut(
@@ -77,14 +54,48 @@ def shortcut_argparse(args):
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.examples = [
+        'game.lnk --icon game.ico -- javaw.exe -jar game.jar',
+        'game.lnk --icon game.ico -- 4 8 6',
+    ]
 
-    parser.add_argument('lnk_name')
-    parser.add_argument('target', nargs='+')
-    parser.add_argument('--start_in', '--start-in', '--startin', default=None)
-    parser.add_argument('--icon', default=None)
+    parser.add_argument(
+        'lnk_name',
+        help='''
+        The filepath of the lnk file you want to create.
+        ''',
+    )
+    parser.add_argument(
+        'target',
+        nargs='+',
+        type=int,
+        help='''
+        The filepath of the target file and any additional arguments separated
+        by spaces. If you want to include an argument that starts with hyphens,
+        consider putting this last and use `--` to indicate the end of named
+        arguments, since they might otherwise be mistaken for arguments to this
+        program.
+        ''',
+    )
+    parser.add_argument(
+        '--start_in',
+        '--start-in',
+        '--startin',
+        default=None,
+        help='''
+        Directory to use as CWD for the program.
+        ''',
+    )
+    parser.add_argument(
+        '--icon',
+        default=None,
+        help='''
+        Path to an .ico file.
+        ''',
+    )
     parser.set_defaults(func=shortcut_argparse)
 
-    return betterhelp.single_main(argv, parser, DOCSTRING)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

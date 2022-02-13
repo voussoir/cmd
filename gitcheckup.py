@@ -1,50 +1,3 @@
-'''
-gitcheckup
-==========
-
-This program helps you check the commit and push status of your favorite git
-repositories. The output looks like this:
-
-[ ][P] D:\\Git\\cmd (~1)
-[C][P] D:\\Git\\Etiquette
-[ ][P] D:\\Git\\voussoirkit (+1)
-[C][ ] D:\\Git\\YCDL (↑3)
-
-To specify the list of git directories, you may either:
-- Create a gitcheckup.txt file in the same directory as this file, where every
-  line contains an absolute path to the directory, or
-- Pass directories as a series of positional arguments to this program.
-
-> gitcheckup.py <flags>
-> gitcheckup.py dir1 dir2 <flags>
-
-flags:
---fetch:
-    Run `git fetch --all` in each directory.
-
---pull:
-    Run `git pull --all` in each directory.
-
---push:
-    Run `git push` in each directory.
-
---run <command>:
-    Run `git <command>` in each directory. You can use \- to escape - in your
-    git arguments, since they would confuse this program's argparse.
-    If this is used, any --fetch, --pull, --push is ignored.
-
---add path:
-    Add path to the gitcheckup.txt file.
-
---remove path:
-    Remove path from the gitcheckup.txt file.
-
-Examples:
-> gitcheckup
-> gitcheckup --fetch
-> gitcheckup D:\\Git\\cmd D:\\Git\\YCDL --pull
-> gitcheckup --run add README.md
-'''
 import argparse
 import os
 import re
@@ -349,19 +302,91 @@ def gitcheckup_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        This program helps you check the commit and push status of your favorite git
+        repositories. The output looks like this:
 
-    parser.add_argument('directories', nargs='*')
-    parser.add_argument('--fetch', dest='do_fetch', action='store_true')
-    parser.add_argument('--pull', dest='do_pull', action='store_true')
-    parser.add_argument('--push', dest='do_push', action='store_true')
-    parser.add_argument('--add', dest='add_directory')
-    parser.add_argument('--run', dest='run_command', nargs='+')
-    parser.add_argument('--remove', dest='remove_directory')
+        [ ][P] D:\\Git\\cmd (~1)
+        [C][P] D:\\Git\\Etiquette
+        [ ][P] D:\\Git\\voussoirkit (+1)
+        [C][ ] D:\\Git\\YCDL (↑3)
+        ''',
+    )
+    parser.examples = [
+        '',
+        '--fetch',
+        'D:\\Git\\cmd D:\\Git\\YCDL --pull',
+        '--run add README.md',
+    ]
+
+    parser.add_argument(
+        'directories',
+        nargs='*',
+        help='''
+        One or more directories to check up.
+        If omitted, you should have a file called gitcheckup.txt in the same
+        directory as this file, where every line contains an absolute path to
+        a directory.
+        ''',
+    )
+    parser.add_argument(
+        '--fetch',
+        dest='do_fetch',
+        action='store_true',
+        help='''
+        Run `git fetch --all` in each directory.
+        ''',
+    )
+    parser.add_argument(
+        '--pull',
+        dest='do_pull',
+        action='store_true',
+        help='''
+        Run `git pull --all` in each directory.
+        ''',
+    )
+    parser.add_argument(
+        '--push',
+        dest='do_push',
+        action='store_true',
+        help='''
+        Run `git push` in each directory.
+        ''',
+    )
+    parser.add_argument(
+        '--run',
+        dest='run_command',
+        nargs='+',
+        type=str,
+        help='''
+        Run `git <command>` in each directory. You can use \- to escape - in your
+        git arguments, since they would confuse this program's argparse.
+        If this is used, any --fetch, --pull, --push is ignored.
+        ''',
+    )
+    parser.add_argument(
+        '--add',
+        dest='add_directory',
+        metavar='path',
+        type=str,
+        help='''
+        Add path to the gitcheckup.txt file.
+        ''',
+    )
+    parser.add_argument(
+        '--remove',
+        dest='remove_directory',
+        metavar='path',
+        type=str,
+        help='''
+        Remove path from the gitcheckup.txt file.
+        ''',
+    )
     parser.set_defaults(func=gitcheckup_argparse)
 
     try:
-        return betterhelp.single_main(argv, parser, docstring=__doc__)
+        return betterhelp.go(parser, argv)
     except GitCheckupException as exc:
         print(exc)
         return 1

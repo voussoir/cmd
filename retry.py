@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import sys
 import time
+from voussoirkit import betterhelp
 
 class NoMoreRetries(Exception):
     pass
@@ -43,15 +44,39 @@ def retry_argparse(args):
     )
 
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        Run a command line command multiple times until it returns 0.
+        ''',
+    )
 
-    parser.add_argument('command', nargs='+')
-    parser.add_argument('--limit', type=int, default=None)
-    parser.add_argument('--sleep', type=float, default=None)
+    parser.add_argument(
+        'command',
+        nargs='+',
+        help='''
+        A command line command. You may need to put this after -- to avoid
+        confusion with arguments to this program.
+        ''',
+    )
+    parser.add_argument(
+        '--limit',
+        type=int,
+        default=None,
+        help='''
+        Maximum number of retries before giving up.
+        ''',
+    )
+    parser.add_argument(
+        '--sleep',
+        type=float,
+        default=None,
+        help='''
+        Number of seconds of sleep between each retry.
+        ''',
+    )
     parser.set_defaults(func=retry_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

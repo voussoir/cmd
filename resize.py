@@ -1,65 +1,3 @@
-'''
-resize
-======
-
-Resize image files.
-
-> resize patterns <flags>
-
-patterns:
-    One or more glob patterns for input files.
-    Uses pipeable to support !c clipboard, !i stdin lines of glob patterns.
-
-flags:
---width X:
---height X:
-    New dimensions for the image. If either of these is omitted, then that
-    dimension will be calculated automatically based on the aspect ratio.
-
---break_aspect_ratio:
-    If provided, the given --width and --height will be used exactly. You will
-    need to provide both --width and --height.
-
-    If omitted, the image will be resized to fit within the bounds provided by
-    --width and --height while preserving its aspect ratio.
-
---output X:
-    A string that controls the output filename format. Suppose the input file
-    was myphoto.jpg. You can use these variables in your format string:
-    {base} = myphoto
-    {filename} = myphoto.jpg
-    {width} = an integer
-    {height} = an integer
-    {extension} = .jpg
-
-    You may omit {extension} from your format string and it will automatically
-    be added to the end, unless you already provided a different extension.
-
-    If your format string only designates a basename, output files will go to
-    the same directory as the corresponding input file. If your string contains
-    path separators, all output files will go to that directory.
-    The directory
-    part is not formatted with the variables.
-
---inplace:
-    Overwrite the input files. Cannot be used along with --output.
-    Be careful!
-
---nearest:
-    If provided, use nearest-neighbor scaling to preserve pixelated images.
-    If omitted, use antialiased scaling.
-
---only_shrink:
-    If the input image is smaller than the requested dimensions, do nothing.
-    Useful when globbing in a directory with many differently sized images.
-
---quality X:
-    JPEG compression quality.
-
---scale X:
-    Scale the image by factor X.
-    Use this option instead of --width, --height.
-'''
 import argparse
 import os
 import PIL.Image
@@ -76,15 +14,6 @@ log = vlogging.getLogger(__name__, 'resize')
 
 OUTPUT_INPLACE = sentinel.Sentinel('output inplace')
 DEFAULT_OUTPUT_FORMAT = '{base}_{width}x{height}{extension}'
-
-def resize_core(
-        image,
-        height=None,
-        only_shrink=False,
-        scale=None,
-        width=None,
-    ):
-    pass
 
 def resize(
         filename,
@@ -215,21 +144,121 @@ def resize_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description='Resize image files.')
+    parser.examples = [
+        'myphoto.jpg --scale 0.5 --inplace',
+        '*.jpg --only_shrink --width 500 --height 500 --output thumbs\\{base}.jpg',
+        'sprite*.png sprite*.bmp --width 1024 --nearest --output {base}_big{extension}',
+    ]
 
-    parser.add_argument('patterns', nargs='+')
-    parser.add_argument('--width', type=int, default=None)
-    parser.add_argument('--height', type=int, default=None)
-    parser.add_argument('--inplace', action='store_true')
-    parser.add_argument('--nearest', dest='nearest_neighbor', action='store_true')
-    parser.add_argument('--only_shrink', '--only-shrink', action='store_true')
-    parser.add_argument('--break_aspect_ratio', '--break-aspect-ratio', action='store_true')
-    parser.add_argument('--output', default=None)
-    parser.add_argument('--scale', type=float, default=None)
-    parser.add_argument('--quality', type=int, default=100)
+    parser.add_argument(
+        'patterns',
+        nargs='+',
+        type=str,
+        help='''
+        One or more glob patterns for input files.
+        Uses pipeable to support !c clipboard, !i stdin lines of glob patterns.
+        ''',
+    )
+    parser.add_argument(
+        '--width',
+        type=int,
+        default=None,
+        help='''
+        New width of the image. If --width is omitted and --height is given, then
+        width will be calculated automatically based on the aspect ratio.
+        ''',
+    )
+    parser.add_argument(
+        '--height',
+        type=int,
+        default=None,
+        help='''
+        New width of the image. If --height is omitted and --width is given, then
+        height will be calculated automatically based on the aspect ratio.
+        ''',
+    )
+    parser.add_argument(
+        '--break_aspect_ratio',
+        '--break-aspect-ratio',
+        action='store_true',
+        help='''
+        If provided, the given --width and --height will be used exactly. You will
+        need to provide both --width and --height.
+
+        If omitted, the image will be resized to fit within the bounds provided by
+        --width and --height while preserving its aspect ratio.
+        ''',
+    )
+    parser.add_argument(
+        '--inplace',
+        action='store_true',
+        help='''
+        Overwrite the input files. Cannot be used along with --output.
+        Be careful!
+        ''',
+    )
+    parser.add_argument(
+        '--nearest',
+        '--nearest_neighbor',
+        '--nearest-neighbor',
+        dest='nearest_neighbor',
+        action='store_true',
+        help='''
+        If provided, use nearest-neighbor scaling to preserve pixelated images.
+        If omitted, use antialiased scaling.
+        ''',
+    )
+    parser.add_argument(
+        '--only_shrink',
+        '--only-shrink',
+        action='store_true',
+        help='''
+        If the input image is smaller than the requested dimensions, do nothing.
+        Useful when globbing in a directory with many differently sized images.
+        ''',
+    )
+    parser.add_argument(
+        '--output',
+        default=None,
+        help='''
+        A string that controls the output filename format. Suppose the input file
+        was myphoto.jpg. You can use these variables in your format string:
+        {base} = myphoto
+        {filename} = myphoto.jpg
+        {width} = an integer
+        {height} = an integer
+        {extension} = .jpg
+
+        You may omit {extension} from your format string and it will automatically
+        be added to the end, unless you already provided a different extension.
+
+        If your format string only designates a basename, output files will go to
+        the same directory as the corresponding input file. If your string contains
+        path separators, all output files will go to that directory.
+        The directory part is not formatted with the variables.
+        ''',
+    )
+    parser.add_argument(
+        '--scale',
+        type=float,
+        default=None,
+        help='''
+        Scale the image by this factor, where 1.00 is regular size.
+        Use this option instead of --width, --height.
+        ''',
+    )
+    parser.add_argument(
+        '--quality',
+        type=int,
+        default=100,
+        help='''
+        JPEG compression quality.
+        '''
+    )
     parser.set_defaults(func=resize_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

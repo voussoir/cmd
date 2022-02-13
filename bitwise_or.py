@@ -1,11 +1,3 @@
-'''
-bitwise_or
-==========
-
-Merge two or more files by performing bitwise or on their bits.
-
-> bitwise_or file1 file2 --output file3
-'''
 import argparse
 import sys
 
@@ -40,6 +32,8 @@ def bitwise_or_argparse(args):
         pass
     elif args.overwrite:
         pass
+    elif not pipeable.in_tty():
+        return 1
     elif not interactive.getpermission(f'Overwrite "{output.absolute_path}"?'):
         return 1
 
@@ -61,14 +55,27 @@ def bitwise_or_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        Merge two or more files by performing bitwise or on their bits.
+        That is, every byte of the output file will be the bitwise or of the
+        corresponding byte from all of the input files.
+        ''',
+    )
 
     parser.add_argument('files', nargs='+')
-    parser.add_argument('--output', required=True)
-    parser.add_argument('--overwrite', action='store_true')
+    parser.add_argument('--output', required=True, type=pathclass.Path)
+    parser.add_argument(
+        '--overwrite',
+        action='store_true',
+        help='''
+        Provide this flag if the output file already exists and you'd like to
+        overwrite it.
+        ''',
+    )
     parser.set_defaults(func=bitwise_or_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

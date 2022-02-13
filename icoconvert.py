@@ -85,11 +85,17 @@
 # | 40     |            n | Pixel bytes, r, g, b, a.                              |
 # |________|______________|_______________________________________________________|
 
+import argparse
 import os
 import PIL.Image
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import imagetools
+from voussoirkit import pipeable
+from voussoirkit import vlogging
+
+log = vlogging.get_logger(__name__, 'icoconvert')
 
 ICO_HEADER_LENGTH = 6
 ICON_DIRECTORY_ENTRY_LENGTH = 16
@@ -230,17 +236,36 @@ def images_to_ico(images):
     final_data = b''.join(datablobs)
     return final_data
 
-if __name__ == '__main__':
-    try:
-        inputfiles = sys.argv[1:]
-    except Exception:
-        print('Please provide an image file')
-        raise SystemExit
-    print('Iconifying', inputfiles)
-    images = [load_image(filename) for filename in inputfiles]
+def icoconvert_argparse(args):
+    log.info('Iconifying %s', args.files)
+    images = [load_image(filename) for filename in args.files]
+
     final_data = images_to_ico(images)
-    name = os.path.splitext(inputfiles[0])[0] + '.ico'
-    output_file = open(name, 'wb')
+
+    iconame = os.path.splitext(args.files[0])[0] + '.ico'
+    output_file = open(iconame, 'wb')
     output_file.write(final_data)
     output_file.close()
-    print('Finished %s.' % name)
+    pipeable.stderr(iconame)
+    return 0
+
+@vlogging.main_decorator
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description='''
+        Create a Windows .ico icon file from one or more images.
+        ''',
+    )
+    parser.add_argument(
+        'files',
+        nargs='+',
+        help='''
+        One or more image files to put into the ico.
+        ''',
+    )
+    parser.set_defaults(func=icoconvert_argparse)
+
+    return betterhelp.go(parser, argv)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))

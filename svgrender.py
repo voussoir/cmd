@@ -1,29 +1,3 @@
-'''
-svgrender
-=========
-
-Calls the Inkscape command line to render svg files to png. A link to inkscape
-should be on your PATH.
-
-> svgrender svg_file scales <flags>
-
-scales:
-    One or more integers. Each integer will be the size of one output file.
-
-flags:
---destination:
-    A path to a directory where the png files should be saved. By default,
-    they go to the same folder as the svg file.
-
---y:
-    By default, the scales control the width of the output image.
-    Pass this if you want the scales to control the height.
-
---basename-only:
-    By default, the png filenames will have suffixes like _{scale}.
-    Pass this if you want the png to have the same name as the svg file.
-    Naturally, this only works if you're only using a single scale.
-'''
 import argparse
 import glob
 import os
@@ -79,11 +53,10 @@ def svgrender(filepath, scales, destination, scale_suffix=True, axis='x'):
 
 def svgrender_argparse(args):
     svg_paths = glob.glob(args.svg_filepath)
-    scales = [int(x) for x in args.scales]
     for svg_path in svg_paths:
         svgrender(
             svg_path,
-            scales,
+            scales=args.scales,
             destination=args.destination,
             scale_suffix=args.scale_suffix,
             axis='y' if args.y else 'x',
@@ -93,16 +66,57 @@ def svgrender_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument('svg_filepath')
-    parser.add_argument('scales', nargs='+')
-    parser.add_argument('--destination', default=None)
-    parser.add_argument('--y', dest='y', action='store_true')
-    parser.add_argument('--basename_only', '--basename-only', dest='scale_suffix', action='store_false')
+    parser = argparse.ArgumentParser(
+        description='''
+        Calls the Inkscape command line to render svg files to png. A link to Inkscape
+        should be on your PATH.
+        ''',
+    )
+    parser.add_argument(
+        'svg_filepath',
+        help='''
+        Input svg file to be rendered.
+        ''',
+    )
+    parser.add_argument(
+        'scales',
+        type=int,
+        nargs='+',
+        help='''
+        One or more integers. Each integer will be the size of one output file.
+        ''',
+    )
+    parser.add_argument(
+        '--destination',
+        default=None,
+        help='''
+        A path to a directory where the png files should be saved. By default,
+        they go to the same folder as the svg file.
+        ''',
+    )
+    parser.add_argument(
+        '--y',
+        dest='y',
+        action='store_true',
+        help='''
+        By default, the scales control the width of the output image.
+        Pass this if you want the scales to control the height.
+        ''',
+    )
+    parser.add_argument(
+        '--basename_only',
+        '--basename-only',
+        dest='scale_suffix',
+        action='store_false',
+        help='''
+        By default, the png filenames will have suffixes like _{scale}.
+        Pass this if you want the png to have the same name as the svg file.
+        Naturally, this only works if you're only using a single scale.
+        ''',
+    )
     parser.set_defaults(func=svgrender_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

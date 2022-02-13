@@ -127,6 +127,7 @@ def getcrx_argparse(args):
     else:
         auto_overwrite = None
 
+    return_status = 0
     for extension_id in extension_ids:
         try:
             download_crx(extension_id, auto_overwrite=auto_overwrite)
@@ -136,7 +137,8 @@ def getcrx_argparse(args):
             else:
                 log.error(traceback.format_exc())
                 pipeable.stderr('Resuming...')
-    return 0
+                return_status = 1
+    return return_status
 
 @operatornotify.main_decorator(subject='getcrx')
 @vlogging.main_decorator

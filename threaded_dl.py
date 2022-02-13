@@ -1,40 +1,3 @@
-'''
-threaded_dl
-===========
-
-> threaded_dl links thread_count filename_format <flags>
-
-links:
-    The name of a file containing links to download, one per line.
-    Uses pipeable to support !c clipboard, !i stdin lines of urls.
-
-thread_count:
-    Integer number of threads to use for downloading.
-
-filename_format:
-    A string that controls the names of the downloaded files. Uses Python's
-    brace-style formatting. Available formatters are:
-    - {basename}: The name of the file as indicated by the URL.
-      E.g. example.com/image.jpg -> image.jpg
-    - {extension}: The extension of the file as indicated by the URL, including
-      the dot. E.g. example.com/image.jpg -> .jpg
-    - {index}: The index of this URL within the sequence of all downloaded URLs.
-      Starts from 0.
-    - {now}: The unix timestamp at which this download job was started. It might
-      be ugly but at least it's unambiguous when doing multiple download batches
-      with similar filenames.
-
-flags:
---bytespersecond X:
-    Limit the overall download speed to X bytes per second. Uses
-    bytestring.parsebytes to support strings like "1m", "500k", "2 mb", etc.
-
---headers X:
-    ;
-
---timeout X:
-    Integer number of seconds to use as HTTP request timeout for each download.
-'''
 import argparse
 import ast
 import os
@@ -194,7 +157,7 @@ def threaded_dl(
     ui_thread.join()
 
 def ui_thread_func(meter, pool, stop_event):
-    if pipeable.OUT_PIPE:
+    if pipeable.stdout_pipe():
         return
 
     while not stop_event.is_set():
@@ -236,17 +199,62 @@ def threaded_dl_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument('url_file')
-    parser.add_argument('thread_count', type=int)
-    parser.add_argument('filename_format', nargs='?', default='{now}_{index}_{basename}')
-    parser.add_argument('--bytespersecond', default=None)
-    parser.add_argument('--timeout', default=15)
-    parser.add_argument('--headers', nargs='+', default=None)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'url_file',
+        metavar='links',
+        help='''
+        The name of a file containing links to download, one per line.
+        Uses pipeable to support !c clipboard, !i stdin lines of urls.
+        ''',
+    )
+    parser.add_argument(
+        'thread_count',
+        type=int,
+        help='''
+        Integer number of threads to use for downloading.
+        ''',
+    )
+    parser.add_argument(
+        'filename_format',
+        nargs='?',
+        type=str,
+        default='{now}_{index}_{basename}',
+        help='''
+        A string that controls the names of the downloaded files. Uses Python's
+        brace-style formatting. Available formatters are:
+        - {basename}: The name of the file as indicated by the URL.
+          E.g. example.com/image.jpg -> image.jpg
+        - {extension}: The extension of the file as indicated by the URL, including
+          the dot. E.g. example.com/image.jpg -> .jpg
+        - {index}: The index of this URL within the sequence of all downloaded URLs.
+          Starts from 0.
+        - {now}: The unix timestamp at which this download job was started. It might
+          be ugly but at least it's unambiguous when doing multiple download batches
+          with similar filenames.
+        ''',
+    )
+    parser.add_argument(
+        '--bytespersecond',
+        default=None,
+        help='''
+        Limit the overall download speed to X bytes per second. Uses
+        bytestring.parsebytes to support strings like "1m", "500k", "2 mb", etc.
+        ''',
+    )
+    parser.add_argument(
+        '--timeout',
+        default=15,
+        help='''
+        Integer number of seconds to use as HTTP request timeout for each download.
+        ''',
+    )
+    parser.add_argument(
+        '--headers', nargs='+', default=None,
+    )
     parser.set_defaults(func=threaded_dl_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

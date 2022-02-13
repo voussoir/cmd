@@ -1,6 +1,3 @@
-'''
-Pull all of the files in nested directories into the current directory.
-'''
 import argparse
 import os
 import sys
@@ -9,10 +6,15 @@ from voussoirkit import interactive
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import spinal
+from voussoirkit import winglob
 
-def filepull(pull_from='.', autoyes=False):
+def filepull(pull_from='.', globs=None, autoyes=False):
     start = pathclass.Path(pull_from)
-    files = [file for d in start.listdir_directories() for file in d.walk_files()]
+    files = [
+        file
+        for d in start.listdir_directories()
+        for file in spinal.walk(d, glob_filenames=globs)
+    ]
 
     if len(files) == 0:
         pipeable.stderr('No files to move')
@@ -45,12 +47,23 @@ def filepull(pull_from='.', autoyes=False):
         return 1
 
 def filepull_argparse(args):
-    return filepull(pull_from=args.pull_from, autoyes=args.autoyes)
+    return filepull(pull_from=args.pull_from, globs=args.glob, autoyes=args.autoyes)
 
 def main(argv):
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='''
+        Pull all of the files in nested directories into the current directory.
+        ''',
+    )
 
     parser.add_argument('pull_from', nargs='?', default='.')
+    parser.add_argument(
+        '--glob',
+        nargs='+',
+        help='''
+        Only pull files whose basename matches any of these glob patterns.
+        ''',
+    )
     parser.add_argument('-y', '--yes', dest='autoyes', action='store_true')
     parser.set_defaults(func=filepull_argparse)
 

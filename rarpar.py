@@ -460,64 +460,6 @@ def rarpar(
 
 # COMMAND LINE #####################################################################################
 
-DOCSTRING = '''
-rarpar
-======
-
-> rarpar path <flags>
-
-path:
-    The input file or directory to rarpar.
-
---volume X | X% | min(A, B) | max(A, B):
-    Split rars into volumes of this many megabytes. Should be
-    An integer number of megabytes, or;
-    A percentage "X%" to calculate volumes as X% of the file size, down to
-    a 1 MB minimum, or;
-    A string "min(A, B)" or "max(A, B)" where A and B follow the above rules.
-
---rec X:
-    An integer to generate X% recovery record in the rars.
-    See winrar documentation for information about recovery records.
-
---rev X:
-    An integer to generate X% recovery volumes.
-    Note that winrar's behavior is the number of revs will always be less than
-    the number of rars. If you don't split volumes, you will have 1 rar and
-    thus 0 revs even if you ask for 100% rev.
-    See winrar documentation for information about recovery volumes.
-
---par X:
-    A number to generate X% recovery with par2.
-
---basename X:
-    A basename for the rar and par files. You will end up with
-    basename.partXX.rar and basename.par2.
-    Without this argument, the default basename is "{basename} ({timestamp})".
-    Your string may include {basename}, {timestamp} and/or {date} including the
-    braces to insert that value there.
-
---compression X:
-    Level of compression. Can be "store" or "max" or integer 0-5.
-
---password X:
-    A password with which to encrypt the rar files.
-
---workdir X:
-    The directory in which the rars and pars will be generated while the
-    program is working.
-
---moveto X:
-    The directory to which the rars and pars will be moved after the program
-    has finished working.
-
---recycle:
-    The input file or directory will be recycled at the end.
-
---dry:
-    Print the commands that will be run, but don't actually run them.
-'''
-
 def rarpar_argparse(args):
     status = 0
     try:
@@ -549,24 +491,127 @@ def rarpar_argparse(args):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_argument('path')
-    parser.add_argument('--volume')
-    parser.add_argument('--rec')
-    parser.add_argument('--rev')
-    parser.add_argument('--par')
-    parser.add_argument('--basename')
-    parser.add_argument('--compression')
-    parser.add_argument('--password')
-    parser.add_argument('--profile', dest='rar_profile')
-    parser.add_argument('--workdir', default='.')
-    parser.add_argument('--moveto')
-    parser.add_argument('--recycle', dest='recycle_original', action='store_true')
-    parser.add_argument('--dictionary', dest='dictionary_size')
-    parser.add_argument('--solid', action='store_true')
-    parser.add_argument('--dry', action='store_true')
+    parser.add_argument(
+        'path',
+        type=pathclass.Path,
+        help='''
+        The input file or directory to rarpar.
+        ''',
+    )
+    parser.add_argument(
+        '--volume',
+        help='''
+        Split rars into volumes of this many megabytes. Should be:
+        - An integer number of megabytes, or
+        - A percentage "X%" to calculate volumes as X% of the file size, down to
+          a 1 MB minimum, or
+        - A string "min(A, B)" or "max(A, B)" where A and B follow the above rules.
+        ''',
+    )
+    parser.add_argument(
+        '--rec',
+        type=int,
+        help='''
+        An integer to generate X% recovery record in the rars.
+        See winrar documentation for information about recovery records.
+        ''',
+    )
+    parser.add_argument(
+        '--rev',
+        type=int,
+        help='''
+        An integer to generate X% recovery volumes.
+        Note that winrar's behavior is the number of revs will always be less than
+        the number of rars. If you don't split volumes, you will have 1 rar and
+        thus 0 revs even if you ask for 100% rev.
+        See winrar documentation for information about recovery volumes.
+        ''',
+    )
+    parser.add_argument(
+        '--par',
+        type=int,
+        help='''
+        A number to generate X% recovery with par2.
+        ''',
+    )
+    parser.add_argument(
+        '--basename',
+        type=str,
+        help='''
+        A basename for the rar and par files. You will end up with
+        basename.partXX.rar and basename.par2.
+        Without this argument, the default basename is "{basename} ({timestamp})".
+        Your string may include {basename}, {timestamp} and/or {date} including the
+        braces to insert that value there.
+        ''',
+    )
+    parser.add_argument(
+        '--compression',
+        help='''
+        Level of compression. Can be "store" or "max" or integer 0-5.
+        ''',
+    )
+    parser.add_argument(
+        '--password',
+        type=str,
+        help='''
+        A password with which to encrypt the rar files.
+        ''',
+    )
+    parser.add_argument(
+        '--profile', dest='rar_profile',
+    )
+    parser.add_argument(
+        '--workdir',
+        type=pathclass.Path,
+        default='.',
+        help='''
+        The directory in which the rars and pars will be generated while the
+        program is working.
+        ''',
+    )
+    parser.add_argument(
+        '--moveto',
+        type=pathclass.Path,
+        help='''
+        The directory to which the rars and pars will be moved after the program
+        has finished working.
+        ''',
+    )
+    parser.add_argument(
+        '--recycle',
+        dest='recycle_original',
+        action='store_true',
+        help='''
+        The input file or directory will be recycled at the end.
+        ''',
+    )
+    parser.add_argument(
+        '--dictionary',
+        dest='dictionary_size',
+        help='''
+        Larger dictionary sizes can improve compression in exchange for higher
+        memory usage. Accepted values are 128k, 256k, 512k, 1m, 2m, 4m, 8m, 16m,
+        32m, 64m, 128m, 256m, 512m, 1g.
+        '''
+    )
+    parser.add_argument(
+        '--solid',
+        action='store_true',
+        help='''
+        Generate a 'solid' rar archive. See winrar's documentation for details.
+        ''',
+    )
+    parser.add_argument(
+        '--dry',
+        action='store_true',
+        help='''
+        Print the commands that will be run, but don't actually run them.
+        ''',
+    )
     parser.set_defaults(func=rarpar_argparse)
 
-    return betterhelp.single_main(argv, parser, DOCSTRING)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

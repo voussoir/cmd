@@ -1,17 +1,3 @@
-'''
-getpid
-======
-
-Get PIDs for running processes that match the given process name.
-
-Error level will be 0 if any processes are found, 1 if none are found.
-
-> getpid process_name
-
-Examples:
-> getpid python.exe
-> getpid chrome.exe
-'''
 import argparse
 import psutil
 import sys
@@ -32,12 +18,24 @@ def getpid_argparse(args):
 
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description='''
+        Get PIDs for running processes that match the given process name.
 
-    parser.add_argument('process_name')
+        Error level will be 0 if any processes are found, 1 if none are found.
+        ''',
+    )
+
+    parser.add_argument(
+        'process_name',
+        type=str,
+        help='''
+        Name like "python.exe" or "chrome" as it appears in your task manager / ps.
+        ''',
+    )
     parser.set_defaults(func=getpid_argparse)
 
-    return betterhelp.single_main(argv, parser, __doc__)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))

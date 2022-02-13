@@ -1,19 +1,3 @@
-'''
-Batch rename files by providing a string to be `eval`ed, using variable `x` as
-the current filename. Yes I know this is weird, but for certain tasks it's just
-too quick and easy to pass up.
-
-Examples:
-
-Prefix all the files:
-brename.py "f'Test_{x}'"
-
-Rename files to their index with 0 padding:
-brename.py "f'{index1:>03}{dot_ext}'"
-
-Keep the first word and extension:
-brename.py "(x.split(' ')[0] + dot_ext) if ' ' in x else x"
-'''
 import argparse
 import os
 import random
@@ -125,53 +109,70 @@ def brename_argparse(args):
         recurse=args.recurse,
     )
 
-DOCSTRING = '''
-brename - batch file renaming
-=============================
-
-> brename.py eval_string <flags>
-
-eval_string:
-    A string which will be evaluated by Python's eval. The name of the file or
-    folder will be in the variable `x`. In addition, many other variables are
-    provided for your convenience:
-    `quote` ("), `apostrophe` (') so you don't have to escape command quotes.
-    `hyphen` (-) because leading hyphens often cause problems with argparse.
-    `stringtools` entire stringtools module. See voussoirkit/stringtools.py.
-    `space` ( ), `dot` (.), `underscore` (_) so you don't have to add quotes to
-    your command while using these common characters.
-    `index` the file's index within the loop.
-    `index1` the file's index+1, in case you want your names to start from 1.
-    `parent` a pathclass.Path object for the directory containing the file.
-    `cwd` a pathclass.Path object for the cwd of this program session.
-    `noext` the name of the file, but without its extension.
-    `ext` the file's extension, with no dot.
-
--y | --yes:
-    Accept the results without confirming.
-
---recurse:
-    Recurse into subfolders and rename those files too.
-
---naturalsort:
-    Before renaming, the files will be sorted using natural sort instead of the
-    default lexicographic sort. Natural sort means that "My file 20" will come
-    before "My file 100" because 20<100. Lexicographic sort means 100 will come
-    first because 1 is before 2.
-    The purpose of this flag is so your index and index1 variables are applied
-    in the order you desire.
-'''
-
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument('transformation', help='python command using x as variable name')
-    parser.add_argument('-y', '--yes', dest='autoyes', action='store_true')
-    parser.add_argument('--recurse', action='store_true')
-    parser.add_argument('--naturalsort', action='store_true')
+    parser = argparse.ArgumentParser(
+        description='''
+        Batch rename files by providing a string to be `eval`ed, using variable `x` as
+        the current filename. Yes I know this is weird, but for certain tasks it's just
+        too quick and easy to pass up.
+        ''',
+    )
+    parser.examples = [
+        {'args': ['f\'Test_{x}\''], 'comment': 'Prefix all the files'},
+        {'args': ['f\'{index1:>03}{dot_ext}\''], 'comment': 'Rename files to their index with 0 padding'},
+        {'args': ['(x.split(space)[0] + dot_ext) if space in x else x'], 'comment': 'Keep the first word and extension'},
+    ]
+    parser.add_argument(
+        'transformation',
+        help='''
+        A string which will be evaluated by Python's eval. The name of the file or
+        folder will be in the variable `x`. In addition, many other variables are
+        provided for your convenience:
+        `quote` ("), `apostrophe` (') so you don't have to escape command quotes.
+        `hyphen` (-) because leading hyphens often cause problems with argparse.
+        `stringtools` entire stringtools module. See voussoirkit/stringtools.py.
+        `space` ( ), `dot` (.), `underscore` (_) so you don't have to add quotes to
+        your command while using these common characters.
+        `index` the file's index within the loop.
+        `index1` the file's index+1, in case you want your names to start from 1.
+        `parent` a pathclass.Path object for the directory containing the file.
+        `cwd` a pathclass.Path object for the cwd of this program session.
+        `noext` the name of the file, but without its extension.
+        `ext` the file's extension, with no dot.
+        `dot_ext` the file's extension, with dot.
+        ''',
+    )
+    parser.add_argument(
+        '-y',
+        '--yes',
+        dest='autoyes',
+        action='store_true',
+        help='''
+        Accept the results without confirming.
+        ''',
+    )
+    parser.add_argument(
+        '--recurse',
+        action='store_true',
+        help='''
+        Recurse into subfolders and rename those files too.
+        ''',
+    )
+    parser.add_argument(
+        '--naturalsort',
+        action='store_true',
+        help='''
+        Before renaming, the files will be sorted using natural sort instead of the
+        default lexicographic sort. Natural sort means that "My file 20" will come
+        before "My file 100" because 20<100. Lexicographic sort means 100 will come
+        first because 1 is before 2.
+        The purpose of this flag is so your index and index1 variables are applied
+        in the order you desire.
+        ''',
+    )
     parser.set_defaults(func=brename_argparse)
 
-    return betterhelp.single_main(argv, parser, DOCSTRING)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
