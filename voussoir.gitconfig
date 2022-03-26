@@ -9,6 +9,8 @@
     on = log --graph --oneline --decorate @{u}~1..HEAD
     om = log --graph --oneline --decorate HEAD~1..@{u}
     upstream = clone --origin upstream
+[init]
+    defaultBranch = master
 [push]
     default = simple
 [credential "helperselector"]
