@@ -13,5 +13,4 @@ doskey which=where $*
 doskey gc=gitcheckup $*
 doskey gp=git push $*
 doskey gpa=git_push_all $*
-doskey gg=git gui
 doskey setlatest=recycle __latest $T mklink /j __latest $*
