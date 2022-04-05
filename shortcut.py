@@ -68,7 +68,6 @@ def main(argv):
     parser.add_argument(
         'target',
         nargs='+',
-        type=int,
         help='''
         The filepath of the target file and any additional arguments separated
         by spaces. If you want to include an argument that starts with hyphens,
