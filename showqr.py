@@ -44,7 +44,7 @@ def showqr_argparse(args):
     return 0
 
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser()
 
     parser.add_argument('text')
     parser.set_defaults(func=showqr_argparse)
