@@ -61,6 +61,37 @@ def download_job(
     )
     log.info(f'Finished "{filename}"')
 
+def normalize_headers(headers):
+    if headers is None:
+        return {}
+
+    if not headers:
+        return {}
+
+    if isinstance(headers, dict):
+        return headers
+
+    if isinstance(headers, list) and len(headers) == 1:
+        headers = headers[0]
+
+    if isinstance(headers, (list, tuple)):
+        keys = headers[::2]
+        vals = headers[1::2]
+        return {key: val for (key, val) in zip(keys, vals)}
+
+    if isinstance(headers, str) and os.path.isfile(headers):
+        headers = pathclass.Path(headers).readlines('r', encoding='utf-8')
+
+    if isinstance(headers, str):
+        if headers.startswith('{'):
+            return ast.literal_eval(headers)
+        else:
+            lines = [line for line in headers.splitlines() if line.strip()]
+            pairs = [line.strip().split(': ', 1) for line in lines]
+            return {key: value for (key, value) in pairs}
+
+    return headers
+
 def prepare_urls_filenames(urls, filename_format):
     now = int(time.time())
 
@@ -173,14 +204,7 @@ def threaded_dl_argparse(args):
     urls = pipeable.input(args.url_file, read_files=True, skip_blank=True, strip=True)
     urls = [u.split(' ', 1) if ' ' in u else u for u in urls]
 
-    headers = args.headers
-    if headers is not None:
-        if len(headers) == 1 and headers[0].startswith('{'):
-            headers = ast.literal_eval(headers[0])
-        else:
-            keys = headers[::2]
-            vals = headers[1::2]
-            headers = {key: val for (key, val) in zip(keys, vals)}
+    headers = normalize_headers(args.headers)
 
     bytespersecond = args.bytespersecond
     if bytespersecond is not None:
