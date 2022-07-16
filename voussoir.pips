@@ -2,6 +2,7 @@
 
 bcrypt
 bs4
+exifread
 flake8
 flask
 gevent
