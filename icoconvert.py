@@ -131,7 +131,7 @@ def load_image(filename):
     image = PIL.Image.open(filename)
     (w, h) = image.size
     (new_w, new_h) = imagetools.fit_into_bounds(w, h, 256, 256, only_shrink=True)
-    image = image.resize((new_w, new_h), resample=PIL.Image.ANTIALIAS)
+    image = image.resize((new_w, new_h), resample=PIL.Image.LANCZOS)
     image = image.convert('RGBA')
     image = imagetools.pad_to_square(image)
     return image

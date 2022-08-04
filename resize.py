@@ -103,7 +103,7 @@ def resize(
             raise ValueError('Cannot overwrite input file without OUTPUT_INPLACE.')
 
     log.debug('Resizing %s to %dx%d.', file.absolute_path, width, height)
-    resampler = PIL.Image.NEAREST if nearest_neighbor else PIL.Image.ANTIALIAS
+    resampler = PIL.Image.NEAREST if nearest_neighbor else PIL.Image.LANCZOS
     image = image.resize( (width, height), resampler)
 
     if output_file.extension == '.jpg':
