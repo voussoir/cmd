@@ -1,5 +1,4 @@
 import argparse
-import bs4
 import io
 import json
 import requests

@@ -2,7 +2,6 @@ import argparse
 import PIL.Image
 import sys
 
-from voussoirkit import imagetools
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 

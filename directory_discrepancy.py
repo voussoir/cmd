@@ -4,7 +4,6 @@ import sys
 from voussoirkit import betterhelp
 from voussoirkit import pathclass
 from voussoirkit import niceprints
-from voussoirkit import operatornotify
 from voussoirkit import spinal
 from voussoirkit import vlogging
 

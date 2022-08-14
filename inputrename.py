@@ -7,7 +7,6 @@ import sys
 
 from voussoirkit import pathclass
 from voussoirkit import pipeable
-from voussoirkit import spinal
 
 @pipeable.ctrlc_return1
 def inputrename_argparse(args):

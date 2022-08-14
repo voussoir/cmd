@@ -6,7 +6,6 @@ from voussoirkit import interactive
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import spinal
-from voussoirkit import winglob
 
 def filepull(pull_from='.', globs=None, autoyes=False):
     start = pathclass.Path(pull_from)

@@ -10,7 +10,6 @@ import string
 import sys
 
 from voussoirkit import pathclass
-from voussoirkit import winglob
 
 argv = sys.argv[1:]
 

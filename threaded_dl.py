@@ -1,7 +1,6 @@
 import argparse
 import ast
 import os
-import queue
 import shutil
 import sys
 import threading
@@ -10,17 +9,15 @@ import time
 from voussoirkit import betterhelp
 from voussoirkit import bytestring
 from voussoirkit import downloady
+from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import ratelimiter
 from voussoirkit import ratemeter
-from voussoirkit import sentinel
 from voussoirkit import threadpool
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'threaded_dl')
 downloady.log.setLevel(vlogging.WARNING)
-
-THREAD_FINISHED = sentinel.Sentinel('thread finished')
 
 def clean_url_list(urls):
     for url in urls:

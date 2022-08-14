@@ -4,7 +4,6 @@ import sys
 
 from voussoirkit import betterhelp
 from voussoirkit import pathclass
-from voussoirkit import winwhich
 
 def namedpython_argparse(args):
     this_python = pathclass.Path(sys.executable)

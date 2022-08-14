@@ -4,7 +4,6 @@ import subprocess
 import sys
 
 from voussoirkit import pathclass
-from voussoirkit import winglob
 from voussoirkit import winwhich
 from voussoirkit import vlogging
 
