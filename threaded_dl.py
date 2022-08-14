@@ -5,6 +5,7 @@ import shutil
 import sys
 import threading
 import time
+import traceback
 
 from voussoirkit import betterhelp
 from voussoirkit import bytestring
@@ -175,14 +176,15 @@ def threaded_dl(
         kwargss.append(kwargs)
     pool.add_many(kwargss)
 
+    status = 0
     for job in pool.result_generator():
         if job.exception:
-            ui_stop_event.set()
-            ui_thread.join()
-            raise job.exception
+            log.error(traceback.format_exc())
+            status = 1
 
     ui_stop_event.set()
     ui_thread.join()
+    return status
 
 def ui_thread_func(meter, pool, stop_event):
     if pipeable.stdout_pipe():
@@ -207,7 +209,7 @@ def threaded_dl_argparse(args):
     if bytespersecond is not None:
         bytespersecond = bytestring.parsebytes(bytespersecond)
 
-    threaded_dl(
+    return threaded_dl(
         urls,
         bytespersecond=bytespersecond,
         filename_format=args.filename_format,
@@ -215,8 +217,6 @@ def threaded_dl_argparse(args):
         thread_count=args.thread_count,
         timeout=args.timeout,
     )
-
-    return 0
 
 @vlogging.main_decorator
 def main(argv):
