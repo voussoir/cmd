@@ -16,7 +16,7 @@ argv = sys.argv[1:]
 randname = [random.choice(string.digits) for x in range(12)]
 randname = int(''.join(randname))
 
-for path in pathclass.glob_many(argv):
+for path in sorted(pathclass.glob_many(argv), key=pathclass.natural_sorter):
     newname = str(randname).rjust(12, '0') + path.dot_extension
     randname += 1
     newname = path.parent.with_child(newname)

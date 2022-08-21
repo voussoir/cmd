@@ -12,7 +12,7 @@ from voussoirkit import pathclass
 
 argv = sys.argv[1:]
 
-for path in pathclass.glob_many(argv):
+for path in sorted(pathclass.glob_many(argv), key=pathclass.natural_sorter):
     newname = [random.choice(string.digits) for x in range(12)]
     newname = ''.join(newname) + path.dot_extension
     newname = path.parent.with_child(newname)
