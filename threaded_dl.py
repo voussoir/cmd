@@ -1,6 +1,7 @@
 import argparse
 import ast
 import os
+import random
 import shutil
 import sys
 import threading
@@ -78,15 +79,16 @@ def normalize_headers(headers):
         return {key: val for (key, val) in zip(keys, vals)}
 
     if isinstance(headers, str) and os.path.isfile(headers):
-        headers = pathclass.Path(headers).readlines('r', encoding='utf-8')
+        headers = pathclass.Path(headers).read('r', encoding='utf-8')
 
     if isinstance(headers, str):
         if headers.startswith('{'):
             return ast.literal_eval(headers)
         else:
             lines = [line for line in headers.splitlines() if line.strip()]
-            pairs = [line.strip().split(': ', 1) for line in lines]
-            return {key: value for (key, value) in pairs}
+            lines = [line for line in lines if not line.startswith('#')]
+            pairs = [line.strip().split(':', 1) for line in lines]
+            return {key.strip(): value.strip() for (key, value) in pairs}
 
     return headers
 
@@ -109,6 +111,7 @@ def prepare_urls_filenames(urls, filename_format):
         if isinstance(url, (tuple, list)):
             (url, filename) = url
         else:
+            index1 = index + 1
             basename = downloady.basename_from_url(url)
             extension = os.path.splitext(basename)[1]
             filename = filename_format.format(
@@ -116,6 +119,7 @@ def prepare_urls_filenames(urls, filename_format):
                 ext=extension,
                 extension=extension,
                 index=index,
+                index1=index1,
                 now=now,
             )
 
@@ -179,7 +183,7 @@ def threaded_dl(
     status = 0
     for job in pool.result_generator():
         if job.exception:
-            log.error(traceback.format_exc())
+            log.error(''.join(traceback.format_exception(None, job.exception, job.exception.__traceback__)))
             status = 1
 
     ui_stop_event.set()
@@ -204,6 +208,7 @@ def threaded_dl_argparse(args):
     urls = [u.split(' ', 1) if ' ' in u else u for u in urls]
 
     headers = normalize_headers(args.headers)
+    print(headers)
 
     bytespersecond = args.bytespersecond
     if bytespersecond is not None:
@@ -272,6 +277,19 @@ def main(argv):
     )
     parser.add_argument(
         '--headers', nargs='+', default=None,
+        help='''
+        HTTP headers to add to your request. There are many ways to specify headers:
+
+        You can provide multiple command line arguments where the first is a key,
+        the second is its value, the third is another key, the fourth is its value...
+
+        You can provide a single command line argument which is a JSON string containing
+        key:value pairs.
+
+        You can provide a single command line argument which is a filename.
+        The file can be a JSON file, or alternatively the file should have each
+        key:value on a separate line and a colon should separate each key from its value.
+        ''',
     )
     parser.set_defaults(func=threaded_dl_argparse)
 
