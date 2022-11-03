@@ -4,6 +4,7 @@ import math
 import os
 import random
 import re
+import string
 import sys
 
 from voussoirkit import pipeable
