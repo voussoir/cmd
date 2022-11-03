@@ -8,6 +8,10 @@ import sys
 import time
 
 from voussoirkit import backoff
+from voussoirkit import operatornotify
+from voussoirkit import vlogging
+
+log = vlogging.get_logger(__name__, 'do_tasks')
 
 bo = backoff.Linear(m=1, b=5, max=1800)
 
@@ -47,6 +51,8 @@ def do_tasks_argparse(args):
 
     return do_tasks_forever()
 
+@operatornotify.main_decorator(subject='do_tasks')
+@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
