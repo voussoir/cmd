@@ -2,8 +2,6 @@
     email = git@voussoir.net
     name = Ethan Dalool
     signingkey = 5F7554F8C26DACCB
-[commit]
-    gpgsign = true
 [alias]
     o = log --graph --oneline --decorate --all
     on = log --graph --oneline --decorate @{u}~1..HEAD
