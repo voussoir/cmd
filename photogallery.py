@@ -30,9 +30,14 @@ def imagegallery_argparse(args):
         color: white;
         font-family: sans-serif;
     }
-    body
+    body,
+    body h1
     {
         text-align: center;
+    }
+    body *
+    {
+        text-align: initial;
     }
     body.noscrollbar::-webkit-scrollbar
     {
@@ -49,6 +54,14 @@ def imagegallery_argparse(args):
     a
     {
         cursor: pointer;
+        color: #ae81ff;
+    }
+    p
+    {
+        margin-right: auto;
+        margin-right: auto;
+        width: 100%;
+        max-width: 1024px;
     }
     .photocell
     {
@@ -98,6 +111,9 @@ def imagegallery_argparse(args):
         {% if title %}
         <h1>{{title}}</h1>
         {% endif %}
+
+        <p>Click each photo to view its full resolution. Click the number to download it.</p>
+
         {% for file in files %}
         <div class="photocell">
             <a target="_blank" href="{{urlroot}}{{file.relative_to('.', simple=True)}}"><img loading="lazy" src="{{urlroot}}thumbs/small_{{file.relative_to('.', simple=True)}}"/></a>
