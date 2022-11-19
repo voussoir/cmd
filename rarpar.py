@@ -269,7 +269,7 @@ def _normalize_volume(volume, pathsize):
         if volume.endswith('%'):
             volume = volume[:-1]
             volume = float(volume) / 100
-            volume = (pathsize * volume) / bytestring.MIBIBYTE
+            volume = (pathsize * volume) / bytestring.MEBIBYTE
             volume = max(1, volume)
             return int(volume)
 
