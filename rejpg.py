@@ -18,6 +18,31 @@ log = vlogging.getLogger(__name__, 'rejpg')
 
 PIL.ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+def compress_to_filesize(image, target_size, *, exif=None):
+    lower = 1
+    lower_bio = None
+    upper = 100
+    current = 100
+    while True:
+        # print(lower, current, upper)
+        if lower == (upper - 1):
+            break
+        bio = io.BytesIO()
+        image.save(bio, format='jpeg', exif=exif, quality=current)
+        bio.seek(0)
+        size = len(bio.read())
+        if size > target_size:
+            upper = current
+        if size <= target_size:
+            lower = current
+            lower_bio = bio
+        current = (lower + upper) // 2
+
+    if lower_bio is None:
+        raise RuntimeError(f'Could not compress below {target_size}')
+
+    return lower_bio
+
 def rejpg_argparse(args):
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
     files = spinal.walk(recurse=args.recurse, glob_filenames=patterns)
@@ -28,12 +53,16 @@ def rejpg_argparse(args):
     remaining_size = 0
     for filename in files:
         log.info('Processing %s.', filename)
-        bytesio = io.BytesIO()
         image = PIL.Image.open(filename)
 
         (image, exif) = imagetools.rotate_by_exif(image)
 
-        image.save(bytesio, format='jpeg', exif=exif, quality=args.quality)
+        if args.filesize:
+            target_size = bytestring.parsebytes(args.filesize)
+            bytesio = compress_to_filesize(image, target_size, exif=exif)
+        else:
+            bytesio = io.BytesIO()
+            image.save(bytesio, format='jpeg', exif=exif, quality=args.quality)
 
         bytesio.seek(0)
         new_bytes = bytesio.read()
@@ -56,6 +85,7 @@ def main(argv):
 
     parser.add_argument('patterns', nargs='+', default={'*.jpg', '*.jpeg'})
     parser.add_argument('--quality', type=int, default=80)
+    parser.add_argument('--filesize', type=str, default=None)
     parser.add_argument('--recurse', action='store_true')
     parser.set_defaults(func=rejpg_argparse)
 
