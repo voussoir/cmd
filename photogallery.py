@@ -58,7 +58,7 @@ def imagegallery_argparse(args):
     }
     p
     {
-        margin-right: auto;
+        margin-left: auto;
         margin-right: auto;
         width: 100%;
         max-width: 1024px;
