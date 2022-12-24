@@ -65,6 +65,7 @@ def imagegallery_argparse(args):
     }
     .photocell
     {
+        text-align: center;
         display: block;
         position: relative;
         margin-left: auto;
