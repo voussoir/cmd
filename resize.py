@@ -32,6 +32,7 @@ def resize(
 
     file = pathclass.Path(filename)
     image = PIL.Image.open(file.absolute_path)
+    (image, exif) = imagetools.rotate_by_exif(image)
 
     (image_width, image_height) = image.size
 
@@ -109,7 +110,7 @@ def resize(
     if output_file.extension == '.jpg':
         image = image.convert('RGB')
 
-    image.save(output_file.absolute_path, exif=image.getexif(), quality=quality)
+    image.save(output_file.absolute_path, exif=exif, quality=quality)
     return output_file
 
 def resize_argparse(args):
