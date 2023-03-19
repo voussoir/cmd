@@ -54,6 +54,7 @@ def rejpg_argparse(args):
     for filename in files:
         log.info('Processing %s.', filename)
         image = PIL.Image.open(filename)
+        icc_profile = image.info.get('icc_profile')
 
         (image, exif) = imagetools.rotate_by_exif(image)
 
@@ -62,7 +63,7 @@ def rejpg_argparse(args):
             bytesio = compress_to_filesize(image, target_size, exif=exif)
         else:
             bytesio = io.BytesIO()
-            image.save(bytesio, format='jpeg', exif=exif, quality=args.quality)
+            image.save(bytesio, format='jpeg', exif=exif, quality=args.quality, icc_profile=icc_profile)
 
         bytesio.seek(0)
         new_bytes = bytesio.read()

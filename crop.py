@@ -7,6 +7,7 @@ from voussoirkit import pipeable
 
 def crop(file, crops, *, inplace=False, quality=100):
     image = PIL.Image.open(file.absolute_path)
+    icc_profile = image.info.get('icc_profile')
     if len(crops) == 2:
         crops.extend(image.size)
 
@@ -27,7 +28,7 @@ def crop(file, crops, *, inplace=False, quality=100):
         newname = file.parent.with_child(base + suffix).add_extension(file.extension)
 
     pipeable.stdout(newname.absolute_path)
-    image.save(newname.absolute_path, exif=image.getexif(), quality=quality)
+    image.save(newname.absolute_path, exif=image.getexif(), quality=quality, icc_profile=icc_profile)
 
 def crop_argparse(args):
     patterns = pipeable.input(args.pattern, skip_blank=True, strip=True)

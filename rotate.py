@@ -19,6 +19,7 @@ def rotate_argparse(args):
 
     for file in files:
         image = PIL.Image.open(file.absolute_path)
+        icc_profile = image.info.get('icc_profile')
 
         if args.exif:
             (new_image, exif) = imagetools.rotate_by_exif(image)
@@ -43,7 +44,7 @@ def rotate_argparse(args):
             newname = file.parent.with_child(newname).add_extension(file.extension)
 
         pipeable.stdout(newname.absolute_path)
-        image.save(newname.absolute_path, exif=exif, quality=args.quality)
+        image.save(newname.absolute_path, exif=exif, quality=args.quality, icc_profile=icc_profile)
 
 @vlogging.main_decorator
 def main(argv):
