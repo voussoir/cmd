@@ -2,6 +2,7 @@ import argparse
 import PIL.Image
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 
@@ -52,8 +53,7 @@ def main(argv):
     parser.add_argument('--quality', type=int, default=100)
     parser.set_defaults(func=crop_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
