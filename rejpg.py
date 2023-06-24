@@ -25,7 +25,7 @@ def compress_to_filesize(image, target_size, *, exif=None):
     current = 100
     while True:
         # print(lower, current, upper)
-        if lower == (upper - 1):
+        if lower == 100 or lower == (upper - 1):
             break
         bio = io.BytesIO()
         image.save(bio, format='jpeg', exif=exif, quality=current)
@@ -47,19 +47,18 @@ def rejpg_argparse(args):
     patterns = pipeable.input_many(args.patterns, skip_blank=True, strip=True)
     files = spinal.walk(recurse=args.recurse, glob_filenames=patterns)
 
-    files = [f.absolute_path for f in files]
-
     bytes_saved = 0
     remaining_size = 0
-    for filename in files:
-        log.info('Processing %s.', filename)
-        image = PIL.Image.open(filename)
+    for file in files:
+        log.info('Processing %s.', file.absolute_path)
+        image = PIL.Image.open(file.absolute_path)
         icc_profile = image.info.get('icc_profile')
 
         (image, exif) = imagetools.rotate_by_exif(image)
 
+        if args.filesize and file.size < args.filesize:
+            continue
         if args.filesize:
-            target_size = bytestring.parsebytes(args.filesize)
             bytesio = compress_to_filesize(image, target_size, exif=exif)
         else:
             bytesio = io.BytesIO()
@@ -67,14 +66,12 @@ def rejpg_argparse(args):
 
         bytesio.seek(0)
         new_bytes = bytesio.read()
-        old_size = os.path.getsize(filename)
+        old_size = file.size
         new_size = len(new_bytes)
         remaining_size += new_size
         if new_size < old_size:
             bytes_saved += (old_size - new_size)
-            f = open(filename, 'wb')
-            f.write(new_bytes)
-            f.close()
+            file.write('wb', new_bytes)
 
     log.info('Saved %s.', bytestring.bytestring(bytes_saved))
     log.info('Remaining are %s.', bytestring.bytestring(remaining_size))
@@ -86,7 +83,7 @@ def main(argv):
 
     parser.add_argument('patterns', nargs='+', default={'*.jpg', '*.jpeg'})
     parser.add_argument('--quality', type=int, default=80)
-    parser.add_argument('--filesize', type=str, default=None)
+    parser.add_argument('--filesize', type=bytestring.parsebytes, default=None)
     parser.add_argument('--recurse', action='store_true')
     parser.set_defaults(func=rejpg_argparse)
 
