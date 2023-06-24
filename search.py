@@ -9,6 +9,10 @@ try:
     import winshell
 except ImportError:
     winshell = None
+try:
+    import pysrt
+except ImportError:
+    pysrt = None
 
 from voussoirkit import expressionmatch
 from voussoirkit import pathclass
@@ -80,6 +84,29 @@ def search_contents_generic(filepath, content_args):
     lines = (line.rstrip('\r\n') for line in handle)
     content_args['text'] = lines
     content_args['line_numbers'] = True
+
+    results = search(**content_args)
+    results = list(results)
+    if not results:
+        return
+
+    yield filepath.absolute_path
+    yield from results
+    yield ''
+
+def _srt_format_line(line):
+    text = line.text.replace('\n', ' ')
+    timestamp = f'{line.start.hours:02d}:{line.start.minutes:02d}:{line.start.seconds:02d}:{line.start.milliseconds:03d}'
+    return f'{timestamp} {text}'
+
+def search_contents_srt(filepath, content_args):
+    try:
+        srtlines = pysrt.open(filepath.absolute_path)
+    except UnicodeDecodeError:
+        log.warn('%s experienced Unicode Error', filepath.absolute_path)
+        return
+
+    content_args['text'] = '\n'.join(_srt_format_line(line) for line in srtlines)
 
     results = search(**content_args)
     results = list(results)
@@ -227,6 +254,8 @@ def search(
 
         if filepath.extension == 'lnk' and winshell:
             yield from search_contents_windows_lnk(filepath, content_args)
+        if filepath.extension == 'srt' and pysrt:
+            yield from search_contents_srt(filepath, content_args)
         else:
             yield from search_contents_generic(filepath, content_args)
 
