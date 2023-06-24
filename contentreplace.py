@@ -51,10 +51,11 @@ def contentreplace_argparse(args):
         if not replace_to:
             replace_to = pyperclip.paste()
     else:
-        replace_from = codecs.decode(args.replace_from, 'unicode_escape')
         if args.do_regex:
+            replace_from = args.replace_from
             replace_to = args.replace_to
         else:
+            replace_from = codecs.decode(args.replace_from, 'unicode_escape')
             replace_to = codecs.decode(args.replace_to, 'unicode_escape')
 
     for file in files:
