@@ -59,7 +59,7 @@ def rejpg_argparse(args):
         if args.filesize and file.size < args.filesize:
             continue
         if args.filesize:
-            bytesio = compress_to_filesize(image, target_size, exif=exif)
+            bytesio = compress_to_filesize(image, args.filesize, exif=exif)
         else:
             bytesio = io.BytesIO()
             image.save(bytesio, format='jpeg', exif=exif, quality=args.quality, icc_profile=icc_profile)
