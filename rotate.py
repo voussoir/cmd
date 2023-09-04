@@ -2,6 +2,7 @@ import argparse
 import PIL.Image
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import imagetools
 from voussoirkit import pathclass
 from voussoirkit import pipeable
@@ -51,14 +52,13 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('pattern')
-    parser.add_argument('angle', nargs='?', type=int, default=None)
-    parser.add_argument('--exif', action='store_true')
-    parser.add_argument('--inplace', action='store_true')
+    parser.add_argument('angle', nargs='?', type=int, default=None, help='Degrees clockwise.')
+    parser.add_argument('--exif', action='store_true', help='Rotate based on angle stored in EXIF data.')
+    parser.add_argument('--inplace', action='store_true', help='Overwrite the input file.')
     parser.add_argument('--quality', type=int, default=100)
     parser.set_defaults(func=rotate_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
