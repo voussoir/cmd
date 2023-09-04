@@ -32,6 +32,7 @@ def main(argv):
     )
     parser.add_argument(
         'input_files',
+        nargs='+',
     )
     parser.set_defaults(func=imagesequence_to_images_argparse)
 
