@@ -7,6 +7,8 @@ Wherever you download this repository, don't forget to add that directory to you
 
 ## Mirrors
 
+https://git.voussoir.net/voussoir/cmd
+
 https://github.com/voussoir/cmd
 
 https://gitlab.com/voussoir/cmd
