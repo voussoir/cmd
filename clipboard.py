@@ -5,13 +5,14 @@ import argparse
 import pyperclip
 import sys
 
+from voussoirkit import pipeable
+
 def clipboard_argparse(args):
     if args.output_file:
         open(args.output_file, 'w', encoding='utf-8').write(pyperclip.paste())
     else:
         text = pyperclip.paste()
-        text = text.replace('\r', '')
-        print(text)
+        pipeable.stdout(text)
 
     return 0
 
