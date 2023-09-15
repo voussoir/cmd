@@ -53,7 +53,8 @@ def stitch_argparse(args):
 
     final_width = sum(column_widths) + ((grid_x - 1) * args.gap)
     final_height = sum(row_heights) + ((grid_y - 1) * args.gap)
-    final_image = PIL.Image.new('RGBA', [final_width, final_height])
+    background = '#' + args.background.strip('#')
+    final_image = PIL.Image.new('RGBA', [final_width, final_height], color=background)
 
     offset_y = 0
     for (index_y, row) in enumerate(arranged_images):
@@ -112,6 +113,16 @@ def main(argv):
         default=0,
         help='''
         This many pixels of transparent gap between each row / column.
+        ''',
+    )
+    parser.add_argument(
+        '--background',
+        type=str,
+        default='#00000000',
+        help='''
+        Background color as a four-channel (R, G, B, A) hex string.
+        This color will be seen in the --gap and behind any images that
+        already had transparency.
         ''',
     )
     parser.set_defaults(func=stitch_argparse)
