@@ -84,6 +84,7 @@ class PGUILauncher(tkinter.Frame):
         )
         self.filter_entry.bind('<Return>', self.launch_filtered)
         self.filter_entry.bind('<Escape>', self.quit)
+        self.filter_entry.bind('<Control-w>', self.quit)
 
         self.open_folder_button = tkinter.Button(
             self.upper_frame,
