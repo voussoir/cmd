@@ -98,7 +98,6 @@ class PGUILauncher(tkinter.Frame):
         self.upper_frame.grid(row=0, column=0, columnspan=999, sticky='ew', padx=8, pady=8)
         self.filter_entry.grid(row=0, column=0, sticky='news', padx=2, pady=2)
         self.open_folder_button.grid(row=0, column=1, sticky='news', padx=2, pady=2)
-        return self.filter_entry
 
     def filter(self, *args):
         text = self.filter_entry.get().lower()
