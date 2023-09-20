@@ -12,7 +12,7 @@ log = vlogging.getLogger(__name__, 'imagesequence_to_images')
 
 def imagesequence_to_images_argparse(args):
     for input_file in pathclass.glob_many_files(args.input_files):
-        input_file = pathclass.Path(sys.argv[1])
+        input_file = pathclass.Path(input_file)
         basename = input_file.replace_extension('').basename
         input_image = PIL.Image.open(input_file.absolute_path)
 
