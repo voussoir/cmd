@@ -106,6 +106,10 @@ def resize(
 
     log.debug('Resizing %s to %dx%d.', file.absolute_path, width, height)
     resampler = PIL.Image.NEAREST if nearest_neighbor else PIL.Image.LANCZOS
+
+    if image.mode == '1':
+        image = image.convert('L')
+
     image = image.resize( (width, height), resampler)
 
     if output_file.extension == '.jpg':
