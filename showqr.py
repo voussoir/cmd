@@ -28,6 +28,7 @@ def showqr_argparse(args):
     root.title("QR code")
     root.bind('<Escape>', lambda *args, **kwargs: root.quit())
     root.bind('<Control-s>', lambda *args, **kwargs: save_image(root, image))
+    root.bind('<Control-w>', lambda *args, **kwargs: root.quit())
 
     tk_image = PIL.ImageTk.PhotoImage(image)
     tkinter.Label(root, image=tk_image).grid(row=0, column=0)
