@@ -121,6 +121,7 @@ def prepare_urls_filenames(urls, filename_format):
                 index=index,
                 index1=index1,
                 now=now,
+                random=random.getrandbits(32),
             )
 
         if os.path.exists(filename):

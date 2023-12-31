@@ -3,6 +3,7 @@ import argparse
 import sys
 
 from voussoirkit import betterhelp
+from voussoirkit import imagetools
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import sentinel
@@ -17,6 +18,7 @@ def stitch_argparse(args):
     patterns = pipeable.input_many(args.image_files, skip_blank=True, strip=True)
     files = pathclass.glob_many_files(patterns)
     images = [PIL.Image.open(file.absolute_path) for file in files]
+    images = [imagetools.rotate_by_exif(image)[0] for image in images]
 
     if args.grid:
         (grid_x, grid_y) = [int(part) for part in args.grid.split('x')]
@@ -68,8 +70,12 @@ def stitch_argparse(args):
         offset_y += row_heights[index_y]
         offset_y += args.gap
 
+    output_file = pathclass.Path(args.output)
+    if output_file.extension in {'jpg', 'jpeg'}:
+        final_image = final_image.convert('RGB')
+
     log.info(args.output)
-    final_image.save(args.output)
+    final_image.save(output_file.absolute_path)
     return 0
 
 @vlogging.main_decorator

@@ -84,6 +84,7 @@ def handle_failure(file):
 def override_extension_commands(extension, command):
     extension = extension.lower().strip('.')
 
+    print(command)
     if command:
         command = [f'"{x}"' if ' ' in x else x for x in command]
         command = ' '.join(command).strip()
@@ -91,7 +92,7 @@ def override_extension_commands(extension, command):
         command = qcommands.EXTENSION_COMMANDS[extension]
 
     qcommands.EXTENSION_COMMANDS.clear()
-    qcommands.EXTENSION_COMMANDS[extension] = command
+    qcommands.EXTENSION_COMMANDS[extension] = (command, '{id}')
 
 def parse_collaborate(collaborate):
     if collaborate is None:
@@ -237,10 +238,40 @@ def q_argparse(args):
 @operatornotify.main_decorator(subject='q.py', notify_every_line=True)
 @vlogging.main_decorator
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description='''
+        This program is used to process so-called "queuefiles".
 
-    parser.add_argument('extension', nargs='?', default=None)
-    parser.add_argument('command', nargs='*', default=None)
+        The queuefile is a file where the extension indicates what command
+        should be used to handle it, and the command's argument is either the
+        file's name, or the content of the file.
+
+        If the queuefile is zero bytes, then the name of the file is the
+        argument to the command. If the file is non-empty, then the contents
+        are read as lines, and the command is invoked once for each line as
+        an argument.
+
+        For example, 0123456789a.youtube could be a zero-byte queuefile
+        that will be handled by youtube-dl to download the youtube video
+        with 0123456789a.
+
+        On the other hand, 012345789.wayback could be a queuefile that contains
+        an HTTP link inside, and the command will post it to web.archive.org.
+    ''')
+
+    parser.add_argument(
+        'extension',
+        nargs='?',
+        default=None,
+        help='''
+        Process only queuefiles with this particular extension. Leave blank
+        to process all recognized extensions.
+        ''',
+    )
+    parser.add_argument(
+        'command',
+        nargs='*',
+        default=None,
+    )
     parser.add_argument('--folders', nargs='*', default=None)
     parser.add_argument(
         '--once',

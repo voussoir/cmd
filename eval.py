@@ -1,4 +1,5 @@
 import argparse
+import PIL.Image
 import glob
 import math
 import os
