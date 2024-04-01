@@ -53,7 +53,7 @@ def ls_packages(path):
     packages = set()
     items = path.listdir()
     for item in items:
-        if item.is_dir and '.' in item.basename:
+        if item.is_dir and '.' in item.basename and not item.with_child('disable').exists:
             packages.add(item.basename)
         elif item.is_file and item.extension == 'apk':
             package = item.basename.split('-')[0]
