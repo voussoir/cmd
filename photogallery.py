@@ -109,7 +109,8 @@ article .photograph:last-of-type
 {
     margin-bottom: 0;
 }
-.photograph img
+.photograph img,
+.photograph video
 {
     max-height: 92vh;
     border-radius: 8px;
@@ -286,12 +287,19 @@ pre,
     <p>Click each photo to view its full resolution. Click the number to download it.</p>
 
     {% for file in files %}
+    {% if file.extension == 'jpg' %}
     <article class="photograph">
         <a target="_blank" href="{{urlroot}}{{file.relative_to('.', simple=True)}}"><img loading="lazy" src="{{urlroot}}thumbs/small_{{file.relative_to('.', simple=True)}}"/></a>
         {% if with_download_links %}
         <a class="download_link" download="{{file.basename}}" href="{{urlroot}}{{file.relative_to('.', simple=True)}}">#{{loop.index}}/{{files|length}}</a>
         {% endif %}
     </article>
+    {% elif file.extension in ['mp4', 'mov'] %}
+    <article class="photograph">
+        <p>{{file.replace_extension('').basename}}</p>
+        <video controls preload="none" src="{{urlroot}}{{file.relative_to('.', simple=True)}}" poster="{{urlroot}}thumbs/small_{{file.replace_extension('jpg').relative_to('.', simple=True)}}"></video>
+    </article>
+    {% endif %}
     {% endfor %}
 </body>
 
@@ -332,7 +340,7 @@ function get_center_img()
     {
         const element = document.elementFromPoint(center_x, center_y);
         console.log(element);
-        if (element.tagName === "IMG")
+        if (element.tagName === "IMG" || element.tagName === "VIDEO")
         {
             return element;
         }
@@ -345,7 +353,7 @@ function get_center_img()
 }
 function next_img(img)
 {
-    const images = Array.from(document.images);
+    const images = Array.from(document.querySelectorAll("img,video"));
     const this_index = images.indexOf(img);
     if (this_index === images.length-1)
     {
@@ -355,7 +363,7 @@ function next_img(img)
 }
 function previous_img(img)
 {
-    const images = Array.from(document.images);
+    const images = Array.from(document.querySelectorAll("img,video"));
     const this_index = images.indexOf(img);
     if (this_index === 0)
     {
