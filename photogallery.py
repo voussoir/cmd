@@ -67,7 +67,7 @@ body.noscrollbar::-webkit-scrollbar
 }
 body.noscrollbar
 {
-    scrollbar-width: none;
+    scrollbar-width: 0;
 }
 
 header
@@ -286,6 +286,10 @@ pre,
 
     <p>Click each photo to view its full resolution. Click the number to download it.</p>
 
+    {% for zip in zipz %}
+    <p>Click here to download <a target="_blank" href="{{urlroot}}{{zip.relative_to('.', simple=True)}}">{{zip.basename}}</a></p>
+    {% endfor %}
+
     {% for file in files %}
     {% if file.extension == 'jpg' %}
     <article class="photograph">
@@ -438,7 +442,10 @@ document.addEventListener("DOMContentLoaded", on_pageload);
 ''')
 
 def imagegallery(files, title, urlroot, with_download_links):
+    zipz = [f for f in files if f.extension == 'zip']
+    files = [f for f in files if f.extension != 'zip']
     html = TEMPLATE.render(
+        zipz=zipz,
         files=files,
         title=title,
         urlroot=urlroot,
