@@ -4,6 +4,7 @@ import os
 import re
 import sys
 
+from voussoirkit import betterhelp
 from voussoirkit import imagetools
 from voussoirkit import interactive
 from voussoirkit import pathclass
@@ -13,13 +14,14 @@ from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__)
 
-def makename(file, read_exif=False):
+def makename(file, read_exif=False, read_mtime=False):
     old = file.replace_extension('').basename
     new = old
 
+    final_pattern = r'^(\d\d\d\d)-(\d\d)-(\d\d)_(\d\d)-(\d\d)-(\d\d)(?:x\d+)?$'
     # Already optimized filenames need not apply
     # This is also important when the filename and the exif disagree
-    if re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)_(\d\d)-(\d\d)-(\d\d)(?:x\d+)?$', old) and not read_exif:
+    if re.match(final_pattern, old) and not read_exif:
         return file
 
     # Microsoft ICE
@@ -106,6 +108,13 @@ def makename(file, read_exif=False):
         new,
     )
 
+    # Sony videos
+    new = re.sub(
+        r'^VideoPro_(\d\d\d\d)(\d\d)(\d\d)_(\d\d)(\d\d)(\d\d)+$',
+        r'\1-\2-\3_\4-\5-\6',
+        new,
+    )
+
     new = re.sub(
         r'^(\d\d\d\d)-(\d\d)-(\d\d)_(\d\d)-(\d\d)-(\d\d)[_-](\d+)$',
         r'\1-\2-\3_\4-\5-\6x\7',
@@ -147,6 +156,13 @@ def makename(file, read_exif=False):
     if new == old and read_exif and file.extension in {'jpg', 'jpeg'}:
         new = makename_exif(file, old)
 
+    if new == old and re.match(final_pattern, new):
+        return file
+
+    if new == old and read_mtime:
+        date = datetime.datetime.fromtimestamp(file.stat.st_mtime)
+        new = date.strftime('%Y-%m-%d_%H-%M-%S')
+
     new = file.parent.with_child(new).add_extension(file.extension)
     return new
 
@@ -156,11 +172,16 @@ def makename_exif(file, fallback):
         return fallback
     return dt.strftime('%Y-%m-%d_%H-%M-%S')
 
-def makenames(files, read_exif=False):
+def makename_ffmpeg(file, fallback):
+    import kkroening_ffmpeg
+    probe = kkroening_ffmpeg.probe(file.absolute_path)
+    zulu = probe['streams'][0]['tags']['creation_time']
+
+def makenames(files, read_exif=False, read_mtime=False):
     pairs = {}
     new_duplicates = {}
     for file in files:
-        newname = makename(file, read_exif=read_exif)
+        newname = makename(file, read_exif=read_exif, read_mtime=read_mtime)
         new_duplicates.setdefault(newname, []).append(file)
         if file.basename == newname.basename:
             continue
@@ -193,7 +214,7 @@ def photo_rename_argparse(args):
     else:
         files = pathclass.glob_many_files(patterns)
 
-    pairs = makenames(files, read_exif=args.read_exif)
+    pairs = makenames(files, read_exif=args.read_exif, read_mtime=args.read_mtime)
     if not pairs:
         return 0
 
@@ -212,12 +233,26 @@ def main(argv):
 
     parser.add_argument('patterns', nargs='+')
     parser.add_argument('--recurse', action='store_true')
-    parser.add_argument('--exif', dest='read_exif', action='store_true')
+    parser.add_argument(
+        '--exif',
+        dest='read_exif',
+        action='store_true',
+        help='''
+        Program will look for EXIF metadata and use ImageDateTime, if available.
+        ''',
+    )
+    parser.add_argument(
+        '--mtime',
+        dest='read_mtime',
+        action='store_true',
+        help='''
+        Program will use the file's mtime as a last resort.
+        ''',
+    )
     parser.add_argument('--yes', dest='autoyes', action='store_true')
     parser.set_defaults(func=photo_rename_argparse)
 
-    args = parser.parse_args(argv)
-    return args.func(args)
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
