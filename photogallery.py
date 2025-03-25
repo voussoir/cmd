@@ -296,7 +296,7 @@ pre,
     </article>
     {% elif file.extension in ['mp4', 'mov'] %}
     <article class="photograph">
-        <p>{{file.replace_extension('').basename}}</p>
+        <p>{{file.replace_extension('').basename}} (<a download="{{file.basename}}" href="{{urlroot}}{{file.relative_to('.', simple=True)}}">#{{loop.index}}/{{files|length}}</a>)</p>
         <video controls preload="none" src="{{urlroot}}{{file.relative_to('.', simple=True)}}" poster="{{urlroot}}thumbs/small_{{file.replace_extension('jpg').relative_to('.', simple=True)}}"></video>
     </article>
     {% endif %}
