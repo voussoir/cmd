@@ -3,17 +3,16 @@ import psutil
 import sys
 
 from voussoirkit import betterhelp
+from voussoirkit import subproctools
 from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__, 'getpid')
 
 def getpid_argparse(args):
-    status = 1
-    target = args.process_name.lower()
-    for process in psutil.process_iter():
-        if process.name().lower() == target:
-            print(process.pid)
-            status = 0
+    pids = subproctools.getpid(args.process_name)
+    status = 0 if len(pids) > 0 else 1
+    for pid in pids:
+        print(pid)
     return status
 
 @vlogging.main_decorator
