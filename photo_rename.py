@@ -14,7 +14,7 @@ from voussoirkit import vlogging
 
 log = vlogging.getLogger(__name__)
 
-def makename(file, read_exif=False, read_mtime=False):
+def makename(file, read_exif=False, read_mtime=False, minus_duration=False):
     old = file.replace_extension('').basename
     new = old
 
@@ -160,7 +160,10 @@ def makename(file, read_exif=False, read_mtime=False):
         return file
 
     if new == old and read_mtime:
-        date = datetime.datetime.fromtimestamp(file.stat.st_mtime)
+        mtime = file.stat.st_mtime
+        if minus_duration:
+            mtime -= get_file_duration(file)
+        date = datetime.datetime.fromtimestamp(mtime)
         new = date.strftime('%Y-%m-%d_%H-%M-%S')
 
     new = file.parent.with_child(new).add_extension(file.extension)
@@ -172,16 +175,23 @@ def makename_exif(file, fallback):
         return fallback
     return dt.strftime('%Y-%m-%d_%H-%M-%S')
 
+def get_file_duration(file):
+    import kkroening_ffmpeg
+    probe = kkroening_ffmpeg.probe(file.absolute_path)
+    duration = float(probe['format']['duration'])
+    return duration
+
 def makename_ffmpeg(file, fallback):
     import kkroening_ffmpeg
     probe = kkroening_ffmpeg.probe(file.absolute_path)
+    duration = float(probe['format']['duration'])
     zulu = probe['streams'][0]['tags']['creation_time']
 
-def makenames(files, read_exif=False, read_mtime=False):
+def makenames(files, read_exif=False, read_mtime=False, minus_duration=False):
     pairs = {}
     new_duplicates = {}
     for file in files:
-        newname = makename(file, read_exif=read_exif, read_mtime=read_mtime)
+        newname = makename(file, read_exif=read_exif, read_mtime=read_mtime, minus_duration=minus_duration)
         new_duplicates.setdefault(newname, []).append(file)
         if file.basename == newname.basename:
             continue
@@ -214,7 +224,7 @@ def photo_rename_argparse(args):
     else:
         files = pathclass.glob_many_files(patterns)
 
-    pairs = makenames(files, read_exif=args.read_exif, read_mtime=args.read_mtime)
+    pairs = makenames(files, read_exif=args.read_exif, read_mtime=args.read_mtime, minus_duration=args.minus_duration)
     if not pairs:
         return 0
 
@@ -247,6 +257,17 @@ def main(argv):
         action='store_true',
         help='''
         Program will use the file's mtime as a last resort.
+        ''',
+    )
+    parser.add_argument(
+        '--minus_duration',
+        '--minus-duration',
+        dest='minus_duration',
+        action='store_true',
+        help='''
+        When used with --mtime, the file's duration will be subtracted.
+        Use for cameras that set the mtime to the end of the video and you want
+        the name to be the start.
         ''',
     )
     parser.add_argument('--yes', dest='autoyes', action='store_true')
