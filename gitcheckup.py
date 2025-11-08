@@ -360,7 +360,7 @@ def main(argv):
         nargs='+',
         type=str,
         help='''
-        Run `git <command>` in each directory. You can use \- to escape - in your
+        Run `git <command>` in each directory. You can use \\- to escape - in your
         git arguments, since they would confuse this program's argparse.
         If this is used, any --fetch, --pull, --push is ignored.
         ''',
