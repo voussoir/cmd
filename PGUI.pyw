@@ -148,7 +148,8 @@ def main(argv):
 
     pgui = PGUILauncher(root)
     pgui.pack(fill=tkinter.BOTH, expand=True)
-    pgui.filter_entry.focus()
+    pgui.filter_entry.focus_set()
+    pgui.filter_entry.focus_force()
 
     width = root.winfo_reqwidth()
     height = root.winfo_reqheight()
@@ -157,6 +158,8 @@ def main(argv):
 
     root.geometry('%dx%d+%d+%d' % (width, height, x_offset, y_offset-50))
     root.deiconify()
+    root.focus()
+    root.after(100, lambda: pgui.filter_entry.focus_force())
     root.mainloop()
 
 if __name__ == '__main__':
