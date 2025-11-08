@@ -18,7 +18,7 @@ log = vlogging.getLogger(__name__, 'getcrx')
 FILENAME_BADCHARS = '\\/:*?<>|"'
 
 WEBSTORE_URL = 'https://chrome.google.com/webstore/detail/{extension_id}'
-CRX_URL = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=121.0.6167.161&acceptformat=crx2,crx3&x=id%3D{extension_id}%26uc'
+CRX_URL = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=131.0.6167.161&acceptformat=crx2,crx3&x=id%3D{extension_id}%26uc'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'
 
 session = requests.Session()
