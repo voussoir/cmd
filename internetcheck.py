@@ -1,8 +1,10 @@
+import argparse
 import socket
 import sqlite3
 import sys
 import time
 
+from voussoirkit import betterhelp
 from voussoirkit import hms
 from voussoirkit import threadpool
 from voussoirkit import vlogging
@@ -35,12 +37,11 @@ def percentage(items):
     trues = sum(bool(i) for i in items)
     return trues / len(items)
 
-def ping_lan():
-    ip = '192.168.1.1'
-    log.debug('Checking LAN at %s.', ip)
+def ping_lan(gateway_ip):
+    log.debug('Checking LAN at %s.', gateway_ip)
     try:
         socket.setdefaulttimeout(1)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((ip, 80))
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((gateway_ip, 80))
         return True
     except socket.error:
         return False
@@ -76,21 +77,12 @@ def check_ip():
         log.debug('Checking IP %s.', ip)
         try:
             socket.setdefaulttimeout(2)
-            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(('104.43.253.214', 80))
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((ip, 80))
             return True
         except socket.error:
             return False
     ips = [
-        '104.43.253.214',
-        '13.107.21.200',
-        '13.77.161.179',
-        '142.136.81.136',
-        '151.101.1.140',
-        '172.217.11.174',
-        '172.217.11.78',
-        '176.32.103.205',
-        '35.165.194.49',
-        '69.252.80.75',
+        '198.100.155.125', # voussoir.net
     ]
     thread_pool.pause()
     jobs = [{'function': check, 'args': [ip]} for ip in ips]
@@ -127,10 +119,10 @@ def end_down():
     down = False
     outage_started = None
 
-def check_forever():
+def check_forever(lan_gateway_ip):
     while True:
         now = time.strftime('%Y-%m-%d %H:%M:%S')
-        lan_ok = int(ping_lan())
+        lan_ok = int(ping_lan(lan_gateway_ip))
         dns_stat = check_dns()
         ip_stat = check_ip()
         message = f'{now}, LAN={lan_ok}, DNS={dns_stat:0.2f}, IP={ip_stat:0.2f}'
@@ -148,13 +140,31 @@ def check_forever():
         else:
             time.sleep(20)
 
-@vlogging.main_decorator
-def main(argv):
+def internetcheck_argparse(args):
     try:
-        check_forever()
+        check_forever(lan_gateway_ip=args.lan_gateway_ip)
     except KeyboardInterrupt:
         pass
     return 0
+
+@vlogging.main_decorator
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description='''
+        This program will periodically ping both LAN and external IP addresses
+        to help you troubleshoot the time and duration of network outages.
+        ''',
+    )
+    parser.add_argument(
+        '--lan_gateway_ip',
+        '--lan-gateway-ip',
+        default='192.168.1.1',
+        help='''
+        ''',
+    )
+    parser.set_defaults(func=internetcheck_argparse)
+
+    return betterhelp.go(parser, argv)
 
 if __name__ == '__main__':
     raise SystemExit(main(sys.argv[1:]))
