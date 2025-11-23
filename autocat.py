@@ -1,23 +1,42 @@
-import glob
+import argparse
 import os
 import sys
 import tempfile
 
-if len(sys.argv) < 3:
-    raise ValueError()
+from voussoirkit import betterhelp
+from voussoirkit import ffmpegtools
+from voussoirkit import pathclass
+from voussoirkit import vlogging
+from voussoirkit import winglob
 
-output_filename = sys.argv.pop(-1)
-patterns = sys.argv[1:]
+log = vlogging.getLogger(__name__, 'autocat')
 
-names = [name for pattern in patterns for name in glob.glob(pattern)]
-names = [os.path.abspath(x) for x in names]
-cat_lines = [f'file \'{x}\'' for x in names]
-cat_text = '\n'.join(cat_lines)
-cat_file = tempfile.TemporaryFile('w', encoding='utf-8', delete=False)
-cat_file.write(cat_text)
-cat_file.close()
+def autocat_argparse(args):
+    if len(args.names) < 3:
+        raise ValueError('Should have at least three arguments: two inputs and one output.')
 
-cmd = f'ffmpeg -f concat -safe 0 -i {cat_file.name} -map 0:v? -map 0:a? -map 0:s? -c copy "{output_filename}"'
-os.system(cmd)
+    output_file = pathclass.Path(args.names.pop(-1))
+    patterns = args.names
 
-os.remove(cat_file.name)
+    input_files = list(pathclass.glob_many_files(patterns))
+    output_file = ffmpegtools.concatenate(input_files, output_file)
+    return 0
+
+@vlogging.main_decorator
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description='''
+        ''',
+    )
+    parser.add_argument(
+        'names',
+        nargs='+',
+        help='''
+        ''',
+    )
+    parser.set_defaults(func=autocat_argparse)
+
+    return betterhelp.go(parser, argv)
+
+if __name__ == '__main__':
+    raise SystemExit(main(sys.argv[1:]))
