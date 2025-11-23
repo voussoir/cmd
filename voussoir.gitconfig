@@ -17,6 +17,7 @@
     algorithm = histogram
 [gui]
     diffopts = --patience
+    gcwarning = false
 
 # In the user's .gitconfig file, inclue these lines at the top:
 # [include]
