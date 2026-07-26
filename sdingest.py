@@ -1,6 +1,9 @@
-import shutil
 import argparse
+import os
+import shutil
 import sys
+
+import photo_rename
 
 from voussoirkit import betterhelp
 from voussoirkit import pathclass
@@ -30,6 +33,10 @@ def sdingest_all():
         # Panasonic HC-X1500/HC-X2000
         panasonic = mount.with_child('PRIVATE').with_child('PANA_GRP').with_child('001YAQAM')
         if panasonic.is_folder:
+            files = list(panasonic.walk_files())
+            pairs = photo_rename.makenames(files, read_mtime=True, minus_duration=True)
+            for (old, new) in pairs.items():
+                os.rename(old.absolute_path, new.absolute_path)
             sdingest_one(panasonic)
             continue
 
