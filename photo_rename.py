@@ -21,8 +21,9 @@ def makename(file, read_exif=False, read_mtime=False, minus_duration=False):
     final_pattern = r'^(\d\d\d\d)-(\d\d)-(\d\d)_(\d\d)-(\d\d)-(\d\d)(?:x\d+)?$'
     # Already optimized filenames need not apply
     # This is also important when the filename and the exif disagree
-    if re.match(final_pattern, old) and not read_exif:
-        return file
+    if re.match(final_pattern, old) and not read_exif and not read_mtime:
+        # return file
+        pass
 
     # Microsoft ICE
     new = re.sub(
@@ -156,15 +157,15 @@ def makename(file, read_exif=False, read_mtime=False, minus_duration=False):
     if new == old and read_exif and file.extension in {'jpg', 'jpeg', 'dng'}:
         new = makename_exif(file, old)
 
-    if new == old and re.match(final_pattern, new):
-        return file
-
     if new == old and read_mtime:
         mtime = file.stat.st_mtime
         if minus_duration:
             mtime -= get_file_duration(file)
         date = datetime.datetime.fromtimestamp(mtime)
         new = date.strftime('%Y-%m-%d_%H-%M-%S')
+
+    if new == old:
+        return file
 
     new = file.parent.with_child(new).add_extension(file.extension)
     return new
