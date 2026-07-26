@@ -47,11 +47,14 @@ def sdingest_all():
             continue
 
         # Sony ICD UX570
-        if info.get('name').upper() == 'MEMORY CARD':
-            folder = mount.join('PRIVATE\\SONY\\REC_FILE')
-            if folder.exists:
-                sdingest_one(folder)
-                continue
+        folder = mount.join('PRIVATE\\SONY\\REC_FILE')
+        if info.get('name').upper() == 'MEMORY CARD' and folder.is_folder:
+            files = list(folder.walk_files())
+            pairs = photo_rename.makenames(files, read_mtime=True)
+            for (old, new) in pairs.items():
+                os.rename(old.absolute_path, new.absolute_path)
+            sdingest_one(folder)
+            continue
 
     if dcim is None:
         return 1
