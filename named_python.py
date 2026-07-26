@@ -4,19 +4,24 @@ import sys
 
 from voussoirkit import betterhelp
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 
-def namedpython_argparse(args):
+def named_python(name):
     this_python = pathclass.Path(sys.executable)
-
+    name = name.strip()
+    # If this is running via another named python, we'll cut off the dash first.
     base = this_python.replace_extension('').basename.split('-', 1)[0]
-    name = args.name.strip()
     extension = this_python.extension.with_dot
     named_python = this_python.parent.with_child(f'{base}-{name}{extension}')
     if named_python.exists:
-        return 0
+        return named_python
 
     os.link(this_python.absolute_path, named_python.absolute_path)
-    print(named_python.absolute_path)
+    return named_python
+
+def namedpython_argparse(args):
+    exe = named_python(args.name)
+    pipeable.stdout(exe.absolute_path)
     return 0
 
 def main(argv):
