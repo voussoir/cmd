@@ -11,6 +11,7 @@ from voussoirkit import betterhelp
 from voussoirkit import bytestring
 from voussoirkit import operatornotify
 from voussoirkit import pathclass
+from voussoirkit import pipeable
 from voussoirkit import subproctools
 from voussoirkit import vlogging
 from voussoirkit import winglob
@@ -26,6 +27,9 @@ RESERVE_SPACE_ON_DRIVE = 5 * bytestring.GIBIBYTE
 COMPRESSION_STORE = 0
 COMPRESSION_MAX = 5
 
+DATE_STRFTIME = '%Y-%m-%d'
+DATETIME_STRFTIME = '%Y-%m-%d_%H-%M-%S'
+
 class RarParException(Exception):
     pass
 
@@ -35,7 +39,8 @@ class RarExists(RarParException):
 class NotEnoughSpace(RarParException):
     pass
 
-def RARCOMMAND(
+def build_rarcommand(
+        *,
         path,
         basename,
         workdir,
@@ -49,6 +54,8 @@ def RARCOMMAND(
         volume=None,
     ):
     '''
+    winrar [options] destination files_to_include
+    ----------------------------------------------------------------------------
     winrar
         a = make archive
         -cp{profile} = use compression profile. this must come first so that
@@ -74,8 +81,8 @@ def RARCOMMAND(
         -x = exclude certain filenames
     destination
         workdir/basename.rar
-    files to include
-        input_pattern
+    files_to_include
+        glob pattern
     '''
     command = [WINRAR, 'a']
 
@@ -125,14 +132,30 @@ def RARCOMMAND(
 
     return command
 
-def PARCOMMAND(workdir, basename, par):
+def run_rar(**kwargs) -> list:
     '''
+    Run the winrar command and return a list of rar and rev files.
+    '''
+    workdir = kwargs['workdir']
+    basename = kwargs['basename']
+    command = build_rarcommand(**kwargs)
+    creationflags = subprocess.CREATE_NO_WINDOW if sys.stdout is None else 0
+    log.info(subproctools.format_command(command))
+    status = subprocess.run(command, creationflags=creationflags).returncode
+    return (workdir.glob_files(f'{basename}*.rar') + workdir.glob_files(f'{basename}*.rev'))
+
+def build_parcommand(workdir, basename, par):
+    '''
+    phpar2 [options] destination files_to_include
+    ----------------------------------------------------------------------------
     phpar2
         c = create pars
         -t1 = thread count: 1
         -r{x} = x% recovery
     destination
         workdir/basename.par2
+    files_to_include
+        glob pattern
     '''
     command = [
         PAR2,
@@ -144,6 +167,18 @@ def PARCOMMAND(workdir, basename, par):
     ]
     return command
 
+def run_par(**kwargs) -> list:
+    '''
+    Run the par command and return a list of par2 files.
+    '''
+    workdir = kwargs['workdir']
+    basename = kwargs['basename']
+    command = build_parcommand(**kwargs)
+    creationflags = subprocess.CREATE_NO_WINDOW if sys.stdout is None else 0
+    log.info(subproctools.format_command(command))
+    status = subprocess.run(command, creationflags=creationflags).returncode
+    return workdir.glob_files(f'{basename}*.par2')
+
 def assert_enough_space(path, size, rec, rev, par):
     plus_percent = (rec + rev + par) / 100
     needed = size * (1 + plus_percent)
@@ -151,12 +186,6 @@ def assert_enough_space(path, size, rec, rev, par):
     reserve = int(reserve)
 
     path.assert_disk_space(reserve)
-
-def move(pattern, directory):
-    files = winglob.glob(pattern)
-    for file in files:
-        print(file)
-        shutil.move(file, directory)
 
 def normalize_compression(compression):
     if compression is None:
@@ -283,41 +312,6 @@ def normalize_volume(volume, pathsize):
         raise ValueError('Volume must be >= 1.')
     return volume
 
-def run_script(script, dry=False):
-    '''
-    `script` can be a list of strings, which are command line commands, or
-    callable Python functions. They will be run in order, and the sequence
-    will terminate if any step returns a bad status code. Your Python functions
-    must return either 0 or None to be considered successful, all other return
-    values will be considered failures.
-    '''
-    status = 0
-
-    for command in script:
-        if isinstance(command, str):
-            log.info(command)
-        elif isinstance(command, list):
-            log.info(subproctools.format_command(command))
-        else:
-            log.info(command)
-
-        if dry:
-            continue
-
-        if isinstance(command, str):
-            status = os.system(command)
-        elif isinstance(command, list):
-            # sys.stdout is None indicates pythonw.
-            creationflags = subprocess.CREATE_NO_WINDOW if sys.stdout is None else 0
-            status = subprocess.run(command, creationflags=creationflags).returncode
-        else:
-            status = command()
-        if status not in [0, None]:
-            log.error('!!!! error status: %s', status)
-            break
-
-    return status
-
 def rarpar(
         path,
         *,
@@ -382,8 +376,8 @@ def rarpar(
             par=par or 0,
         )
 
-    date = time.strftime('%Y-%m-%d')
-    timestamp = time.strftime('%Y-%m-%d_%H-%M-%S')
+    date = time.strftime(DATE_STRFTIME)
+    timestamp = time.strftime(DATETIME_STRFTIME)
 
     if basename is not None:
         basename = re.sub(r'\.rar$', '', basename)
@@ -402,11 +396,11 @@ def rarpar(
     if existing:
         raise RarExists(f'{existing[0].absolute_path} already exists.')
 
-    # Script building ##############################################################################
+    output_files = []
 
-    script = []
+    ################################################################################################
 
-    rarcommand = RARCOMMAND(
+    rar_kwargs = dict(
         path=path,
         basename=basename,
         compression=compression,
@@ -419,51 +413,50 @@ def rarpar(
         volume=volume,
         workdir=workdir,
     )
-    script.append(rarcommand)
+    if dry:
+        rarcommand = build_rarcommand(**rar_kwargs)
+        log.info(subproctools.format_command(rarcommand))
+    else:
+        rar_files = run_rar(**rar_kwargs)
+        output_files.extend(rar_files)
 
-    if par:
-        parcommand = PARCOMMAND(
-            basename=basename,
-            par=par,
-            workdir=workdir,
-        )
-        script.append(parcommand)
+    ################################################################################################
 
-    def move_rars():
-        move(f'{workdir.absolute_path}\\{basename}*.rar', f'{moveto.absolute_path}')
+    par_kwargs = dict(
+        basename=basename,
+        par=par,
+        workdir=workdir,
+    )
+    if not par:
+        pass
+    elif dry:
+        parcommand = build_parcommand(**par_kwargs)
+        log.info(subproctools.format_command(parcommand))
+    else:
+        par_files = run_par(**par_kwargs)
+        output_files.extend(par_files)
 
-    def move_revs():
-        move(f'{workdir.absolute_path}\\{basename}*.rev', f'{moveto.absolute_path}')
+    ################################################################################################
 
-    def move_pars():
-        move(f'{workdir.absolute_path}\\{basename}*.par2', f'{moveto.absolute_path}')
+    if moveto and not dry:
+        moved_files = []
+        for file in output_files:
+            shutil.move(file.absolute_path, moveto.absolute_path)
+            moved_files.append(moveto.with_child(file.basename))
+        output_files = moved_files
 
-    if moveto:
-        if True:
-            script.append(move_rars)
-        if rev:
-            script.append(move_revs)
-        if par:
-            script.append(move_pars)
-
-    def recycle():
+    if recycle_original and not dry:
         send2trash.send2trash(path.absolute_path)
 
-    if recycle_original:
-        script.append(recycle)
+    return output_files
 
-    #### ####
-
-    status = run_script(script, dry)
-
-    return status
-
+####################################################################################################
 # COMMAND LINE #####################################################################################
+####################################################################################################
 
 def rarpar_argparse(args):
-    status = 0
     try:
-        return rarpar(
+        output_files = rarpar(
             path=args.path,
             volume=args.volume,
             basename=args.basename,
@@ -480,11 +473,12 @@ def rarpar_argparse(args):
             solid=args.solid,
             workdir=args.workdir,
         )
+        for file in output_files:
+            pipeable.stdout(file.absolute_path)
+        return 0
     except (RarExists, pathclass.NotEnoughSpace) as exc:
         log.fatal(exc)
-        status = 1
-
-    return status
+        return 1
 
 @operatornotify.main_decorator(subject='rarpar.py')
 @vlogging.main_decorator
