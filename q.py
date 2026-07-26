@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import os
 import re
+import send2trash
 import sys
 import time
 import traceback
@@ -159,7 +160,8 @@ def process_file(file, args=None):
 
     if exit_code == 0:
         try:
-            os.remove(file)
+            # os.remove(file)
+            send2trash.send2trash(file)
         except FileNotFoundError:
             # Race condition
             pass
