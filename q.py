@@ -47,19 +47,20 @@ def filter_collaborate(files, collaborate):
     return newfiles
 
 def get_extension_command(extension):
-    for (key, (command, argument)) in qcommands.EXTENSION_COMMANDS.items():
+    for (key, qcommand) in qcommands.EXTENSION_COMMANDS.items():
         if isinstance(key, str):
             if key == extension:
-                return (command, argument)
+                return qcommand
             continue
         match = re.match(key, extension)
         if not match:
             continue
         groups = match.groups()
         if not groups:
-            return (command, argument)
-        command = re.sub(key, command, extension)
-        return (command, argument)
+            return qcommand
+        qcommand = qcommand.copy()
+        qcommand['command'] = re.sub(key, qcommand['command'], extension)
+        return qcommand
 
 def handle_blacklist(file, reason=''):
     if reason:
@@ -137,16 +138,18 @@ def process_file(file, args=None):
 
     commands = []
 
-    if file.size > 0:
+    qcommand = get_extension_command(extension)
+    command = qcommand['command']
+    argument = qcommand['argument']
+
+    if file.size > 0 and qcommand.get('read_file', True):
         links = read_file_links(file)
-        (command, argument) = get_extension_command(extension)
         commands.extend(f'{command} "{link}"' for link in links)
 
     else:
-        (command, argument) = get_extension_command(extension)
         base = file.replace_extension('').basename
-        argument = argument.format(id=base)
-        commands.append(f'{command} {argument}')
+        argument = argument.format(id=base, abspath=file.absolute_path)
+        commands.append(f'{command} -- {argument}')
 
     exit_code = 0
 
