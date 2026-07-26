@@ -153,7 +153,7 @@ def makename(file, read_exif=False, read_mtime=False, minus_duration=False):
     # Especially in cases where the user has edited a photo with software that
     # reset the exif but the filename refers to the original date.
     # I'm sure cases could be made either way but I'm starting here.
-    if new == old and read_exif and file.extension in {'jpg', 'jpeg'}:
+    if new == old and read_exif and file.extension in {'jpg', 'jpeg', 'dng'}:
         new = makename_exif(file, old)
 
     if new == old and re.match(final_pattern, new):
