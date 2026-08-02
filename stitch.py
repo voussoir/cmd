@@ -64,7 +64,7 @@ def stitch_argparse(args):
         for (index_x, image) in enumerate(row):
             pad_x = int((column_widths[index_x] - image.size[0]) / 2)
             pad_y = int((row_heights[index_y] - image.size[1]) / 2)
-            final_image.paste(image, (offset_x + pad_x, offset_y + pad_y))
+            final_image.paste(image, (offset_x + pad_x, offset_y + pad_y), mask=image)
             offset_x += column_widths[index_x]
             offset_x += args.gap
         offset_y += row_heights[index_y]
