@@ -123,10 +123,13 @@ class PGUILauncher(tkinter.Frame):
         self.launch_program(self.ready_to_launch.shortcut)
 
     def launch_program(self, shortcut):
-        print('opening application', shortcut.basename)
+        print('opening shortcut', shortcut.basename)
         os.chdir(shortcut.parent.absolute_path)
-        command = f'"{shortcut.absolute_path}"'
-        subprocess.Popen(command, shell=True)
+        if os.name == 'nt':
+            os.startfile(shortcut.absolute_path)
+        else:
+            command = f'"{shortcut.absolute_path}"'
+            subprocess.Popen(command, shell=True)
         self.quit()
 
     def open_pgui_folder(self):
