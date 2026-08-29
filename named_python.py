@@ -6,13 +6,12 @@ from voussoirkit import betterhelp
 from voussoirkit import pathclass
 from voussoirkit import pipeable
 
-def named_python(name):
-    this_python = pathclass.Path(sys.executable)
+def named_python(executable, name):
+    this_python = pathclass.Path(executable)
     name = name.strip()
     # If this is running via another named python, we'll cut off the dash first.
     base = this_python.replace_extension('').basename.split('-', 1)[0]
-    extension = this_python.extension.with_dot
-    named_python = this_python.parent.with_child(f'{base}-{name}{extension}')
+    named_python = this_python.parent.with_child(f'{base}-{name}').add_extension(this_python.extension)
     if named_python.exists:
         return named_python
 
@@ -20,7 +19,7 @@ def named_python(name):
     return named_python
 
 def namedpython_argparse(args):
-    exe = named_python(args.name)
+    exe = named_python(sys.executable, args.name)
     pipeable.stdout(exe.absolute_path)
     return 0
 
