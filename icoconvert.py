@@ -12,6 +12,7 @@
 # |_______________________|
 
 # ICO header:
+# https://en.wikipedia.org/wiki/ICO_%28file_format%29#ICONDIR_structure
 #  _______________________________________________________________________________
 # | Offset | Size (bytes) | Purpose                                               |
 # |--------|--------------|-------------------------------------------------------|
@@ -24,6 +25,7 @@
 # |________|______________|_______________________________________________________|
 
 # Icon directory structure:
+# https://en.wikipedia.org/wiki/ICO_%28file_format%29#ICONDIRENTRY_structure
 #  _______________________________________________________________________________
 # | Offset | Size (bytes) | Purpose                                               |
 # |--------|--------------|-------------------------------------------------------|
@@ -56,7 +58,8 @@
 # |________|______________|_______________________________________________________|
 
 # Image data structure
-# BMP, starting from the BITMAPINFOHEADER, ignoring normal file header:
+# BMP, starting from the BITMAPINFOHEADER, ignoring normal 14-byte file header:
+# https://en.wikipedia.org/wiki/BMP_file_format
 #  _______________________________________________________________________________
 # | Offset | Size (bytes) | Purpose                                               |
 # |--------|--------------|-------------------------------------------------------|
@@ -65,6 +68,8 @@
 # |  4     |            4 | Image width in pixels, signed.                        |
 # |--------|--------------|-------------------------------------------------------|
 # |  8     |            4 | Image height in pixels, signed.                       |
+# |        |              | The value will actually be doubled because the 1-bit  |
+# |        |              | AND mask is treated as a second stacked layer.        |
 # |--------|--------------|-------------------------------------------------------|
 # | 12     |            2 | Number of color planes. Always 1.                     |
 # |--------|--------------|-------------------------------------------------------|
@@ -82,7 +87,7 @@
 # |--------|--------------|-------------------------------------------------------|
 # | 36     |            4 | Number of important colors. 0 for all.                |
 # |--------|--------------|-------------------------------------------------------|
-# | 40     |            n | Pixel bytes, r, g, b, a.                              |
+# | 40     |            n | Pixel bytes, R, G, B, A. Then 1-bit AND-mask layer.   |
 # |________|______________|_______________________________________________________|
 
 import argparse
@@ -139,7 +144,7 @@ def load_image(file):
     image = imagetools.pad_to_square(image)
     return image
 
-def build_ico_header_blob(image_count):
+def build_ico_header_blob(image_count) -> bytes:
     datablob = b''.join([
         # reserved
         little(0, 2),
@@ -149,7 +154,7 @@ def build_ico_header_blob(image_count):
     ])
     return datablob
 
-def build_icon_directory_blob(image, offset_from_start):
+def build_icon_directory_blob(image, offset_from_start) -> bytes:
     (width, height) = image.size
     datablob = b''.join([
         little(width if width < 256 else 0, 1),
@@ -162,19 +167,50 @@ def build_icon_directory_blob(image, offset_from_start):
         little(1, 2),
         # bit depth
         little(32, 2),
-        # image bytes length
-        little((width * height * 4) + BMP_HEADER_LENGTH, 4),
+        # image bytes length, plus 1-bit AND mask length
+        little((width * height * 4) + ((width * height)//8) + BMP_HEADER_LENGTH, 4),
         little(offset_from_start, 4),
     ])
     return datablob
 
-def build_image_data_blob(image):
+def build_image_data_blob(image) -> bytes:
+    # The AND mask is one bit per pixel regardless of the image's colour depth:
+    # a 0 bit draws the corresponding image pixel, while a 1 bit leaves the
+    # screen unchanged, making the pixel transparent.
+    # https://en.wikipedia.org/wiki/ICO_%28file_format%29#DIB_format
+    andmask = []
+    pixeldata = []
+    # Image.getdata() is a list of (r, g, b, a) channels
+    # But the BMP are written (b, g, r, a).
+    # Also they are written from bottom to top.
+    pixels = list(image.getdata())
+    pixels = reversed(chunk_sequence(pixels, image.size[0]))
+    pixels = [line for chunk in pixels for line in chunk]
+    for pixel in pixels:
+        (r, g, b, a) = pixel
+        if a == 0:
+            andmask.append(1)
+        else:
+            andmask.append(0)
+        pixeldata.extend((b, g, r, a))
+    pixeldata = bytes(pixeldata)
+
+    andmask = [str(bit) for bit in andmask]
+    andmask = chunk_sequence(andmask, 8)
+    andmask = (''.join(chunk) for chunk in andmask)
+    andmask = (int(chunk, 2) for chunk in andmask)
+    andmask = bytes(andmask)
+
     datablob = b''.join([
         # header size
-        little(40, 4),
+        little(BMP_HEADER_LENGTH, 4),
         little(image.size[0], 4),
-        # "Even if the AND mask is not supplied, if the image is in Windows BMP
-        # format, the BMP header must still specify a doubled height." - wikipedia
+        # The height declared in the BITMAPINFOHEADER is twice the height
+        # declared in the image directory, because the DIB holds two stacked
+        # parts of equal dimensions: the colour image (the XOR mask) above the
+        # 1-bit AND mask.[9][8] Rows in both parts are padded to a multiple of
+        # four bytes.
+        # https://en.wikipedia.org/wiki/ICO_%28file_format%29#DIB_format
         little(image.size[1] * 2, 4),
         # color planes
         little(1, 2),
@@ -192,51 +228,37 @@ def build_image_data_blob(image):
         little(0, 4),
         # important palette
         little(0, 4),
+        pixeldata,
+        andmask,
     ])
-    pixeldata = []
-    # Image.getdata() is a list of (r, g, b, a) channels
-    # But the BMP are written (b, g, r, a)
-    # Also they are written from bottom to top.
-    pixels = list(image.getdata())
-    pixels = reversed(chunk_sequence(pixels, image.size[0]))
-    pixels = [line for chunk in pixels for line in chunk]
-    for pixel in pixels:
-        (r, g, b, a) = pixel
-        pixeldata.extend((b, g, r, a))
-    datablob += bytes(pixeldata)
     return datablob
 
 def images_to_ico(images):
-    # For some reason Windows reads the icons in reverse order.
+    # Windows reads the icons in reverse order.
     images.sort(key=lambda i: i.size[0] * i.size[1], reverse=True)
 
-    # The directory entries need to know their image's address, so therefore
-    # we must know the lengths of all the image binaries before we can write
-    # any directory entries.
-    # We will calculate the image blobs first, store them separately,
-    # and then put them after the directory blobs.
-    datablobs = []
-    imageblobs = []
+    directory_blobs = []
+    image_blobs = []
 
     ico_header_blob = build_ico_header_blob(image_count=len(images))
-    datablobs.append(ico_header_blob)
-
-    for (index, image) in enumerate(images):
-        imageblob = build_image_data_blob(image)
-        imageblobs.append(imageblob)
 
     # Since the ICO header and directory entries are of fixed length, we know
     # the location of the first image.
     # After that, the offset just gains the size of the previous image.
     offset_from_start = ICO_HEADER_LENGTH + (len(images) * ICON_DIRECTORY_ENTRY_LENGTH)
-    for (index, (image, imageblob)) in enumerate(zip(images, imageblobs)):
-        directoryblob = build_icon_directory_blob(image, offset_from_start=offset_from_start)
-        datablobs.append(directoryblob)
-        offset_from_start += len(imageblob)
+    for (index, image) in enumerate(images):
+        directory_blob = build_icon_directory_blob(image, offset_from_start=offset_from_start)
+        directory_blobs.append(directory_blob)
+        image_blob = build_image_data_blob(image)
+        image_blobs.append(image_blob)
+        offset_from_start += len(image_blob)
 
-    datablobs.extend(imageblobs)
-
-    final_data = b''.join(datablobs)
+    final_data = [
+        ico_header_blob,
+        *directory_blobs,
+        *image_blobs,
+    ]
+    final_data = b''.join(final_data)
     return final_data
 
 def icoconvert_argparse(args):
