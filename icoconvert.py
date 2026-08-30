@@ -92,6 +92,7 @@ import sys
 
 from voussoirkit import betterhelp
 from voussoirkit import imagetools
+from voussoirkit import pathclass
 from voussoirkit import pipeable
 from voussoirkit import vlogging
 
@@ -127,11 +128,13 @@ def chunk_sequence(sequence, chunk_length, allow_incomplete=True):
 def little(x, length):
     return x.to_bytes(length, byteorder='little')
 
-def load_image(filename):
-    image = PIL.Image.open(filename)
+def load_image(file):
+    image = PIL.Image.open(file.absolute_path)
     (w, h) = image.size
-    (new_w, new_h) = imagetools.fit_into_bounds(w, h, 256, 256, only_shrink=True)
-    image = image.resize((new_w, new_h), resample=PIL.Image.LANCZOS)
+    if w > 256 or h > 256:
+        log.info(f'{file.basename} is being downsampled to 256x256.')
+        (new_w, new_h) = imagetools.fit_into_bounds(w, h, 256, 256, only_shrink=True)
+        image = image.resize((new_w, new_h), resample=PIL.Image.LANCZOS)
     image = image.convert('RGBA')
     image = imagetools.pad_to_square(image)
     return image
@@ -205,7 +208,7 @@ def build_image_data_blob(image):
 
 def images_to_ico(images):
     # For some reason Windows reads the icons in reverse order.
-    images.reverse()
+    images.sort(key=lambda i: i.size[0] * i.size[1], reverse=True)
 
     # The directory entries need to know their image's address, so therefore
     # we must know the lengths of all the image binaries before we can write
@@ -237,16 +240,22 @@ def images_to_ico(images):
     return final_data
 
 def icoconvert_argparse(args):
-    log.info('Iconifying %s', args.files)
-    images = [load_image(filename) for filename in args.files]
+    files = list(pathclass.glob_many_files(args.patterns))
+    if len(files) == 0:
+        raise ValueError('Got no input files.')
 
-    final_data = images_to_ico(images)
+    log.info('Iconifying %s', [f.basename for f in files])
+    images = [load_image(file) for file in files]
 
-    iconame = os.path.splitext(args.files[0])[0] + '.ico'
-    output_file = open(iconame, 'wb')
-    output_file.write(final_data)
-    output_file.close()
-    pipeable.stderr(iconame)
+    if args.output:
+        icofile = pathclass.Path(args.output)
+    else:
+        icofile = files[0].replace_extension('ico')
+
+    ico_bytes = images_to_ico(images)
+
+    icofile.write('wb', ico_bytes)
+    pipeable.stderr(icofile.absolute_path)
     return 0
 
 @vlogging.main_decorator
@@ -257,10 +266,17 @@ def main(argv):
         ''',
     )
     parser.add_argument(
-        'files',
+        'patterns',
         nargs='+',
         help='''
         One or more image files to put into the ico.
+        ''',
+    )
+    parser.add_argument(
+        '--output',
+        dest='output',
+        nargs='?',
+        help='''
         ''',
     )
     parser.set_defaults(func=icoconvert_argparse)
