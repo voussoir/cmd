@@ -137,7 +137,7 @@ def getcrx_argparse(args):
             if args.fail_early:
                 raise
             else:
-                log.error(traceback.format_exc())
+                log.error(f'Error during {extension_id}:\n{traceback.format_exc()}')
                 pipeable.stderr('Resuming...')
                 return_status = 1
     return return_status
