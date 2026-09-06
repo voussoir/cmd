@@ -17,6 +17,7 @@ alias copy=cp
 alias md=mkdir
 alias cls=clear
 alias gfa='git fetch --all'
+alias sss='sudo du -h -x --max-depth=1 . | sort -hr'
 
 # This generates a warning in some non-interactive situations, like cron.
 bind TAB:menu-complete > /dev/null 2>&1
