@@ -15,4 +15,4 @@ doskey gp=git push $*
 doskey gpa=git_push_all $*
 doskey gfa=git fetch --all
 doskey gg=start git gui $*
-doskey setlatest=recycle __latest $T mklink /j __latest $*
+doskey setlatest=rmdir __latest $T mklink /j __latest $*
